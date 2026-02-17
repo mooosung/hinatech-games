@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>カラーマッチ｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="カラーマッチ（ストループテスト）で遊ぼう！表示された色名のテキストを読んで正しいボタンを押そう。脳トレ・反射神経を鍛えるPC・スマホ対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="カラーマッチ｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="色名と表示色が違う！テキストを読んで正しい色ボタンを押そう。脳トレ・反射神経を鍛えるPC・スマホ対応の無料ブラウザゲーム。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/color-match/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "カラーマッチ",
+    "description": "色名と表示色が異なるストループテスト風の脳トレ・反射神経ゲーム",
+    "url": "https://hinata-ya.tech/games/games/color-match/",
+    "genre": ["脳トレ", "反射神経"],
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">カラーマッチ</h1>
+    <div class="game-page-tags">
+      <span class="tag">脳トレ</span>
+      <span class="tag">反射神経</span>
+    </div>
+
+    <div class="game-container">
+      <!-- スコアエリア -->
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">スコア</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">ベスト</span>
+          <span class="score-value" id="best-score">0</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">New Game</button>
+      </div>
+
+      <!-- ゲームボード -->
+      <div class="board-container" id="board-container">
+        <div class="color-board" id="color-board">
+          <!-- タイマーバー -->
+          <div class="timer-bar-wrapper">
+            <div class="timer-bar" id="timer-bar"></div>
+          </div>
+
+          <!-- 残り時間 -->
+          <div class="timer-display">
+            <span class="timer-label">残り時間</span>
+            <span class="timer-value" id="timer">30</span>
+          </div>
+
+          <!-- 色ワード表示エリア -->
+          <div class="color-word-area" id="color-word-area">
+            <span class="color-word" id="color-word">あか</span>
+          </div>
+
+          <!-- 判定フィードバック -->
+          <div class="feedback" id="feedback"></div>
+
+          <!-- 色ボタン -->
+          <div class="color-buttons" id="color-buttons">
+            <button class="color-btn" data-color="red">あか</button>
+            <button class="color-btn" data-color="blue">あお</button>
+            <button class="color-btn" data-color="green">みどり</button>
+            <button class="color-btn" data-color="yellow">きいろ</button>
+          </div>
+        </div>
+
+        <!-- スタートオーバーレイ -->
+        <div class="game-overlay active" id="game-start-overlay">
+          <div class="overlay-content">
+            <h2>カラーマッチ</h2>
+            <p>文字の「意味」に合うボタンを押そう！<br>色に惑わされないで！</p>
+            <button class="btn-primary" id="btn-start">ゲームスタート</button>
+          </div>
+        </div>
+
+        <!-- ゲームオーバーオーバーレイ -->
+        <div class="game-overlay" id="game-over-overlay">
+          <div class="overlay-content">
+            <h2>タイムアップ！</h2>
+            <div class="result-stats">
+              <div class="result-stat">
+                <span class="result-stat-label">スコア</span>
+                <span class="result-stat-value" id="final-score">0</span>
+              </div>
+              <div class="result-stat">
+                <span class="result-stat-label">正解数</span>
+                <span class="result-stat-value" id="final-correct">0</span>
+              </div>
+              <div class="result-stat">
+                <span class="result-stat-label">ミス</span>
+                <span class="result-stat-value" id="final-wrong">0</span>
+              </div>
+            </div>
+            <p class="best-result" id="best-result"></p>
+            <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li>画面中央に色の名前（あか、あお、みどり、きいろ）が表示されます</li>
+        <li>文字は<strong>違う色</strong>で表示されます（ストループ効果）</li>
+        <li>表示されている<strong>色ではなく</strong>、文字の<strong>意味</strong>に合うボタンを押してください</li>
+        <li>正解で<strong>+10点</strong>、不正解で<strong>-5点</strong></li>
+        <li>制限時間は<strong>30秒</strong>。できるだけ多く正解しよう！</li>
+        <li>スコアが上がるほど問題の切り替えが速くなります</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        カラーマッチはストループ効果を利用した<br>
+        脳トレゲームで、DOM操作とタイマー処理で<br>
+        作られています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/color-match" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">&larr; 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

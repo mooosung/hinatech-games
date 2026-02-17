@@ -1,0 +1,353 @@
+/* ============================================
+   サイモンゲーム - 固有スタイル
+   ============================================ */
+
+/* スコアエリア（2048風） */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.score-box {
+  background: #BBADA0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 70px;
+  flex: 1;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #EEE4DA;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-new-game {
+  background: #8F7A66;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.btn-new-game:hover {
+  background: #7A6658;
+}
+
+/* ゲームボード */
+.board-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ボードラッパー */
+.board-wrapper {
+  background: #BBADA0;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* ステータステキスト */
+.status-text {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 0.6rem 0;
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  letter-spacing: 0.05em;
+  min-height: 2.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s;
+}
+
+/* サイモンボード（2x2グリッド） */
+.simon-board {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  aspect-ratio: 1 / 1;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* サイモンボタン共通 */
+.simon-btn {
+  position: relative;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: filter 0.1s, transform 0.1s;
+  overflow: hidden;
+  padding: 0;
+}
+
+.simon-btn .btn-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  transition: opacity 0.1s;
+}
+
+.simon-btn:disabled {
+  cursor: default;
+}
+
+/* 各色のボタン */
+.simon-btn[data-color="green"] {
+  background: #4CAF50;
+  box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.2),
+              0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.simon-btn[data-color="green"] .btn-inner {
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+
+.simon-btn[data-color="red"] {
+  background: #F44336;
+  box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.2),
+              0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.simon-btn[data-color="red"] .btn-inner {
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+
+.simon-btn[data-color="yellow"] {
+  background: #FFEB3B;
+  box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.15),
+              0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.simon-btn[data-color="yellow"] .btn-inner {
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+}
+
+.simon-btn[data-color="blue"] {
+  background: #2196F3;
+  box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.2),
+              0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.simon-btn[data-color="blue"] .btn-inner {
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+
+/* アクティブ/光り状態 */
+.simon-btn[data-color="green"].active {
+  background: #81C784;
+  box-shadow: 0 0 30px rgba(76, 175, 80, 0.8),
+              0 0 60px rgba(76, 175, 80, 0.4),
+              inset 0 0 15px rgba(255, 255, 255, 0.3);
+  transform: scale(1.03);
+}
+
+.simon-btn[data-color="red"].active {
+  background: #EF9A9A;
+  box-shadow: 0 0 30px rgba(244, 67, 54, 0.8),
+              0 0 60px rgba(244, 67, 54, 0.4),
+              inset 0 0 15px rgba(255, 255, 255, 0.3);
+  transform: scale(1.03);
+}
+
+.simon-btn[data-color="yellow"].active {
+  background: #FFF9C4;
+  box-shadow: 0 0 30px rgba(255, 235, 59, 0.8),
+              0 0 60px rgba(255, 235, 59, 0.4),
+              inset 0 0 15px rgba(255, 255, 255, 0.3);
+  transform: scale(1.03);
+}
+
+.simon-btn[data-color="blue"].active {
+  background: #90CAF9;
+  box-shadow: 0 0 30px rgba(33, 150, 243, 0.8),
+              0 0 60px rgba(33, 150, 243, 0.4),
+              inset 0 0 15px rgba(255, 255, 255, 0.3);
+  transform: scale(1.03);
+}
+
+/* プレイヤーがクリックしたとき */
+.simon-btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* デスクトップホバー */
+@media (hover: hover) {
+  .simon-btn:not(:disabled):not(.active):hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+  }
+}
+
+/* 間違えたときのフラッシュ */
+@keyframes error-flash {
+  0%   { opacity: 1; }
+  25%  { opacity: 0.3; }
+  50%  { opacity: 1; }
+  75%  { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+.simon-board.error-flash .simon-btn {
+  animation: error-flash 0.6s ease;
+}
+
+/* ゲームオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(238, 228, 218, 0.85);
+  border-radius: 12px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.5s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  max-width: 300px;
+  width: 90%;
+}
+
+.overlay-content h2 {
+  font-size: 1.75rem;
+  color: #E67E22;
+  margin-bottom: 0.75rem;
+}
+
+.overlay-content p {
+  font-size: 1rem;
+  color: #776E65;
+  margin-bottom: 0.75rem;
+  line-height: 1.8;
+}
+
+.result-text {
+  font-size: 1.15rem;
+  color: #776E65;
+  margin-bottom: 0.5rem;
+  line-height: 1.8;
+  font-weight: 600;
+}
+
+.best-result {
+  font-size: 0.85rem;
+  color: #E67E22;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  min-height: 1.2em;
+}
+
+.overlay-content .btn-primary {
+  margin-top: 0.5rem;
+}
+
+/* レスポンシブ */
+@media (max-width: 500px) {
+  .simon-board {
+    gap: 8px;
+  }
+
+  .simon-btn {
+    border-radius: 16px;
+  }
+
+  .simon-btn .btn-inner {
+    border-radius: 16px;
+  }
+
+  .status-text {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .board-wrapper {
+    padding: 10px;
+  }
+
+  .simon-board {
+    gap: 6px;
+  }
+
+  .simon-btn {
+    border-radius: 12px;
+  }
+
+  .simon-btn .btn-inner {
+    border-radius: 12px;
+  }
+
+  .score-box {
+    padding: 0.4rem 0.5rem;
+    min-width: 55px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+
+  .status-text {
+    font-size: 0.9rem;
+    padding: 0.5rem 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .simon-btn {
+    border-radius: 10px;
+  }
+
+  .simon-btn .btn-inner {
+    border-radius: 10px;
+  }
+}

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>サイモンゲーム｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="サイモンゲームで記憶力チャレンジ！光るボタンの順番を覚えて繰り返そう。ラウンドが進むほど難しくなるPC・スマホ対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="サイモンゲーム｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="光るボタンの順番を覚えて繰り返そう！ラウンドが進むほど難しくなる記憶力チャレンジ。PC・スマホ対応の無料ブラウザゲーム。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/simon/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "サイモンゲーム",
+    "description": "光るボタンの順番を覚えて繰り返す記憶力ゲーム",
+    "url": "https://hinata-ya.tech/games/games/simon/",
+    "genre": ["脳トレ", "記憶"],
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">サイモンゲーム</h1>
+    <div class="game-page-tags">
+      <span class="tag">脳トレ</span>
+      <span class="tag">記憶</span>
+    </div>
+
+    <div class="game-container">
+      <!-- スコアエリア -->
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">スコア</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">ベスト</span>
+          <span class="score-value" id="best-score">0</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">New Game</button>
+      </div>
+
+      <!-- ゲームボード -->
+      <div class="board-container" id="board-container">
+        <div class="board-wrapper" id="board-wrapper">
+          <!-- ステータステキスト -->
+          <div class="status-text" id="status-text">スタートを押してね！</div>
+
+          <!-- サイモンボード（2x2グリッド） -->
+          <div class="simon-board" id="simon-board">
+            <button class="simon-btn" id="btn-green" data-color="green" disabled>
+              <span class="btn-inner"></span>
+            </button>
+            <button class="simon-btn" id="btn-red" data-color="red" disabled>
+              <span class="btn-inner"></span>
+            </button>
+            <button class="simon-btn" id="btn-yellow" data-color="yellow" disabled>
+              <span class="btn-inner"></span>
+            </button>
+            <button class="simon-btn" id="btn-blue" data-color="blue" disabled>
+              <span class="btn-inner"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- スタートオーバーレイ -->
+        <div class="game-overlay active" id="game-start-overlay">
+          <div class="overlay-content">
+            <h2>サイモンゲーム</h2>
+            <p>光るボタンの順番を覚えて<br>同じ順番でタップしよう！</p>
+            <button class="btn-primary" id="btn-start">ゲームスタート</button>
+          </div>
+        </div>
+
+        <!-- ゲームオーバーオーバーレイ -->
+        <div class="game-overlay" id="game-over-overlay">
+          <div class="overlay-content">
+            <h2>ゲームオーバー！</h2>
+            <p class="result-text">
+              スコア: <span id="final-score">0</span>
+            </p>
+            <p class="best-result" id="best-result"></p>
+            <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li>ゲームが始まると、ボタンが順番に光ります</li>
+        <li>光った順番を覚えて、同じ順番でボタンをタップしましょう</li>
+        <li>正解するとラウンドが進み、光る順番が1つずつ増えます</li>
+        <li>間違えるとゲームオーバーになります</li>
+        <li>スコア＝正しく繰り返せたラウンド数</li>
+        <li>どこまで記憶できるかチャレンジしよう！</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        サイモンゲームは配列操作と<br>
+        setTimeoutによるアニメーション制御で<br>
+        作られています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/simon" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">&larr; 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

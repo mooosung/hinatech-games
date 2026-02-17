@@ -1,0 +1,340 @@
+/* ============================================
+   テトリス - 固有スタイル
+   ============================================ */
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.score-box {
+  background: #BBADA0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 70px;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #EEE4DA;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-new-game {
+  margin-left: auto;
+  background: #8F7A66;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-new-game:hover {
+  background: #7A6658;
+}
+
+/* テトリスエリア（ボード + ネクスト） */
+.tetris-area {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ゲームボード */
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1 / 2;
+  touch-action: none;
+}
+
+.tetris-board {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(20, 1fr);
+  gap: 1px;
+  padding: 4px;
+  background: #2C2C2E;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tetris-cell {
+  background: #1C1C1E;
+  border-radius: 2px;
+}
+
+/* テトロミノの色（固定ブロック） */
+.tetris-cell.cell-I { background: #00BCD4; }
+.tetris-cell.cell-O { background: #FFEB3B; }
+.tetris-cell.cell-T { background: #9C27B0; }
+.tetris-cell.cell-S { background: #4CAF50; }
+.tetris-cell.cell-Z { background: #F44336; }
+.tetris-cell.cell-J { background: #2196F3; }
+.tetris-cell.cell-L { background: #FF9800; }
+
+/* ゴーストピース */
+.tetris-cell.cell-ghost {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ネクストピースパネル */
+.next-piece-panel {
+  flex-shrink: 0;
+  width: 90px;
+}
+
+.next-piece-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #EEE4DA;
+  text-align: center;
+  background: #BBADA0;
+  border-radius: 8px 8px 0 0;
+  padding: 0.3rem 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.next-piece-box {
+  background: #2C2C2E;
+  border-radius: 0 0 8px 8px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  aspect-ratio: 1 / 1;
+}
+
+.next-cell {
+  background: #1C1C1E;
+  border-radius: 2px;
+}
+
+.next-cell.cell-I { background: #00BCD4; }
+.next-cell.cell-O { background: #FFEB3B; }
+.next-cell.cell-T { background: #9C27B0; }
+.next-cell.cell-S { background: #4CAF50; }
+.next-cell.cell-Z { background: #F44336; }
+.next-cell.cell-J { background: #2196F3; }
+.next-cell.cell-L { background: #FF9800; }
+
+/* ゲームオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(44, 44, 46, 0.9);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.3s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.overlay-content h2 {
+  font-size: 1.75rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content p {
+  font-size: 1.1rem;
+  color: #ddd;
+  margin-bottom: 0.75rem;
+}
+
+.overlay-content .best-result {
+  font-size: 0.95rem;
+  color: #FFEB3B;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.overlay-content .btn-primary {
+  margin-bottom: 0.5rem;
+}
+
+/* モバイル操作ボタン */
+.mobile-controls {
+  display: none;
+  margin: 1.25rem auto 0;
+  max-width: 280px;
+}
+
+/* PCでは非表示 */
+@media (min-width: 769px) {
+  .mobile-controls {
+    display: none;
+  }
+}
+
+/* モバイルでは表示 */
+@media (max-width: 768px) {
+  .mobile-controls {
+    display: block;
+  }
+}
+
+.mobile-controls-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.mobile-btn {
+  width: 72px;
+  height: 52px;
+  border: none;
+  border-radius: 12px;
+  background: #8F7A66;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-btn:active {
+  background: #7A6658;
+  transform: scale(0.92);
+}
+
+.mobile-btn-wide {
+  width: 100%;
+  max-width: 232px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  gap: 0.25rem;
+}
+
+/* ライン消去アニメーション */
+@keyframes line-clear {
+  0% {
+    background: #fff;
+    transform: scaleY(1);
+  }
+  50% {
+    background: #FFEB3B;
+  }
+  100% {
+    background: #fff;
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+
+.tetris-cell.clearing {
+  animation: line-clear 0.3s ease forwards;
+}
+
+/* レスポンシブ */
+@media (max-width: 500px) {
+  .tetris-area {
+    gap: 0.5rem;
+  }
+
+  .board-wrapper {
+    max-width: 250px;
+  }
+
+  .next-piece-panel {
+    width: 72px;
+  }
+
+  .next-piece-box {
+    padding: 6px;
+  }
+
+  .tetris-board {
+    gap: 1px;
+    padding: 3px;
+  }
+
+  .tetris-cell {
+    border-radius: 1px;
+  }
+}
+
+@media (max-width: 360px) {
+  .board-wrapper {
+    max-width: 210px;
+  }
+
+  .next-piece-panel {
+    width: 60px;
+  }
+
+  .tetris-board {
+    gap: 0px;
+    padding: 2px;
+  }
+
+  .score-box {
+    padding: 0.4rem 0.75rem;
+    min-width: 55px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+
+  .mobile-btn {
+    width: 60px;
+    height: 46px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+  }
+
+  .mobile-btn-wide {
+    max-width: 196px;
+    font-size: 0.85rem;
+  }
+}

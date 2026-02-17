@@ -303,6 +303,23 @@
   margin-top: 0.5rem;
 }
 
+/* 戦績エリア */
+.stats-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+
+.stats-area .score-box {
+  background: #BBADA0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 60px;
+}
+
 /* New Game ボタン */
 .btn-new-game {
   display: block;

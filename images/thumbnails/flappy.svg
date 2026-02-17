@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <rect width="400" height="250" rx="16" fill="#87CEEB"/>
+  <!-- Clouds -->
+  <ellipse cx="80" cy="50" rx="40" ry="20" fill="#fff" opacity="0.7"/>
+  <ellipse cx="300" cy="70" rx="50" ry="22" fill="#fff" opacity="0.6"/>
+  <!-- Pipe left -->
+  <rect x="90" y="0" width="50" height="80" rx="4" fill="#4CAF50"/>
+  <rect x="82" y="75" width="66" height="20" rx="4" fill="#66BB6A"/>
+  <rect x="90" y="140" width="50" height="110" rx="4" fill="#4CAF50"/>
+  <rect x="82" y="140" width="66" height="20" rx="4" fill="#66BB6A"/>
+  <!-- Pipe right -->
+  <rect x="250" y="0" width="50" height="110" rx="4" fill="#4CAF50"/>
+  <rect x="242" y="105" width="66" height="20" rx="4" fill="#66BB6A"/>
+  <rect x="250" y="170" width="50" height="80" rx="4" fill="#4CAF50"/>
+  <rect x="242" y="170" width="66" height="20" rx="4" fill="#66BB6A"/>
+  <!-- Bird -->
+  <circle cx="180" cy="115" r="18" fill="#FFD600"/>
+  <circle cx="188" cy="110" r="5" fill="#fff"/>
+  <circle cx="190" cy="110" r="3" fill="#333"/>
+  <polygon points="198,115 212,112 198,118" fill="#FF5722"/>
+  <ellipse cx="170" cy="110" rx="12" ry="5" fill="#FFC107" transform="rotate(-15 170 110)"/>
+  <!-- Ground -->
+  <rect x="0" y="210" width="400" height="40" fill="#8BC34A"/>
+  <text x="200" y="238" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="#fff">Flappy Bird</text>
+</svg>

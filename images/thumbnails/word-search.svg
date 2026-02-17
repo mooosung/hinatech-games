@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <rect width="400" height="250" rx="16" fill="#E8EAF6"/>
+  <g transform="translate(100, 15)" font-family="monospace" font-size="16" font-weight="600">
+    <!-- Grid of letters -->
+    <text x="10" y="20" fill="#555">G A M E H</text>
+    <text x="10" y="42" fill="#555">R C O D E</text>
+    <text x="10" y="64" fill="#555">H T M L P</text>
+    <text x="10" y="86" fill="#555">J A V A Y</text>
+    <text x="10" y="108" fill="#555">X R E W T</text>
+    <text x="10" y="130" fill="#555">C L I C K</text>
+    <text x="10" y="152" fill="#555">M O U S E</text>
+    <text x="10" y="174" fill="#555">B N W E B</text>
+    <!-- Highlight "GAME" -->
+    <rect x="4" y="5" width="108" height="20" rx="4" fill="#E67E22" opacity="0.25"/>
+    <!-- Highlight "CODE" -->
+    <rect x="46" y="27" width="86" height="20" rx="4" fill="#4CAF50" opacity="0.25"/>
+    <!-- Highlight "HTML" -->
+    <rect x="4" y="49" width="86" height="20" rx="4" fill="#2196F3" opacity="0.25"/>
+    <!-- Highlight "JAVA" -->
+    <rect x="4" y="71" width="86" height="20" rx="4" fill="#F44336" opacity="0.25"/>
+  </g>
+  <!-- Word list -->
+  <g transform="translate(310, 35)" font-family="sans-serif" font-size="11" fill="#555">
+    <text y="0" text-decoration="line-through" fill="#aaa">GAME</text>
+    <text y="18" text-decoration="line-through" fill="#aaa">CODE</text>
+    <text y="36" text-decoration="line-through" fill="#aaa">HTML</text>
+    <text y="54" text-decoration="line-through" fill="#aaa">JAVA</text>
+    <text y="72" fill="#333">CLICK</text>
+    <text y="90" fill="#333">MOUSE</text>
+  </g>
+  <text x="200" y="232" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="#3F51B5">Word Search</text>
+</svg>
