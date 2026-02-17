@@ -547,6 +547,8 @@
   // ============================================
   // マウス操作
   // ============================================
+  initCanvas();
+
   canvas.addEventListener('mousemove', function (e) {
     if (!gameRunning) return;
     var rect = canvas.getBoundingClientRect();
@@ -680,7 +682,6 @@
   // 初期化
   // ============================================
   bestScoreEl.textContent = bestScore;
-  initCanvas();
   initPaddle();
   createBricks();
   initBall();

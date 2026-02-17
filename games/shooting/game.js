@@ -642,6 +642,8 @@
   // ============================================
   // タッチ操作
   // ============================================
+  initCanvas();
+
   canvas.addEventListener('touchstart', function (e) {
     e.preventDefault();
     if (!gameRunning) return;
@@ -733,7 +735,6 @@
   // 初期化
   // ============================================
   bestScoreEl.textContent = bestScore;
-  initCanvas();
   initPlayer();
   draw();
   renderLives();
