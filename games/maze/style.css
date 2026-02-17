@@ -1,0 +1,331 @@
+/* ============================================
+   迷路ゲーム - 固有スタイル
+   ============================================ */
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.score-box {
+  background: #BBADA0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 70px;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #EEE4DA;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-new-game {
+  margin-left: auto;
+  background: #8F7A66;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-new-game:hover {
+  background: #7A6658;
+}
+
+/* ゲームボード */
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  touch-action: none;
+}
+
+.maze-board {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  gap: 0px;
+  padding: 0;
+  background: #BBADA0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 迷路セル共通 */
+.maze-cell {
+  position: relative;
+  transition: background-color 0.1s;
+}
+
+/* 壁セル */
+.maze-cell.wall {
+  background: #6D5D4E;
+}
+
+/* 通路セル */
+.maze-cell.path {
+  background: #EEE4DA;
+}
+
+/* 訪問済みの通路（プレイヤーの軌跡） */
+.maze-cell.visited {
+  background: #E8DDD0;
+}
+
+/* プレイヤー */
+.maze-cell.player {
+  background: #EEE4DA;
+}
+
+.maze-cell.player::after {
+  content: '';
+  position: absolute;
+  top: 12%;
+  left: 12%;
+  width: 76%;
+  height: 76%;
+  background: #E67E22;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  animation: player-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes player-pulse {
+  0% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ゴール */
+.maze-cell.goal {
+  background: #EEE4DA;
+}
+
+.maze-cell.goal::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  background: #2ECC71;
+  border-radius: 4px;
+  animation: goal-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes goal-glow {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* クリア演出 */
+.maze-cell.player.cleared::after {
+  background: #F1C40F;
+  animation: clear-burst 0.6s ease-out forwards;
+}
+
+@keyframes clear-burst {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 1;
+    background: #F1C40F;
+  }
+}
+
+/* ゲームオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(238, 228, 218, 0.85);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.3s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.overlay-content h2 {
+  font-size: 1.75rem;
+  color: #776E65;
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content p {
+  font-size: 1.1rem;
+  color: #776E65;
+  margin-bottom: 0.75rem;
+}
+
+.overlay-content .best-result {
+  font-size: 0.95rem;
+  color: #E67E22;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.overlay-content .btn-primary {
+  margin-bottom: 0.5rem;
+}
+
+/* モバイル方向ボタン（十字パッド） */
+.dpad-container {
+  display: none;
+  width: 160px;
+  margin: 1.25rem auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 6px;
+}
+
+/* PCでは方向パッドを非表示 */
+@media (min-width: 769px) {
+  .dpad-container {
+    display: none;
+  }
+}
+
+/* モバイルでは方向パッドを表示 */
+@media (max-width: 768px) {
+  .dpad-container {
+    display: grid;
+  }
+}
+
+.dpad-btn {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: none;
+  border-radius: 12px;
+  background: #8F7A66;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dpad-btn:active {
+  background: #7A6658;
+  transform: scale(0.92);
+}
+
+.dpad-btn:disabled {
+  background: transparent;
+  cursor: default;
+}
+
+/* 十字配置 */
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad-center {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* レスポンシブ */
+@media (max-width: 500px) {
+  .maze-board {
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .score-box {
+    padding: 0.4rem 0.75rem;
+    min-width: 60px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+
+  .dpad-container {
+    width: 140px;
+    gap: 4px;
+  }
+
+  .dpad-btn {
+    border-radius: 10px;
+    font-size: 1.1rem;
+  }
+}

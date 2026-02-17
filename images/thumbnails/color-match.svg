@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <rect width="400" height="250" rx="16" fill="#F3E5F5"/>
+  <!-- Color word display -->
+  <text x="200" y="90" text-anchor="middle" font-family="sans-serif" font-size="48" font-weight="700" fill="#2196F3">あか</text>
+  <!-- Color buttons -->
+  <rect x="50" y="120" width="70" height="50" rx="12" fill="#F44336"/>
+  <text x="85" y="152" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="600" fill="#fff">あか</text>
+  <rect x="130" y="120" width="70" height="50" rx="12" fill="#2196F3"/>
+  <text x="165" y="152" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="600" fill="#fff">あお</text>
+  <rect x="210" y="120" width="70" height="50" rx="12" fill="#4CAF50"/>
+  <text x="245" y="152" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="600" fill="#fff">みどり</text>
+  <rect x="290" y="120" width="70" height="50" rx="12" fill="#FFEB3B"/>
+  <text x="325" y="152" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#333">きいろ</text>
+  <!-- Timer bar -->
+  <rect x="80" y="188" width="240" height="8" rx="4" fill="#E0E0E0"/>
+  <rect x="80" y="188" width="160" height="8" rx="4" fill="#E67E22"/>
+  <text x="200" y="232" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="#7B1FA2">Color Match</text>
+</svg>

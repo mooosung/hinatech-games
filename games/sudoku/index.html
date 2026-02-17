@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>数独｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="数独（ナンプレ）の無料ブラウザゲーム。9×9のマスに1〜9の数字を埋めよう！PC・スマホ対応。">
+  <!-- OGP -->
+  <meta property="og:title" content="数独｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="数独（ナンプレ）の無料ブラウザゲーム。9×9のマスに1〜9の数字を埋めよう！PC・スマホ対応。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/sudoku/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "数独",
+    "description": "9×9のマスに1〜9の数字を埋めるロジックパズルゲーム",
+    "url": "https://hinata-ya.tech/games/games/sudoku/",
+    "genre": ["ロジック", "パズル"],
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">数独</h1>
+    <div class="game-page-tags">
+      <span class="tag">ロジック</span>
+      <span class="tag">パズル</span>
+    </div>
+
+    <div class="game-container">
+      <!-- スコアエリア -->
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">タイム</span>
+          <span class="score-value" id="timer">00:00</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">ベスト</span>
+          <span class="score-value" id="best-time">--:--</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">New Game</button>
+      </div>
+
+      <!-- ゲームボード -->
+      <div class="board-wrapper">
+        <div class="sudoku-board" id="sudoku-board"></div>
+
+        <!-- クリアオーバーレイ -->
+        <div class="game-overlay" id="game-clear-overlay">
+          <div class="overlay-content">
+            <h2>クリア！</h2>
+            <p>タイム: <span id="clear-time">00:00</span></p>
+            <button class="btn-primary" id="btn-play-again">もう一度遊ぶ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 数字入力ボタン -->
+      <div class="number-buttons" id="number-buttons">
+        <button class="num-btn" data-num="1">1</button>
+        <button class="num-btn" data-num="2">2</button>
+        <button class="num-btn" data-num="3">3</button>
+        <button class="num-btn" data-num="4">4</button>
+        <button class="num-btn" data-num="5">5</button>
+        <button class="num-btn" data-num="6">6</button>
+        <button class="num-btn" data-num="7">7</button>
+        <button class="num-btn" data-num="8">8</button>
+        <button class="num-btn" data-num="9">9</button>
+        <button class="num-btn num-btn-clear" data-num="0">消去</button>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li>9×9のマスに<strong>1〜9の数字</strong>を埋めましょう</li>
+        <li>各<strong>行</strong>・各<strong>列</strong>・各<strong>3×3ブロック</strong>に同じ数字は入りません</li>
+        <li>マスをクリック（タップ）して選択し、数字ボタンまたはキーボード（1〜9）で入力</li>
+        <li><strong>Delete / Backspace</strong>キーで数字を消去できます</li>
+        <li>最初から入っている数字は変更できません</li>
+        <li>すべてのマスを正しく埋めればクリア！</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        数独はバックトラッキング（再帰探索）と<br>
+        制約充足で作られています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/sudoku" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">← 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

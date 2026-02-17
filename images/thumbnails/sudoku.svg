@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <rect width="400" height="250" rx="16" fill="#ECEFF1"/>
+  <g transform="translate(110, 15)">
+    <!-- Grid background -->
+    <rect width="180" height="180" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
+    <!-- 3x3 box borders -->
+    <line x1="60" y1="0" x2="60" y2="180" stroke="#333" stroke-width="2"/>
+    <line x1="120" y1="0" x2="120" y2="180" stroke="#333" stroke-width="2"/>
+    <line x1="0" y1="60" x2="180" y2="60" stroke="#333" stroke-width="2"/>
+    <line x1="0" y1="120" x2="180" y2="120" stroke="#333" stroke-width="2"/>
+    <!-- Cell lines -->
+    <line x1="20" y1="0" x2="20" y2="180" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="40" y1="0" x2="40" y2="180" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="80" y1="0" x2="80" y2="180" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="100" y1="0" x2="100" y2="180" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="140" y1="0" x2="140" y2="180" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="160" y1="0" x2="160" y2="180" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="0" y1="20" x2="180" y2="20" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="0" y1="40" x2="180" y2="40" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="0" y1="80" x2="180" y2="80" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="0" y1="100" x2="180" y2="100" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="0" y1="140" x2="180" y2="140" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="0" y1="160" x2="180" y2="160" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Sample numbers -->
+    <text x="10" y="16" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#333">5</text>
+    <text x="50" y="16" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#333">3</text>
+    <text x="130" y="16" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#333">7</text>
+    <text x="10" y="36" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#333">6</text>
+    <text x="70" y="36" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#333">1</text>
+    <text x="90" y="36" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#333">9</text>
+    <text x="110" y="36" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#333">5</text>
+    <text x="30" y="56" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#2196F3">9</text>
+    <text x="50" y="56" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#333">8</text>
+    <text x="150" y="56" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#333">6</text>
+    <!-- Highlighted cell -->
+    <rect x="20" y="40" width="20" height="20" fill="#E3F2FD" opacity="0.7"/>
+  </g>
+  <text x="200" y="228" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="700" fill="#37474F">Sudoku</text>
+</svg>

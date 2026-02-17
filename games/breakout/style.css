@@ -1,0 +1,183 @@
+/* ============================================
+   ブロック崩し - 固有スタイル
+   ============================================ */
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.score-box {
+  background: #BBADA0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 70px;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #EEE4DA;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-new-game {
+  margin-left: auto;
+  background: #8F7A66;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-new-game:hover {
+  background: #7A6658;
+}
+
+/* ゲームボード */
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  aspect-ratio: 3 / 4;
+  touch-action: none;
+}
+
+#game-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #BBADA0;
+  border-radius: 8px;
+  display: block;
+}
+
+/* ライフ表示 */
+.lives-display {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+  z-index: 5;
+}
+
+.life-icon {
+  width: 12px;
+  height: 12px;
+  background: #E67E22;
+  border-radius: 50%;
+  opacity: 0.9;
+}
+
+.life-icon.lost {
+  opacity: 0.25;
+}
+
+/* ゲームオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(238, 228, 218, 0.85);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.3s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.overlay-content h2 {
+  font-size: 1.75rem;
+  color: #776E65;
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content p {
+  font-size: 1.1rem;
+  color: #776E65;
+  margin-bottom: 0.75rem;
+}
+
+.overlay-content .best-result {
+  font-size: 0.95rem;
+  color: #E67E22;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.overlay-content .btn-primary {
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content .btn-new-game {
+  margin-left: 0;
+  display: block;
+  margin: 0.5rem auto 0;
+}
+
+/* レスポンシブ */
+@media (max-width: 500px) {
+  .board-wrapper {
+    border-radius: 6px;
+  }
+
+  #game-canvas {
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .score-area {
+    gap: 0.5rem;
+  }
+
+  .score-box {
+    padding: 0.4rem 0.75rem;
+    min-width: 55px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+
+  .score-label {
+    font-size: 0.6rem;
+  }
+}

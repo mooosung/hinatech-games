@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>三目並べ｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="三目並べ（○×ゲーム）を無料で遊ぼう！CPUと対戦できるPC・スマホ対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="三目並べ｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="三目並べ（○×ゲーム）を無料で遊ぼう！CPUと対戦できるPC・スマホ対応の無料ブラウザゲーム。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/tictactoe/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "三目並べ",
+    "description": "三目並べ（○×ゲーム）を無料で遊べるブラウザゲーム。CPU対戦搭載。",
+    "url": "https://hinata-ya.tech/games/games/tictactoe/",
+    "genre": "ボードゲーム",
+    "gamePlatform": "Web Browser",
+    "numberOfPlayers": {
+      "@type": "QuantitativeValue",
+      "minValue": 1,
+      "maxValue": 1
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">三目並べ</h1>
+    <div class="game-page-tags">
+      <span class="tag">ボードゲーム</span>
+      <span class="tag">対戦</span>
+    </div>
+
+    <div class="game-container">
+      <!-- スコアエリア -->
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">勝ち</span>
+          <span class="score-value" id="score-wins">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">負け</span>
+          <span class="score-value" id="score-losses">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">引き分け</span>
+          <span class="score-value" id="score-draws">0</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">New Game</button>
+      </div>
+
+      <!-- ステータス表示 -->
+      <div class="status-bar">
+        <span id="status-text">あなたのターン（○）</span>
+      </div>
+
+      <!-- ゲームボード -->
+      <div class="board-wrapper">
+        <div class="board" id="board">
+          <div class="cell" data-index="0"></div>
+          <div class="cell" data-index="1"></div>
+          <div class="cell" data-index="2"></div>
+          <div class="cell" data-index="3"></div>
+          <div class="cell" data-index="4"></div>
+          <div class="cell" data-index="5"></div>
+          <div class="cell" data-index="6"></div>
+          <div class="cell" data-index="7"></div>
+          <div class="cell" data-index="8"></div>
+        </div>
+
+        <!-- ゲームオーバーオーバーレイ -->
+        <div class="game-overlay" id="game-over-overlay">
+          <div class="overlay-content">
+            <h2 id="result-title">ゲーム終了</h2>
+            <p id="result-message"></p>
+            <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li>あなたは<strong>○</strong>、コンピュータは<strong>×</strong>です</li>
+        <li>マスをクリック（タップ）して○を置きます</li>
+        <li>たて・よこ・ななめに<strong>3つ並べた</strong>ら勝ちです</li>
+        <li>コンピュータはとても強いので、引き分けを目指そう！</li>
+        <li>勝敗の記録はブラウザに保存されます</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        三目並べはミニマックスアルゴリズムという<br>
+        ゲームAIの基本を学べるゲームです。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/tictactoe" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">← 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -52,6 +52,31 @@
   var btnNewGame = document.getElementById('btn-new-game');
   var modeBtns = document.querySelectorAll('.mode-btn');
   var boardWrapper = document.querySelector('.board-wrapper');
+  var winsEl = document.getElementById('wins');
+  var lossesEl = document.getElementById('losses');
+  var bestMarginEl = document.getElementById('best-margin');
+
+  // ============================================
+  // 戦績管理（localStorage）
+  // ============================================
+  function getStats() {
+    try {
+      var data = localStorage.getItem('bestReversi');
+      if (data) return JSON.parse(data);
+    } catch (e) {}
+    return { wins: 0, losses: 0, draws: 0, bestMargin: 0 };
+  }
+
+  function saveStats(stats) {
+    localStorage.setItem('bestReversi', JSON.stringify(stats));
+  }
+
+  function updateStatsDisplay() {
+    var stats = getStats();
+    if (winsEl) winsEl.textContent = stats.wins;
+    if (lossesEl) lossesEl.textContent = stats.losses;
+    if (bestMarginEl) bestMarginEl.textContent = stats.bestMargin;
+  }
 
   // ============================================
   // 盤面の初期化
@@ -610,6 +635,22 @@
       resultMessageEl.textContent = '同点です。もう一度勝負しよう！';
     }
 
+    // 戦績を記録（CPUモードのみ）
+    if (isCpuMode()) {
+      var stats = getStats();
+      var margin = counts.black - counts.white;
+      if (counts.black > counts.white) {
+        stats.wins++;
+        if (margin > stats.bestMargin) stats.bestMargin = margin;
+      } else if (counts.white > counts.black) {
+        stats.losses++;
+      } else {
+        stats.draws++;
+      }
+      saveStats(stats);
+      updateStatsDisplay();
+    }
+
     renderBoard();
     gameOverOverlay.classList.add('active');
   }
@@ -654,6 +695,7 @@
   // ============================================
   // 初期化
   // ============================================
+  updateStatsDisplay();
   startGame();
 
 })();

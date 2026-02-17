@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>テトリス｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="テトリスで遊ぼう！落ちてくるブロックを回転・移動させてラインを消そう。PC・スマホ対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="テトリス｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="テトリスで遊ぼう！落ちてくるブロックを回転・移動させてラインを消そう。PC・スマホ対応の無料ブラウザゲーム。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/tetris/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "テトリス",
+    "description": "落ちてくるブロックを回転・移動させてラインを消すクラシックなパズルゲーム",
+    "url": "https://hinata-ya.tech/games/games/tetris/",
+    "genre": ["パズル", "クラシック"],
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">テトリス</h1>
+    <div class="game-page-tags">
+      <span class="tag">パズル</span>
+      <span class="tag">クラシック</span>
+    </div>
+
+    <div class="game-container">
+      <!-- スコアエリア -->
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">スコア</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">ベスト</span>
+          <span class="score-value" id="best-score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">レベル</span>
+          <span class="score-value" id="level">1</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">New Game</button>
+      </div>
+
+      <!-- ゲームエリア（ボード + ネクスト表示） -->
+      <div class="tetris-area">
+        <!-- ゲームボード -->
+        <div class="board-wrapper">
+          <div class="tetris-board" id="tetris-board"></div>
+
+          <!-- ゲームオーバーオーバーレイ -->
+          <div class="game-overlay" id="game-over-overlay">
+            <div class="overlay-content">
+              <h2>ゲームオーバー</h2>
+              <p>スコア: <span id="final-score">0</span></p>
+              <p class="best-result" id="best-result"></p>
+              <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
+            </div>
+          </div>
+
+          <!-- スタートオーバーレイ -->
+          <div class="game-overlay active" id="game-start-overlay">
+            <div class="overlay-content">
+              <h2>テトリス</h2>
+              <p>ブロックを並べてラインを消そう！</p>
+              <button class="btn-primary" id="btn-start">ゲームスタート</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ネクストピース表示 -->
+        <div class="next-piece-panel">
+          <div class="next-piece-label">つぎ</div>
+          <div class="next-piece-box" id="next-piece-box"></div>
+        </div>
+      </div>
+
+      <!-- モバイル操作ボタン -->
+      <div class="mobile-controls" id="mobile-controls">
+        <div class="mobile-controls-row">
+          <button class="mobile-btn" id="btn-rotate" aria-label="回転">&#10227;</button>
+        </div>
+        <div class="mobile-controls-row">
+          <button class="mobile-btn" id="btn-left" aria-label="左">&#9664;</button>
+          <button class="mobile-btn" id="btn-down" aria-label="下">&#9660;</button>
+          <button class="mobile-btn" id="btn-right" aria-label="右">&#9654;</button>
+        </div>
+        <div class="mobile-controls-row">
+          <button class="mobile-btn mobile-btn-wide" id="btn-drop" aria-label="ハードドロップ">&#9660;&#9660; ドロップ</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li><strong>PC</strong>: ← → で左右移動、↑ で回転、↓ でソフトドロップ、スペースでハードドロップ</li>
+        <li><strong>スマホ</strong>: 画面下のボタンで操作</li>
+        <li>横一列をブロックで埋めるとラインが消えます</li>
+        <li>一度に多くのラインを消すと高得点！（1列=100, 2列=300, 3列=500, 4列=800）</li>
+        <li>10ライン消すごとにレベルアップ！スピードも上がります</li>
+        <li>ブロックが一番上まで積み上がるとゲームオーバー！</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        テトリスはJavaScriptの配列操作と<br>
+        タイマー処理で作られています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/tetris" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">&larr; 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

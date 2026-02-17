@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>シューティング｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="シューティングゲームで遊ぼう！自機を操作して敵を撃ち落とそう。PC・スマホ対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="シューティング｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="シューティングゲームで遊ぼう！自機を操作して敵を撃ち落とそう。PC・スマホ対応の無料ブラウザゲーム。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/shooting/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "シューティング",
+    "description": "自機を操作して敵を撃ち落とす縦スクロールシューティングゲーム",
+    "url": "https://hinata-ya.tech/games/games/shooting/",
+    "genre": ["アクション", "シューティング"],
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">シューティング</h1>
+    <div class="game-page-tags">
+      <span class="tag">アクション</span>
+      <span class="tag">シューティング</span>
+    </div>
+
+    <div class="game-container">
+      <!-- スコアエリア -->
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">スコア</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">ベスト</span>
+          <span class="score-value" id="best-score">0</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">New Game</button>
+      </div>
+
+      <!-- ゲームボード -->
+      <div class="board-wrapper">
+        <canvas id="game-canvas"></canvas>
+
+        <!-- ライフ表示 -->
+        <div class="lives-display" id="lives-display"></div>
+
+        <!-- ゲームオーバーオーバーレイ -->
+        <div class="game-overlay" id="game-over-overlay">
+          <div class="overlay-content">
+            <h2>ゲームオーバー</h2>
+            <p>スコア: <span id="final-score">0</span></p>
+            <p class="best-result" id="best-result"></p>
+            <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
+          </div>
+        </div>
+
+        <!-- スタートオーバーレイ -->
+        <div class="game-overlay active" id="game-start-overlay">
+          <div class="overlay-content">
+            <h2>シューティング</h2>
+            <p>敵を撃ち落として<br>ハイスコアを目指そう！</p>
+            <button class="btn-primary" id="btn-start">ゲームスタート</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li><strong>PC</strong>: 左右の矢印キーで自機を移動、スペースキーで弾を発射</li>
+        <li><strong>スマホ</strong>: 画面の左半分タッチで左移動、右半分タッチで右移動（弾は自動発射）</li>
+        <li>敵を撃ち落とすと1体10点！</li>
+        <li>敵が画面下まで到達する、または自機に衝突するとライフが減ります</li>
+        <li>ライフは3つ。すべて失うとゲームオーバー！</li>
+        <li>スコアが上がるほど敵のスピードと出現頻度がアップ！</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        シューティングゲームはCanvas APIと<br>
+        当たり判定のロジックで作られています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/shooting" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">&larr; 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

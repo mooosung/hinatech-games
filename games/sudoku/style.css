@@ -1,0 +1,352 @@
+/* ============================================
+   数独 - 固有スタイル
+   ============================================ */
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.score-box {
+  background: #BBADA0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 70px;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #EEE4DA;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-new-game {
+  margin-left: auto;
+  background: #8F7A66;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.btn-new-game:hover {
+  background: #7A6658;
+}
+
+/* ボードラッパー */
+.board-wrapper {
+  position: relative;
+  margin: 0 auto 1rem;
+  text-align: center;
+}
+
+/* 数独ボード */
+.sudoku-board {
+  display: inline-grid;
+  grid-template-columns: repeat(9, 1fr);
+  background: #776E65;
+  border: 3px solid #776E65;
+  border-radius: 4px;
+  user-select: none;
+  -webkit-user-select: none;
+  width: 100%;
+  max-width: 450px;
+  aspect-ratio: 1 / 1;
+}
+
+/* セル共通 */
+.sudoku-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FAF8EF;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #333;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.1s;
+  border: 0.5px solid #CDC1B4;
+}
+
+/* 3x3ブロック境界（太い線） */
+/* 右境界：列2, 5（0-indexed） */
+.sudoku-cell[data-col="2"],
+.sudoku-cell[data-col="5"] {
+  border-right: 2px solid #776E65;
+}
+
+/* 下境界：行2, 5 */
+.sudoku-cell[data-row="2"],
+.sudoku-cell[data-row="5"] {
+  border-bottom: 2px solid #776E65;
+}
+
+/* 左境界：列0 */
+.sudoku-cell[data-col="0"] {
+  border-left: 1.5px solid #776E65;
+}
+
+/* 上境界：行0 */
+.sudoku-cell[data-row="0"] {
+  border-top: 1.5px solid #776E65;
+}
+
+/* 右境界：列8 */
+.sudoku-cell[data-col="8"] {
+  border-right: 1.5px solid #776E65;
+}
+
+/* 下境界：行8 */
+.sudoku-cell[data-row="8"] {
+  border-bottom: 1.5px solid #776E65;
+}
+
+/* 列3, 6の左境界 */
+.sudoku-cell[data-col="3"],
+.sudoku-cell[data-col="6"] {
+  border-left: 2px solid #776E65;
+}
+
+/* 行3, 6の上境界 */
+.sudoku-cell[data-row="3"],
+.sudoku-cell[data-row="6"] {
+  border-top: 2px solid #776E65;
+}
+
+/* 固定セル（問題の数字） */
+.sudoku-cell.fixed {
+  color: #333;
+  font-weight: 800;
+  background: #EEE4DA;
+}
+
+/* ユーザー入力セル */
+.sudoku-cell.user-input {
+  color: #2E7D91;
+}
+
+/* 選択中のセル */
+.sudoku-cell.selected {
+  background: #F5D69C !important;
+  box-shadow: inset 0 0 0 2px #E67E22;
+  z-index: 2;
+}
+
+/* 選択セルと同じ行/列/ブロックのハイライト */
+.sudoku-cell.highlighted {
+  background: #FFF3E0;
+}
+
+/* 同じ数字のハイライト */
+.sudoku-cell.same-number {
+  background: #FDEBD0;
+}
+
+/* エラーハイライト（重複） */
+.sudoku-cell.error {
+  color: #C62828;
+  background: #FFCDD2 !important;
+}
+
+/* セルホバー */
+.sudoku-cell:hover:not(.selected) {
+  background: #FFF8E1;
+}
+
+/* 数字入力ボタン */
+.number-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.num-btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: #8F7A66;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.num-btn:hover {
+  background: #7A6658;
+  transform: translateY(-1px);
+}
+
+.num-btn:active {
+  transform: translateY(0);
+  background: #695A4E;
+}
+
+.num-btn.num-btn-clear {
+  width: auto;
+  padding: 0 1rem;
+  background: #BBADA0;
+  font-size: 0.9rem;
+}
+
+.num-btn.num-btn-clear:hover {
+  background: #A89888;
+}
+
+/* 完成した数字のボタンを薄く */
+.num-btn.completed {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ゲームオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(237, 194, 46, 0.55);
+  border-radius: 4px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.4s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.overlay-content h2 {
+  font-size: 1.75rem;
+  color: #E67E22;
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content p {
+  font-size: 1.1rem;
+  color: #776E65;
+  margin-bottom: 1rem;
+}
+
+.overlay-content .btn-primary {
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================
+   レスポンシブ
+   ============================================ */
+
+@media (max-width: 500px) {
+  .sudoku-cell {
+    font-size: 1.1rem;
+  }
+
+  .num-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+  }
+
+  .num-btn.num-btn-clear {
+    font-size: 0.8rem;
+    padding: 0 0.75rem;
+  }
+
+  .score-box {
+    padding: 0.4rem 0.75rem;
+    min-width: 60px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .sudoku-cell {
+    font-size: 0.9rem;
+  }
+
+  .num-btn {
+    width: 33px;
+    height: 33px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+
+  .num-btn.num-btn-clear {
+    font-size: 0.75rem;
+    padding: 0 0.6rem;
+  }
+
+  .number-buttons {
+    gap: 0.35rem;
+  }
+
+  .score-box {
+    padding: 0.3rem 0.5rem;
+    min-width: 50px;
+  }
+
+  .score-value {
+    font-size: 0.9rem;
+  }
+
+  .score-label {
+    font-size: 0.6rem;
+  }
+}
+
+/* 勝利時のアニメーション */
+@keyframes cell-celebrate {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.sudoku-cell.celebrate {
+  animation: cell-celebrate 0.3s ease;
+  background: #C8E6C9 !important;
+}

@@ -29,6 +29,62 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://hinata-ya.tech/games/games/tetris/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/breakout/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/whack-a-mole/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/flappy/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/color-match/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/puzzle15/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/maze/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/sudoku/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/tictactoe/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/pong/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/catching/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/simon/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/word-search/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/shooting/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://hinata-ya.tech/games/about/</loc>
     <priority>0.6</priority>
   </url>
