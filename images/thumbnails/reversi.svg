@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <rect width="400" height="250" rx="16" fill="#E8F5E9"/>
+  <!-- Board -->
+  <g transform="translate(108, 15)">
+    <rect width="184" height="184" rx="6" fill="#2E7D32"/>
+    <!-- Grid lines -->
+    <line x1="23" y1="0" x2="23" y2="184" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="46" y1="0" x2="46" y2="184" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="69" y1="0" x2="69" y2="184" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="92" y1="0" x2="92" y2="184" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="115" y1="0" x2="115" y2="184" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="138" y1="0" x2="138" y2="184" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="161" y1="0" x2="161" y2="184" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="0" y1="23" x2="184" y2="23" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="0" y1="46" x2="184" y2="46" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="0" y1="69" x2="184" y2="69" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="0" y1="92" x2="184" y2="92" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="0" y1="115" x2="184" y2="115" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="0" y1="138" x2="184" y2="138" stroke="#1B5E20" stroke-width="0.5"/>
+    <line x1="0" y1="161" x2="184" y2="161" stroke="#1B5E20" stroke-width="0.5"/>
+    <!-- Stones - opening position + some moves -->
+    <circle cx="80.5" cy="80.5" r="9" fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+    <circle cx="103.5" cy="80.5" r="9" fill="#222"/>
+    <circle cx="80.5" cy="103.5" r="9" fill="#222"/>
+    <circle cx="103.5" cy="103.5" r="9" fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+    <!-- Extra stones for visual interest -->
+    <circle cx="57.5" cy="80.5" r="9" fill="#222"/>
+    <circle cx="80.5" cy="57.5" r="9" fill="#222"/>
+    <circle cx="126.5" cy="103.5" r="9" fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+    <circle cx="103.5" cy="126.5" r="9" fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+    <!-- Valid move indicators -->
+    <circle cx="57.5" cy="57.5" r="4" fill="#fff" opacity="0.3"/>
+    <circle cx="57.5" cy="103.5" r="4" fill="#fff" opacity="0.3"/>
+    <circle cx="34.5" cy="80.5" r="4" fill="#fff" opacity="0.3"/>
+  </g>
+  <text x="200" y="232" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="700" fill="#2E7D32">Reversi</text>
+</svg>

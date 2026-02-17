@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>リバーシ｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="リバーシ（オセロ）を無料で遊ぼう！CPU対戦（かんたん・つよい）や2人対戦モード搭載。PC・スマホ対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="リバーシ｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="リバーシ（オセロ）を無料で遊ぼう！CPU対戦や2人対戦モード搭載。PC・スマホ対応。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/reversi/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "リバーシ",
+    "description": "リバーシ（オセロ）を無料で遊べるブラウザゲーム。CPU対戦や2人対戦モード搭載。",
+    "url": "https://hinata-ya.tech/games/games/reversi/",
+    "genre": "ボードゲーム",
+    "gamePlatform": "Web Browser",
+    "numberOfPlayers": {
+      "@type": "QuantitativeValue",
+      "minValue": 1,
+      "maxValue": 2
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">リバーシ</h1>
+    <div class="game-page-tags">
+      <span class="tag">ボードゲーム</span>
+      <span class="tag">対戦</span>
+    </div>
+
+    <div class="game-container">
+      <!-- モード選択 -->
+      <div class="mode-selector">
+        <button class="mode-btn active" data-mode="cpu-easy">CPU（かんたん）</button>
+        <button class="mode-btn" data-mode="cpu-hard">CPU（つよい）</button>
+        <button class="mode-btn" data-mode="two-player">2人で対戦</button>
+      </div>
+
+      <!-- スコアエリア -->
+      <div class="score-area">
+        <div class="score-box score-black" id="score-black-box">
+          <span class="stone-icon black-icon"></span>
+          <span class="score-label">黒</span>
+          <span class="score-value" id="score-black">2</span>
+        </div>
+        <div class="turn-indicator" id="turn-indicator">
+          <span id="turn-text">黒のターン</span>
+        </div>
+        <div class="score-box score-white" id="score-white-box">
+          <span class="stone-icon white-icon"></span>
+          <span class="score-label">白</span>
+          <span class="score-value" id="score-white">2</span>
+        </div>
+      </div>
+
+      <!-- ゲームボード -->
+      <div class="board-wrapper">
+        <div class="board" id="board"></div>
+
+        <!-- ゲームオーバーオーバーレイ -->
+        <div class="game-overlay" id="game-over-overlay">
+          <div class="overlay-content">
+            <h2 id="result-title">ゲーム終了</h2>
+            <p class="result-score">
+              <span class="stone-icon black-icon"></span> <span id="final-black">0</span>
+              ー
+              <span id="final-white">0</span> <span class="stone-icon white-icon"></span>
+            </p>
+            <p id="result-message"></p>
+            <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-new-game" id="btn-new-game">New Game</button>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li>黒が先手です。自分の石で相手の石を<strong>はさむ</strong>と、はさんだ石が自分の色にひっくり返ります</li>
+        <li>たて・よこ・ななめの<strong>8方向</strong>すべてで判定されます</li>
+        <li>置ける場所がハイライト表示されるので、そこをクリック（タップ）してください</li>
+        <li>置ける場所がないときは自動でパスになります</li>
+        <li>どちらも置けなくなったらゲーム終了。<strong>石の多い方が勝ち</strong>です</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        リバーシはゲームAIの基本を学べるゲームです。<br>
+        盤面を評価する関数を作って、<br>
+        コンピュータに「いい手」を選ばせてみよう！<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">← 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

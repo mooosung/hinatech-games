@@ -1,0 +1,449 @@
+/* ============================================
+   リバーシ - 固有スタイル
+   ============================================ */
+
+/* モード選択 */
+.mode-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.mode-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.5rem;
+  border: 2px solid #BBADA0;
+  border-radius: 8px;
+  background: #fff;
+  color: #776E65;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.mode-btn:hover {
+  border-color: #8F7A66;
+  background: #f5ebe0;
+}
+
+.mode-btn.active {
+  border-color: #2E7D32;
+  background: #2E7D32;
+  color: #fff;
+}
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.score-box {
+  background: #BBADA0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: center;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.score-box.active-player {
+  box-shadow: 0 0 0 3px #E67E22, 0 4px 12px rgba(230, 126, 34, 0.3);
+  transform: scale(1.05);
+}
+
+.score-label {
+  font-size: 0.75rem;
+  color: #EEE4DA;
+  font-weight: 500;
+}
+
+.score-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* 石のアイコン（スコア用） */
+.stone-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.black-icon {
+  background: radial-gradient(circle at 35% 35%, #555, #111);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.white-icon {
+  background: radial-gradient(circle at 35% 35%, #fff, #ccc);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ターン表示 */
+.turn-indicator {
+  background: #8F7A66;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+#turn-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ボード */
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 1rem;
+  aspect-ratio: 1 / 1;
+}
+
+.board {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 2px;
+  padding: 6px;
+  background: #1B5E20;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* マス目 */
+.cell {
+  background: #2E7D32;
+  border-radius: 3px;
+  position: relative;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.cell:hover {
+  background: #338536;
+}
+
+/* 置ける場所のハイライト */
+.cell.valid {
+  cursor: pointer;
+}
+
+.cell.valid::after {
+  content: '';
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+  animation: valid-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes valid-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.15); }
+}
+
+.cell.valid:hover {
+  background: #3a9a40;
+}
+
+.cell.valid:hover::after {
+  background: rgba(255, 255, 255, 0.55);
+  animation: none;
+}
+
+/* 最後に置いた場所 */
+.cell.last-move {
+  box-shadow: inset 0 0 0 2px rgba(255, 235, 59, 0.6);
+}
+
+/* 石 */
+.stone {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  position: absolute;
+  transition: transform 0.05s;
+}
+
+.stone.black {
+  background: radial-gradient(circle at 35% 35%, #555, #111);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.stone.white {
+  background: radial-gradient(circle at 35% 35%, #fff, #ccc);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 石を置くアニメーション */
+@keyframes stone-place {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.stone.placed {
+  animation: stone-place 0.3s ease-out;
+}
+
+/* 石をひっくり返すアニメーション */
+@keyframes stone-flip {
+  0% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.stone.flipping {
+  animation: stone-flip 0.4s ease-in-out;
+}
+
+/* ゲームオーバーオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.4s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  margin: 1rem;
+  max-width: 90%;
+}
+
+.overlay-content h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+.result-score {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.result-score .stone-icon {
+  width: 24px;
+  height: 24px;
+}
+
+#result-message {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.overlay-content .btn-primary {
+  margin-top: 0.5rem;
+}
+
+/* New Game ボタン */
+.btn-new-game {
+  display: block;
+  margin: 0 auto;
+  background: #8F7A66;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-new-game:hover {
+  background: #7A6658;
+}
+
+/* CPU思考中の表示 */
+.thinking {
+  position: relative;
+}
+
+.thinking::before {
+  content: 'CPU思考中...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 5;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: thinking-pulse 1s ease-in-out infinite;
+}
+
+@keyframes thinking-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+/* パス通知 */
+.pass-notification {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  z-index: 5;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: pass-appear 0.3s ease, pass-disappear 0.3s ease 0.7s forwards;
+}
+
+@keyframes pass-appear {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes pass-disappear {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ============================================
+   レスポンシブ
+   ============================================ */
+@media (max-width: 500px) {
+  .board {
+    gap: 1.5px;
+    padding: 4px;
+  }
+
+  .score-box {
+    padding: 0.4rem 0.6rem;
+    min-width: 65px;
+  }
+
+  .score-value {
+    font-size: 1.1rem;
+  }
+
+  .turn-indicator {
+    padding: 0.3rem 0.5rem;
+  }
+
+  #turn-text {
+    font-size: 0.7rem;
+  }
+
+  .mode-btn {
+    padding: 0.4rem 0.3rem;
+    font-size: 0.7rem;
+  }
+
+  .result-score {
+    font-size: 1.4rem;
+  }
+
+  .overlay-content h2 {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .board {
+    gap: 1px;
+    padding: 3px;
+  }
+
+  .score-box {
+    padding: 0.3rem 0.4rem;
+    min-width: 55px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+
+  .score-label {
+    font-size: 0.65rem;
+  }
+
+  .stone-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .mode-btn {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.25rem;
+  }
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://hinata-ya.tech/games/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/2048/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/snake/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/memory/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/minesweeper/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/typing/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/reversi/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/about/</loc>
+    <priority>0.6</priority>
+  </url>
+</urlset>

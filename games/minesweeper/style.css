@@ -1,0 +1,357 @@
+/* ============================================
+   マインスイーパー - 固有スタイル
+   ============================================ */
+
+/* コントロールエリア（地雷カウンター・スマイリー・タイマー） */
+.ms-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  gap: 0.75rem;
+}
+
+.ms-info-box {
+  background: #1a1a2e;
+  color: #ff4444;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  min-width: 70px;
+  text-align: center;
+  border: 2px solid #333;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  line-height: 1.2;
+}
+
+.ms-smiley {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: #FFE082;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.1s, box-shadow 0.1s;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+
+.ms-smiley:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ms-smiley:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* 難易度選択 */
+.ms-difficulty {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  justify-content: center;
+}
+
+.ms-diff-btn {
+  background: #fff;
+  border: 2px solid #E0D5C8;
+  border-radius: 100px;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #777;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.ms-diff-btn:hover {
+  border-color: #E67E22;
+  color: #E67E22;
+}
+
+.ms-diff-btn.active {
+  background: #E67E22;
+  border-color: #E67E22;
+  color: #fff;
+}
+
+/* ベストタイム */
+.ms-best-time {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #999;
+  margin-bottom: 0.75rem;
+  min-height: 1.2em;
+}
+
+/* ゲームボードラッパー */
+.ms-board-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+}
+
+/* ゲームボード */
+.ms-board {
+  display: inline-grid;
+  gap: 1px;
+  background: #999;
+  border: 3px solid #888;
+  border-radius: 4px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  margin: 0 auto;
+}
+
+/* セル共通 */
+.ms-cell {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  transition: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+}
+
+/* 未開封セル（3D浮き出しデザイン） */
+.ms-cell-hidden {
+  background: linear-gradient(145deg, #f0e6d6, #e0d5c5);
+  border-top: 2px solid #f8f0e4;
+  border-left: 2px solid #f8f0e4;
+  border-right: 2px solid #c0b5a5;
+  border-bottom: 2px solid #c0b5a5;
+}
+
+.ms-cell-hidden:hover {
+  background: linear-gradient(145deg, #f5ece0, #e8ddcc);
+}
+
+.ms-cell-hidden:active {
+  background: #d8cfc0;
+  border: 1px solid #bbb;
+}
+
+/* 開封済みセル */
+.ms-cell-revealed {
+  background: #e8e0d4;
+  border: 1px solid #d0c8bc;
+  cursor: default;
+}
+
+/* 旗付きセル */
+.ms-cell-flagged::after {
+  content: '🚩';
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* 疑問符セル（未使用だが拡張用） */
+.ms-cell-question::after {
+  content: '?';
+  font-size: 1rem;
+  color: #333;
+  font-weight: 700;
+}
+
+/* 地雷セル（ゲームオーバー時） */
+.ms-cell-mine {
+  background: #e8e0d4;
+  border: 1px solid #d0c8bc;
+  cursor: default;
+}
+
+.ms-cell-mine::after {
+  content: '💣';
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* クリックした地雷（赤背景） */
+.ms-cell-mine-hit {
+  background: #ff4444 !important;
+  border: 1px solid #cc0000;
+  cursor: default;
+}
+
+.ms-cell-mine-hit::after {
+  content: '💣';
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* 間違った旗 */
+.ms-cell-wrong-flag {
+  background: #e8e0d4;
+  border: 1px solid #d0c8bc;
+  cursor: default;
+}
+
+.ms-cell-wrong-flag::after {
+  content: '❌';
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* 数字の色 */
+.ms-num-1 { color: #0000FF; }
+.ms-num-2 { color: #008000; }
+.ms-num-3 { color: #FF0000; }
+.ms-num-4 { color: #000080; }
+.ms-num-5 { color: #800000; }
+.ms-num-6 { color: #008080; }
+.ms-num-7 { color: #000000; }
+.ms-num-8 { color: #808080; }
+
+/* ゲームメッセージ */
+.ms-message {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 0.75rem;
+  min-height: 1.6em;
+  transition: opacity 0.3s;
+}
+
+.ms-message-win {
+  color: #2E7D32;
+}
+
+.ms-message-lose {
+  color: #C62828;
+}
+
+/* ============================================
+   レスポンシブ
+   ============================================ */
+
+/* タブレット以下：セルを少し大きく */
+@media (max-width: 768px) {
+  .ms-board-wrapper {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+/* モバイル：タッチフレンドリーなサイズ */
+@media (max-width: 500px) {
+  .ms-cell {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
+  .ms-cell-flagged::after,
+  .ms-cell-mine::after,
+  .ms-cell-mine-hit::after,
+  .ms-cell-wrong-flag::after {
+    font-size: 0.8rem;
+  }
+
+  .ms-info-box {
+    font-size: 1.4rem;
+    min-width: 58px;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .ms-smiley {
+    font-size: 1.6rem;
+    width: 40px;
+    height: 40px;
+  }
+
+  .ms-diff-btn {
+    padding: 0.3rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* 小さいモバイル */
+@media (max-width: 380px) {
+  .ms-cell {
+    width: 24px;
+    height: 24px;
+    font-size: 0.7rem;
+  }
+
+  .ms-cell-flagged::after,
+  .ms-cell-mine::after,
+  .ms-cell-mine-hit::after,
+  .ms-cell-wrong-flag::after {
+    font-size: 0.7rem;
+  }
+
+  .ms-info-box {
+    font-size: 1.2rem;
+    min-width: 50px;
+  }
+
+  .ms-diff-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* ハード難易度用：横スクロール対応 */
+.ms-board-wrapper.scrollable {
+  justify-content: flex-start;
+}
+
+/* ボード中央揃え */
+.ms-board-wrapper {
+  text-align: center;
+}
+
+.ms-board {
+  display: inline-grid;
+}
+
+/* アニメーション */
+@keyframes cell-reveal {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.ms-cell-revealed,
+.ms-cell-mine,
+.ms-cell-mine-hit,
+.ms-cell-wrong-flag {
+  animation: cell-reveal 0.1s ease;
+}
+
+/* 勝利時のパルスアニメーション */
+@keyframes win-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.ms-message-win {
+  animation: win-pulse 0.6s ease 2;
+}

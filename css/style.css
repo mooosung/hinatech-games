@@ -1,0 +1,507 @@
+/* ============================================
+   ひなテックGames - 共通スタイル
+   ============================================ */
+
+/* リセット & ベース */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+  line-height: 1.7;
+  color: #333;
+  background-color: #FFF8F0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: #E67E22;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #D35400;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ============================================
+   ヘッダー
+   ============================================ */
+.site-header {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #333;
+}
+
+.site-logo img {
+  height: 36px;
+  width: auto;
+}
+
+.site-logo .site-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #E67E22;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-nav a {
+  color: #555;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.header-nav a:hover {
+  color: #E67E22;
+}
+
+/* モバイルメニュー */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #333;
+  margin: 5px 0;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .header-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    flex-direction: column;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    gap: 0.75rem;
+  }
+
+  .header-nav.open {
+    display: flex;
+  }
+
+  .header-nav a {
+    font-size: 1rem;
+    padding: 0.5rem 0;
+  }
+}
+
+/* ============================================
+   フッター
+   ============================================ */
+.site-footer {
+  background: #333;
+  color: #ccc;
+  margin-top: auto;
+  padding: 2rem 1rem;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: #ccc;
+  font-size: 0.85rem;
+}
+
+.footer-links a:hover {
+  color: #E67E22;
+}
+
+.footer-copyright {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+/* ============================================
+   ヒーローエリア
+   ============================================ */
+.hero {
+  background: linear-gradient(135deg, #F39C12 0%, #E67E22 50%, #D35400 100%);
+  color: #fff;
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.hero h1 {
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.hero p {
+  font-size: 1.1rem;
+  opacity: 0.95;
+}
+
+@media (min-width: 768px) {
+  .hero {
+    padding: 4rem 1rem;
+  }
+
+  .hero h1 {
+    font-size: 2.25rem;
+  }
+
+  .hero p {
+    font-size: 1.25rem;
+  }
+}
+
+/* ============================================
+   ゲーム一覧（カードグリッド）
+   ============================================ */
+.section-title {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #333;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: #E67E22;
+  margin: 0.5rem auto 0;
+  border-radius: 2px;
+}
+
+.games-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .games-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .games-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.game-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.game-card-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: #f0e6d6;
+}
+
+.game-card-body {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.game-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.game-card-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #FFF3E0;
+  color: #E67E22;
+}
+
+/* ============================================
+   ひなテック紹介バナー
+   ============================================ */
+.promo-banner {
+  background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+.promo-banner-inner {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.promo-banner h2 {
+  font-size: 1.35rem;
+  color: #E67E22;
+  margin-bottom: 0.75rem;
+}
+
+.promo-banner p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 1.25rem;
+  line-height: 1.8;
+}
+
+.btn-primary {
+  display: inline-block;
+  background: #E67E22;
+  color: #fff;
+  padding: 0.75rem 2rem;
+  border-radius: 100px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.2s;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #D35400;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   ゲームページ共通
+   ============================================ */
+.game-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.game-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.game-page-tags {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.game-container {
+  margin-bottom: 2rem;
+}
+
+.game-instructions {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.game-instructions h3 {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  color: #E67E22;
+}
+
+.game-instructions ul {
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.game-instructions li {
+  margin-bottom: 0.25rem;
+}
+
+/* このゲームを作ってみよう！セクション */
+.game-promo {
+  background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.game-promo h3 {
+  font-size: 1.15rem;
+  color: #E67E22;
+  margin-bottom: 0.75rem;
+}
+
+.game-promo p {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+/* 他のゲームへの導線 */
+.other-games {
+  text-align: center;
+}
+
+.other-games a {
+  font-weight: 600;
+}
+
+/* ============================================
+   aboutページ
+   ============================================ */
+.about-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+.about-page h1 {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  color: #E67E22;
+  text-align: center;
+}
+
+.about-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.about-section h2 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #FFF3E0;
+}
+
+.about-section p,
+.about-section ul {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.8;
+}
+
+.about-section ul {
+  padding-left: 1.25rem;
+}
+
+.about-section li {
+  margin-bottom: 0.25rem;
+}
+
+.about-cta {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* ============================================
+   ユーティリティ
+   ============================================ */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }

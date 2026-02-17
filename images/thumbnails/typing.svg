@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+  <rect width="400" height="250" rx="16" fill="#E3F2FD"/>
+  <!-- Word display -->
+  <rect x="60" y="30" width="280" height="60" rx="12" fill="#fff" stroke="#90CAF9" stroke-width="2"/>
+  <text x="200" y="68" text-anchor="middle" font-family="monospace" font-size="28" font-weight="700">
+    <tspan fill="#4CAF50">java</tspan><tspan fill="#333">script</tspan>
+  </text>
+  <!-- Cursor blink -->
+  <rect x="252" y="45" width="2" height="30" fill="#E67E22" opacity="0.8"/>
+  <!-- Input field -->
+  <rect x="80" y="105" width="240" height="45" rx="8" fill="#fff" stroke="#BBDEFB" stroke-width="2"/>
+  <text x="100" y="134" font-family="monospace" font-size="22" fill="#4CAF50">java</text>
+  <rect x="160" y="112" width="2" height="28" fill="#1976D2"/>
+  <!-- Keyboard hint -->
+  <g transform="translate(90, 165)">
+    <rect x="0" y="0" width="28" height="28" rx="4" fill="#fff" stroke="#BDBDBD" stroke-width="1"/>
+    <text x="14" y="19" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">Q</text>
+    <rect x="32" y="0" width="28" height="28" rx="4" fill="#fff" stroke="#BDBDBD" stroke-width="1"/>
+    <text x="46" y="19" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">W</text>
+    <rect x="64" y="0" width="28" height="28" rx="4" fill="#fff" stroke="#BDBDBD" stroke-width="1"/>
+    <text x="78" y="19" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">E</text>
+    <rect x="96" y="0" width="28" height="28" rx="4" fill="#fff" stroke="#BDBDBD" stroke-width="1"/>
+    <text x="110" y="19" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">R</text>
+    <rect x="128" y="0" width="28" height="28" rx="4" fill="#fff" stroke="#BDBDBD" stroke-width="1"/>
+    <text x="142" y="19" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">T</text>
+    <rect x="160" y="0" width="28" height="28" rx="4" fill="#fff" stroke="#BDBDBD" stroke-width="1"/>
+    <text x="174" y="19" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">Y</text>
+  </g>
+  <text x="200" y="235" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="700" fill="#1565C0">Typing</text>
+</svg>

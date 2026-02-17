@@ -1,0 +1,446 @@
+/* ============================================
+   タイピングゲーム - 固有スタイル
+   ============================================ */
+
+/* 難易度選択エリア */
+.difficulty-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.difficulty-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #776E65;
+}
+
+.difficulty-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.difficulty-btn {
+  background: #CDC1B4;
+  color: #776E65;
+  border: 2px solid transparent;
+  border-radius: 100px;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  font-family: inherit;
+}
+
+.difficulty-btn:hover {
+  background: #BBADA0;
+  color: #fff;
+}
+
+.difficulty-btn.active {
+  background: #E67E22;
+  color: #fff;
+  border-color: #D35400;
+}
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.score-box {
+  background: #BBADA0;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  text-align: center;
+  min-width: 60px;
+  flex: 1;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.65rem;
+  color: #EEE4DA;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* タイマー低下時の警告 */
+.score-box.timer-warning {
+  background: #E74C3C;
+  animation: timer-pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes timer-pulse {
+  0% {
+    background: #E74C3C;
+  }
+  100% {
+    background: #C0392B;
+  }
+}
+
+/* タイピングエリア */
+.typing-area {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+/* ワード表示 */
+.word-display {
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: #FAF8F0;
+  border-radius: 8px;
+  border: 2px solid #EEE4DA;
+  font-family: 'Courier New', 'SF Mono', 'Consolas', monospace;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  word-break: break-all;
+  line-height: 1.4;
+  flex-wrap: wrap;
+}
+
+.word-placeholder {
+  color: #BBADA0;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+  letter-spacing: 0;
+}
+
+/* 文字ごとのハイライト */
+.char-correct {
+  color: #27AE60;
+}
+
+.char-wrong {
+  color: #E74C3C;
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-underline-offset: 4px;
+}
+
+.char-remaining {
+  color: #BBADA0;
+}
+
+.char-cursor {
+  color: #555;
+  border-left: 2px solid #E67E22;
+  padding-left: 1px;
+  animation: cursor-blink 1s ease-in-out infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% {
+    border-color: #E67E22;
+  }
+  50% {
+    border-color: transparent;
+  }
+}
+
+/* ワード完了アニメーション */
+@keyframes word-complete {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.word-display.word-completed {
+  animation: word-complete 0.3s ease;
+}
+
+/* 入力フィールド */
+.typing-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.75rem 1rem;
+  font-size: 1.2rem;
+  font-family: 'Courier New', 'SF Mono', 'Consolas', monospace;
+  letter-spacing: 0.05em;
+  border: 2px solid #EEE4DA;
+  border-radius: 8px;
+  outline: none;
+  text-align: center;
+  background: #fff;
+  color: #333;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.typing-input:focus {
+  border-color: #E67E22;
+  box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.15);
+}
+
+.typing-input:disabled {
+  background: #F5F0EB;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.typing-input.input-correct {
+  border-color: #27AE60;
+  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.15);
+}
+
+.typing-input.input-error {
+  border-color: #E74C3C;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+}
+
+/* ゲームアクションボタン */
+.game-actions {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.game-actions .btn-primary {
+  min-width: 160px;
+  font-size: 1.1rem;
+  padding: 0.8rem 2.5rem;
+}
+
+/* 結果オーバーレイ */
+.result-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+  animation: overlay-appear 0.3s ease;
+}
+
+.result-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.result-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: result-pop 0.4s ease;
+}
+
+@keyframes result-pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.result-content h2 {
+  font-size: 1.5rem;
+  color: #776E65;
+  margin-bottom: 0.75rem;
+}
+
+/* 星評価 */
+.result-stars {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  letter-spacing: 0.25rem;
+}
+
+.star-filled {
+  color: #F39C12;
+}
+
+.star-empty {
+  color: #DDD;
+}
+
+/* 結果統計 */
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.result-stat {
+  background: #FAF8F0;
+  border-radius: 8px;
+  padding: 0.75rem 0.5rem;
+}
+
+.result-stat:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.result-stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #999;
+  margin-bottom: 0.25rem;
+}
+
+.result-stat-value {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #776E65;
+}
+
+/* ベストスコア更新表示 */
+.result-best {
+  color: #E67E22;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  animation: best-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes best-glow {
+  0% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(230, 126, 34, 0.3);
+  }
+}
+
+.result-content .btn-primary {
+  margin-top: 0.5rem;
+}
+
+/* レスポンシブ */
+@media (min-width: 600px) {
+  .word-display {
+    font-size: 2.25rem;
+    min-height: 4rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .typing-input {
+    font-size: 1.35rem;
+    padding: 0.85rem 1.25rem;
+  }
+
+  .score-box {
+    min-width: 70px;
+    padding: 0.5rem 1rem;
+  }
+
+  .score-label {
+    font-size: 0.7rem;
+  }
+
+  .score-value {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .score-area {
+    gap: 0.35rem;
+  }
+
+  .score-box {
+    min-width: 50px;
+    padding: 0.35rem 0.5rem;
+  }
+
+  .score-label {
+    font-size: 0.6rem;
+  }
+
+  .score-value {
+    font-size: 0.95rem;
+  }
+
+  .word-display {
+    font-size: 1.35rem;
+    min-height: 3rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .typing-input {
+    font-size: 1rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .difficulty-buttons {
+    gap: 0.35rem;
+  }
+
+  .difficulty-btn {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .result-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .result-stat-value {
+    font-size: 1.1rem;
+  }
+}
+
+/* タブレット向け注意書き（スマホでは非表示） */
+@media (max-width: 600px) {
+  .typing-area::after {
+    content: '※ タイピングゲームはキーボード付きの端末で遊ぶのがおすすめです';
+    display: block;
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: #BBADA0;
+    text-align: center;
+  }
+}

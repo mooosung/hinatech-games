@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>タイピングゲーム｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="タイピングゲームで楽しくタイピング練習！難易度を選んで60秒間にどれだけ打てるか挑戦しよう。PC・タブレット対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="タイピングゲーム｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="タイピングゲームで楽しくタイピング練習！難易度を選んで60秒間にどれだけ打てるか挑戦しよう。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/typing/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "タイピングゲーム",
+    "description": "60秒間にどれだけ正確にタイピングできるか挑戦するタイピング練習ゲーム",
+    "url": "https://hinata-ya.tech/games/games/typing/",
+    "genre": "タイピング",
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">タイピングゲーム</h1>
+    <div class="game-page-tags">
+      <span class="tag">タイピング</span>
+      <span class="tag">学習</span>
+    </div>
+
+    <div class="game-container">
+      <!-- 難易度選択 -->
+      <div class="difficulty-area">
+        <label class="difficulty-label" for="difficulty-select">難易度:</label>
+        <div class="difficulty-buttons">
+          <button class="difficulty-btn active" data-difficulty="easy">かんたん</button>
+          <button class="difficulty-btn" data-difficulty="normal">ふつう</button>
+          <button class="difficulty-btn" data-difficulty="hard">むずかしい</button>
+        </div>
+      </div>
+
+      <!-- スコアエリア -->
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">スコア</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">残り時間</span>
+          <span class="score-value" id="timer">60</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">正確さ</span>
+          <span class="score-value" id="accuracy">100%</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">ベスト</span>
+          <span class="score-value" id="best-score">0</span>
+        </div>
+      </div>
+
+      <!-- ワード表示エリア -->
+      <div class="typing-area">
+        <div class="word-display" id="word-display">
+          <span class="word-placeholder">スタートボタンを押してね！</span>
+        </div>
+        <input
+          type="text"
+          class="typing-input"
+          id="typing-input"
+          placeholder="ここに入力..."
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          disabled
+        >
+      </div>
+
+      <!-- スタート/リスタートボタン -->
+      <div class="game-actions">
+        <button class="btn-primary" id="btn-start">スタート</button>
+      </div>
+
+      <!-- 結果オーバーレイ -->
+      <div class="result-overlay" id="result-overlay">
+        <div class="result-content">
+          <h2>タイムアップ！</h2>
+          <div class="result-stars" id="result-stars"></div>
+          <div class="result-stats">
+            <div class="result-stat">
+              <span class="result-stat-label">スコア</span>
+              <span class="result-stat-value" id="result-score">0</span>
+            </div>
+            <div class="result-stat">
+              <span class="result-stat-label">正確さ</span>
+              <span class="result-stat-value" id="result-accuracy">0%</span>
+            </div>
+            <div class="result-stat">
+              <span class="result-stat-label">WPM</span>
+              <span class="result-stat-value" id="result-wpm">0</span>
+            </div>
+            <div class="result-stat">
+              <span class="result-stat-label">完了ワード</span>
+              <span class="result-stat-value" id="result-words">0</span>
+            </div>
+            <div class="result-stat">
+              <span class="result-stat-label">入力文字数</span>
+              <span class="result-stat-value" id="result-chars">0</span>
+            </div>
+          </div>
+          <div class="result-best" id="result-best" style="display:none;">
+            ベストスコア更新！
+          </div>
+          <button class="btn-primary" id="btn-restart">もう一度遊ぶ</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li>難易度を選んで「スタート」ボタンを押すとゲーム開始</li>
+        <li>画面に表示される単語をキーボードで入力しよう</li>
+        <li>正しく入力すると次の単語が表示されます</li>
+        <li>制限時間は<strong>60秒</strong>。時間内にできるだけ多くの単語を打とう！</li>
+        <li><strong>かんたん</strong>: 短い英単語（cat, dog, sunなど）</li>
+        <li><strong>ふつう</strong>: プログラミング用語（function, arrayなど）</li>
+        <li><strong>むずかしい</strong>: 英語のフレーズ（"hello world"など）</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        タイピングゲームはキーボードイベントの処理で<br>
+        作られています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">&larr; 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

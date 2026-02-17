@@ -1,0 +1,292 @@
+/* ============================================
+   へびゲーム - 固有スタイル
+   ============================================ */
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.score-box {
+  background: #BBADA0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 70px;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #EEE4DA;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-new-game {
+  margin-left: auto;
+  background: #8F7A66;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-new-game:hover {
+  background: #7A6658;
+}
+
+/* ゲームボード */
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  touch-action: none;
+}
+
+.snake-board {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  grid-template-rows: repeat(20, 1fr);
+  gap: 1px;
+  padding: 4px;
+  background: #BBADA0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.snake-cell {
+  background: #CDC1B4;
+  border-radius: 2px;
+  transition: background-color 0.05s;
+}
+
+/* へびの体 */
+.snake-cell.snake-body {
+  background: #4CAF50;
+  border-radius: 3px;
+}
+
+/* へびの頭（少し濃い色） */
+.snake-cell.snake-head {
+  background: #2E7D32;
+  border-radius: 4px;
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.2);
+}
+
+/* エサ */
+.snake-cell.snake-food {
+  background: #F44336;
+  border-radius: 50%;
+  animation: food-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes food-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ゲームオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(238, 228, 218, 0.85);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.3s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.overlay-content h2 {
+  font-size: 1.75rem;
+  color: #776E65;
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content p {
+  font-size: 1.1rem;
+  color: #776E65;
+  margin-bottom: 0.75rem;
+}
+
+.overlay-content .best-result {
+  font-size: 0.95rem;
+  color: #E67E22;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.overlay-content .btn-primary {
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content .btn-new-game {
+  margin-left: 0;
+  display: block;
+  margin: 0.5rem auto 0;
+}
+
+/* モバイル方向ボタン（十字パッド） */
+.dpad-container {
+  display: none;
+  width: 160px;
+  margin: 1.25rem auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 6px;
+}
+
+/* PCでは方向パッドを非表示 */
+@media (min-width: 769px) {
+  .dpad-container {
+    display: none;
+  }
+}
+
+/* モバイルでは方向パッドを表示 */
+@media (max-width: 768px) {
+  .dpad-container {
+    display: grid;
+  }
+}
+
+.dpad-btn {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: none;
+  border-radius: 12px;
+  background: #8F7A66;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dpad-btn:active {
+  background: #7A6658;
+  transform: scale(0.92);
+}
+
+.dpad-btn:disabled {
+  background: transparent;
+  cursor: default;
+}
+
+/* 十字配置 */
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad-center {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* レスポンシブ */
+@media (max-width: 500px) {
+  .snake-board {
+    gap: 1px;
+    padding: 3px;
+  }
+
+  .snake-cell {
+    border-radius: 1px;
+  }
+
+  .snake-cell.snake-head {
+    border-radius: 2px;
+  }
+}
+
+@media (max-width: 360px) {
+  .snake-board {
+    gap: 0px;
+    padding: 2px;
+  }
+
+  .score-box {
+    padding: 0.4rem 0.75rem;
+    min-width: 60px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+
+  .dpad-container {
+    width: 140px;
+    gap: 4px;
+  }
+
+  .dpad-btn {
+    border-radius: 10px;
+    font-size: 1.1rem;
+  }
+}

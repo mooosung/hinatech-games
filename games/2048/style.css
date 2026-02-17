@@ -1,0 +1,282 @@
+/* ============================================
+   2048ゲーム - 固有スタイル
+   ============================================ */
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.score-box {
+  background: #BBADA0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 70px;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #EEE4DA;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-new-game {
+  margin-left: auto;
+  background: #8F7A66;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-new-game:hover {
+  background: #7A6658;
+}
+
+/* ゲームボード */
+.board-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  touch-action: none;
+}
+
+.grid-background {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 10px;
+  background: #BBADA0;
+  border-radius: 8px;
+}
+
+.grid-cell {
+  background: #CDC1B4;
+  border-radius: 4px;
+}
+
+.tile-container {
+  position: absolute;
+  inset: 0;
+  padding: 10px;
+}
+
+/* タイル */
+.tile {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 4px;
+  transition: top 0.15s ease, left 0.15s ease;
+  user-select: none;
+}
+
+.tile-2 {
+  background: #EEE4DA;
+  color: #776E65;
+}
+
+.tile-4 {
+  background: #EDE0C8;
+  color: #776E65;
+}
+
+.tile-8 {
+  background: #F2B179;
+  color: #F9F6F2;
+}
+
+.tile-16 {
+  background: #F59563;
+  color: #F9F6F2;
+}
+
+.tile-32 {
+  background: #F67C5F;
+  color: #F9F6F2;
+}
+
+.tile-64 {
+  background: #F65E3B;
+  color: #F9F6F2;
+}
+
+.tile-128 {
+  background: #EDCF72;
+  color: #F9F6F2;
+}
+
+.tile-256 {
+  background: #EDCC61;
+  color: #F9F6F2;
+}
+
+.tile-512 {
+  background: #EDC850;
+  color: #F9F6F2;
+}
+
+.tile-1024 {
+  background: #EDC53F;
+  color: #F9F6F2;
+}
+
+.tile-2048 {
+  background: #EDC22E;
+  color: #F9F6F2;
+  box-shadow: 0 0 30px 10px rgba(237, 194, 46, 0.4);
+}
+
+.tile-super {
+  background: #3C3A32;
+  color: #F9F6F2;
+}
+
+/* タイルアニメーション */
+@keyframes tile-appear {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tile-merge {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.tile-new {
+  animation: tile-appear 0.2s ease;
+}
+
+.tile-merged {
+  animation: tile-merge 0.2s ease;
+}
+
+/* ゲームオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(238, 228, 218, 0.7);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.3s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+.game-win {
+  background: rgba(237, 194, 46, 0.5);
+}
+
+@keyframes overlay-appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.overlay-content h2 {
+  font-size: 1.75rem;
+  color: #776E65;
+  margin-bottom: 0.5rem;
+}
+
+.game-win .overlay-content h2 {
+  color: #F9F6F2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.overlay-content p {
+  font-size: 1.1rem;
+  color: #776E65;
+  margin-bottom: 1rem;
+}
+
+.overlay-content .btn-primary {
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content .btn-new-game {
+  margin-left: 0;
+  display: block;
+  margin: 0.5rem auto 0;
+}
+
+/* レスポンシブ */
+@media (max-width: 500px) {
+  .grid-background {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .tile-container {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .grid-background {
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .tile-container {
+    padding: 6px;
+  }
+
+  .score-box {
+    padding: 0.4rem 0.75rem;
+    min-width: 60px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+}
