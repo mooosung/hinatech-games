@@ -194,7 +194,6 @@
       x: canvasW / 2,
       y: canvasH / 2,
       radius: INITIAL_PLAYER_RADIUS,
-      score: Math.ceil(INITIAL_PLAYER_RADIUS),
       color: '#3498DB',
       vx: 0,
       vy: 0,
@@ -264,7 +263,6 @@
       if (d < touchDist * 0.7) {
         if (player.radius > npc.radius) {
           score += npc.score;
-          player.score += npc.score;
           floatingTexts.push({
             x: npc.x, y: npc.y,
             text: '+' + npc.score,
@@ -482,9 +480,9 @@
       ctx.stroke();
     }
 
-    // スコア数字（反転を打ち消してから描画）
+    // サイズ数字（反転を打ち消してから描画）
     ctx.scale(facing, 1);
-    var sizeNum = fish.score || Math.ceil(r);
+    var sizeNum = Math.ceil(r);
     var fontSize = Math.max(7, r * 0.45);
     ctx.fillStyle = '#fff';
     ctx.font = 'bold ' + fontSize + 'px sans-serif';
