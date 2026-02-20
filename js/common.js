@@ -54,7 +54,35 @@
     });
   }
 
+  // シンタックスハイライト（Prism.js）をチュートリアルページで有効化
+  function initSyntaxHighlight() {
+    var codeBlocks = document.querySelectorAll('.code-block code');
+    if (codeBlocks.length === 0) return;
+
+    // <code> タグに言語クラスを付与
+    codeBlocks.forEach(function (el) {
+      if (!el.className.match(/language-/)) {
+        el.classList.add('language-javascript');
+      }
+    });
+
+    // Prism.js の CSS を読み込み
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css';
+    document.head.appendChild(link);
+
+    // Prism.js の JS を読み込み → ハイライト実行
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js';
+    s.onload = function () {
+      if (window.Prism) Prism.highlightAll();
+    };
+    document.head.appendChild(s);
+  }
+
   // 読み込み実行
   loadComponent('header', 'components/header.html');
   loadComponent('footer', 'components/footer.html');
+  initSyntaxHighlight();
 })();

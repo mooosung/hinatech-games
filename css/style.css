@@ -597,8 +597,6 @@ img {
 }
 
 .code-block {
-  background: #1e1e2e;
-  color: #cdd6f4;
   border-radius: 8px;
   padding: 1rem 1.25rem;
   margin: 0.75rem 0;
@@ -613,6 +611,12 @@ img {
   font-family: inherit;
   font-size: inherit;
   white-space: pre;
+}
+
+/* Prism.js 未ロード時のフォールバック */
+.code-block:not([class*="language-"]) {
+  background: #2d2d2d;
+  color: #ccc;
 }
 
 .concept-list {
