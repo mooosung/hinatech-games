@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>タワーディフェンスの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="タワーディフェンスをJavaScriptで作る方法をステップごとにやさしく解説。経路探索やタワーAIの基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="タワーディフェンスの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="タワーディフェンスをJavaScriptで作る方法をステップごとにやさしく解説。経路探索やタワーAIが学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/tower-defense/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "タワーディフェンスの作り方",
+    "description": "JavaScriptでタワーディフェンスを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "Canvas要素とマップ描画の基本セットアップを行います"},
+      {"@type": "HowToStep", "name": "マップと敵の経路", "text": "2次元配列でマップを定義し、敵が通る経路を設定します"},
+      {"@type": "HowToStep", "name": "タワーAIと攻撃処理", "text": "タワーが敵を探して弾を撃つロジックを実装します"},
+      {"@type": "HowToStep", "name": "ウェーブ管理", "text": "敵のウェーブを順次出現させる仕組みを作ります"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>タワーディフェンスの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/tower-defense" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>タワーディフェンスは、決められた経路を進む敵を、設置したタワーで迎え撃つ戦略ゲームです。マップ上の経路に沿って敵を移動させる仕組み、タワーが射程内の敵を自動で攻撃するAI、ウェーブごとに強くなる敵の管理など、ゲームプログラミングの面白いテクニックがたくさん登場します。</p>
+      <ul class="concept-list">
+        <li>経路探索（マップ上の決まったルートに沿って敵を移動させる）</li>
+        <li>タワーAI（射程内の敵を自動で探して攻撃する）</li>
+        <li>ウェーブ管理（敵の波を制御する仕組み）</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>HTMLとCanvasの準備をしよう</h2>
+      <p>タワーディフェンスはCanvasを使ってマップ、タワー、敵、弾をリアルタイムに描画します。<code>requestAnimationFrame</code>でゲームループを回し、毎フレーム更新と描画を行いましょう。</p>
+      <pre class="code-block"><code>var canvas = document.getElementById('game-canvas');
+var ctx = canvas.getContext('2d');
+var canvasW, canvasH, cellW, cellH;
+
+function resizeCanvas() {
+  var wrapper = canvas.parentElement;
+  var rect = wrapper.getBoundingClientRect();
+  var dpr = window.devicePixelRatio || 1;
+  canvasW = rect.width;
+  canvasH = rect.height;
+  cellW = canvasW / MAP_COLS;
+  cellH = canvasH / MAP_ROWS;
+  canvas.width = canvasW * dpr;
+  canvas.height = canvasH * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function gameLoop() {
+  update();  // ゲームの状態を更新
+  draw();    // 画面を描画
+  if (gameRunning) {
+    animFrameId = requestAnimationFrame(gameLoop);
+  }
+}</code></pre>
+      <p>マップの列数・行数からセルの幅と高さを計算します。<code>gameLoop</code>関数が毎フレーム呼ばれて、更新と描画を繰り返します。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>マップと敵の経路を作ろう</h2>
+      <h3>2次元配列でマップを定義する</h3>
+      <p>マップは2次元配列で定義します。0が空地（タワーを置ける場所）、1が道（敵が通る場所）、2がスタート、3がゴールです。敵が通る経路は、座標の配列として事前に定義しておきます。</p>
+      <pre class="code-block"><code>var MAP_COLS = 12;
+var MAP_ROWS = 9;
+var MAP = [
+  [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0],
+  [0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+  [0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+  [0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0],
+  [0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0],
+  [0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0],
+  [0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+];
+
+// 敵の通る経路（座標のリスト）
+var PATH = [
+  {r:0,c:2}, {r:1,c:2}, {r:2,c:2}, {r:3,c:2},
+  {r:3,c:3}, {r:3,c:4}, {r:3,c:5}, {r:2,c:5},
+  // ... 続く
+  {r:8,c:2}  // ゴール
+];</code></pre>
+      <p>敵は<code>PATH</code>配列のポイントを1つずつたどって移動します。現在の位置と次のポイントの方向を計算して、滑らかに動かしましょう。</p>
+
+      <h3>敵の移動処理</h3>
+      <pre class="code-block"><code>function createEnemy() {
+  var hp = ENEMY_BASE_HP + wave * 1.5;
+  var speed = ENEMY_BASE_SPEED + wave * 0.001;
+  var start = cellCenter(PATH[0].r, PATH[0].c);
+  return {
+    x: start.x, y: start.y,
+    pathIndex: 0, hp: hp, maxHp: hp,
+    speed: speed, baseSpeed: speed
+  };
+}
+
+// 更新ループ内で敵を移動
+var target = cellCenter(PATH[e.pathIndex + 1].r, PATH[e.pathIndex + 1].c);
+var dx = target.x - e.x;
+var dy = target.y - e.y;
+var d = Math.sqrt(dx * dx + dy * dy);
+if (d &lt; 2) {
+  e.pathIndex++;
+} else {
+  e.x += (dx / d) * e.speed * cellW;
+  e.y += (dy / d) * e.speed * cellW;
+}</code></pre>
+      <p>次のポイントまでの距離と方向を計算し、速度に応じて少しずつ近づけます。ポイントに十分近づいたら次のポイントに切り替えます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>タワーAIと攻撃処理を実装しよう</h2>
+      <p>タワーは射程内に敵が入ると自動で攻撃します。複数の敵がいる場合は、経路を最も進んでいる敵（ゴールに近い敵）を優先的に狙いましょう。タワーの種類ごとに射程、ダメージ、攻撃速度が異なります。</p>
+      <pre class="code-block"><code>var TOWER_TYPES = {
+  normal: { cost: 20, range: 2.2, damage: 1,
+            fireRate: 50, color: '#3498DB', name: 'ノーマル' },
+  fast:   { cost: 35, range: 1.8, damage: 0.6,
+            fireRate: 18, color: '#2ECC71', name: 'はやい' },
+  strong: { cost: 50, range: 2.5, damage: 3.5,
+            fireRate: 90, color: '#E74C3C', name: 'つよい' }
+};
+
+// タワーの攻撃処理（毎フレーム実行）
+for (var t = 0; t &lt; towers.length; t++) {
+  var tower = towers[t];
+  tower.cooldown--;
+
+  // 射程内で最も進んだ敵を探す
+  var bestTarget = null;
+  var bestProgress = -1;
+  for (var ei = 0; ei &lt; enemies.length; ei++) {
+    var en = enemies[ei];
+    var d = dist(tower.x, tower.y, en.x, en.y);
+    if (d &lt;= tower.range &amp;&amp; en.pathIndex &gt; bestProgress) {
+      bestProgress = en.pathIndex;
+      bestTarget = en;
+    }
+  }
+
+  if (bestTarget &amp;&amp; tower.cooldown &lt;= 0) {
+    tower.cooldown = tower.fireRate;
+    bullets.push({
+      x: tower.x, y: tower.y,
+      target: bestTarget,
+      damage: tower.damage,
+      speed: 5
+    });
+  }
+}</code></pre>
+      <p><code>cooldown</code>で攻撃の間隔を管理します。<code>pathIndex</code>が大きい敵ほどゴールに近いので優先して攻撃します。弾は毎フレーム敵を追いかけ、当たったらダメージを与えます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ウェーブ管理を実装しよう</h2>
+      <p>敵は「ウェーブ」（波）ごとにまとまって出現します。ウェーブが進むにつれて敵の数とHPが増え、難しくなっていきます。5ウェーブごとにボス敵を出すと、より戦略性が増します。</p>
+      <pre class="code-block"><code>function startWave() {
+  waveInProgress = true;
+  enemiesToSpawn = ENEMIES_PER_WAVE_BASE + Math.floor(wave * 1.5);
+  spawnTimer = 0;
+}
+
+// 更新ループ内でウェーブ完了をチェック
+if (waveInProgress &amp;&amp; enemiesToSpawn === 0 &amp;&amp; enemies.length === 0) {
+  waveInProgress = false;
+  wave++;
+  waveDelay = 90; // 次のウェーブまで少し待つ
+}
+
+// ボス敵の生成
+var isBoss = (wave % 5 === 0) &amp;&amp; enemiesToSpawn === 1;
+if (isBoss) {
+  hp *= 5;     // HPが5倍
+  speed *= 0.6; // 移動が遅い
+}</code></pre>
+      <p>現在のウェーブの全敵を倒すと、少しの休憩を挟んで次のウェーブが始まります。<code>wave * 1.5</code>で敵の数を段階的に増やし、5ウェーブごとのボスがゲームにメリハリをつけます。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、マップと経路の定義、敵の経路追従、タワーAIの攻撃ロジック、ウェーブ管理の仕組みを学びました。さらに発展させるなら、タワーのアップグレード機能、新しいマップの追加、スプラッシュダメージ（範囲攻撃）、スロウ効果（敵の減速）、マップエディタなどに挑戦してみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../shooting/tutorial/">シューティングの作り方</a></li>
+        <li><a href="../../maze/tutorial/">迷路の作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

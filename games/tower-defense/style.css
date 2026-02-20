@@ -1,0 +1,290 @@
+/* ============================================
+   タワーディフェンス - 固有スタイル
+   ============================================ */
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.score-box {
+  background: #3d2b1f;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 70px;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #c4a45a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-new-game {
+  margin-left: auto;
+  background: #8B4513;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-new-game:hover {
+  background: #6b3410;
+}
+
+/* HUD */
+.game-hud {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hud-item {
+  background: #2d5a27;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  text-align: center;
+  flex: 1;
+}
+
+.hud-label {
+  display: block;
+  font-size: 0.6rem;
+  color: #a0d48a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hud-value {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* タワー選択 */
+.tower-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.tower-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 1 1 calc(25% - 0.35rem);
+  min-width: 0;
+  background: #444;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 0.3rem 0.4rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  color: #ccc;
+}
+
+.tower-btn:hover {
+  background: #555;
+}
+
+.tower-btn.selected {
+  border-color: #F1C40F;
+  background: #555;
+}
+
+.tower-btn-sell.selected {
+  border-color: #E74C3C;
+}
+
+.tower-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tower-info {
+  font-size: 0.6rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.tower-info small {
+  font-weight: 400;
+  color: #F1C40F;
+}
+
+.tower-btn-sell .tower-info small {
+  color: #E74C3C;
+}
+
+/* 速度コントロール */
+.speed-control {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.speed-btn {
+  flex: 1;
+  background: #444;
+  color: #ccc;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.speed-btn:hover {
+  background: #555;
+}
+
+.speed-btn.selected {
+  border-color: #F1C40F;
+  background: #555;
+  color: #F1C40F;
+}
+
+/* ゲームボード */
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  aspect-ratio: 12 / 9;
+  touch-action: none;
+}
+
+#game-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #2d5a27;
+  border-radius: 8px;
+  display: block;
+}
+
+/* ゲームオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(30, 30, 20, 0.88);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.3s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.overlay-content h2 {
+  font-size: 1.75rem;
+  color: #c4a45a;
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content p {
+  font-size: 1.1rem;
+  color: #d4c9a0;
+  margin-bottom: 0.75rem;
+}
+
+.overlay-content .best-result {
+  font-size: 0.95rem;
+  color: #F1C40F;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.overlay-content .btn-primary {
+  margin-bottom: 0.5rem;
+}
+
+/* レスポンシブ */
+@media (max-width: 500px) {
+  .board-wrapper {
+    border-radius: 6px;
+  }
+
+  #game-canvas {
+    border-radius: 6px;
+  }
+
+  .tower-btn {
+    flex: 1 1 calc(25% - 0.35rem);
+  }
+}
+
+@media (max-width: 360px) {
+  .score-area {
+    gap: 0.5rem;
+  }
+
+  .score-box {
+    padding: 0.4rem 0.75rem;
+    min-width: 55px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+
+  .score-label {
+    font-size: 0.6rem;
+  }
+
+  .tower-btn {
+    padding: 0.25rem 0.3rem;
+  }
+
+  .tower-info {
+    font-size: 0.55rem;
+  }
+
+  .tower-icon {
+    width: 14px;
+    height: 14px;
+  }
+}

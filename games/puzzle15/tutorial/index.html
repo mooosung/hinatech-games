@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>15パズルの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="15パズルをJavaScriptで作る方法をステップごとにやさしく解説。配列操作やクリックイベントの基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="15パズルの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="15パズルをJavaScriptで作る方法をステップごとにやさしく解説。配列操作やクリックイベントが学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/puzzle15/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "15パズルの作り方",
+    "description": "JavaScriptで15パズルを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとタイルの準備", "text": "1次元配列でパズルの状態を管理し、DOMでタイルを描画します"},
+      {"@type": "HowToStep", "name": "タイルの移動と隣接判定", "text": "空白マスに隣接するタイルだけ移動できるロジックを実装します"},
+      {"@type": "HowToStep", "name": "解法判定とシャッフル", "text": "ランダムに並べたパズルが必ず解けるかどうかを判定するアルゴリズムを学びます"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>15パズルの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/puzzle15" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>15パズルは、1〜15の数字タイルを正しい順番に並べ替えるクラシックなパズルゲームです。このチュートリアルでは、JavaScriptで15パズルを作りながら、配列操作、クリックイベント処理、そしてパズルが解けるかどうかを数学的に判定する方法を学びましょう。</p>
+      <ul class="concept-list">
+        <li>1次元配列を使ったパズル状態の管理と配列操作</li>
+        <li>クリックイベントでタイルを動かすインタラクション</li>
+        <li>転倒数を使った解法判定アルゴリズム</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>パズルのデータ構造を準備しよう</h2>
+      <p>15パズルの盤面は4x4=16マスです。1次元配列で管理すると、シャッフルや位置計算がシンプルになります。値が0のところが空白マスです。タイルの位置は、配列のインデックスから行と列を計算できます。</p>
+      <pre class="code-block"><code>var SIZE = 4;
+var TOTAL_TILES = SIZE * SIZE;
+var board = []; // 1D array: 値0が空白
+
+// タイルの位置を計算（row, col）
+function tilePos(index) {
+  var row = Math.floor(index / SIZE);
+  var col = index % SIZE;
+  return {
+    top: padSize + row * (cellSize + gapSize),
+    left: padSize + col * (cellSize + gapSize)
+  };
+}
+
+// 空白の位置を取得
+function getEmptyIndex() {
+  return board.indexOf(0);
+}</code></pre>
+      <p>1次元配列のインデックスから行と列を計算するには、<code>Math.floor(index / SIZE)</code>で行、<code>index % SIZE</code>で列が求められます。この変換はグリッド系のゲームでよく使うテクニックなので、覚えておくと便利です。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>タイルの移動ロジックを作ろう</h2>
+      <h3>隣接判定とスワップ</h3>
+      <p>タイルは空白マスに隣接している場合だけ動かせます。上下左右の隣接チェックをして、クリックされたタイルと空白マスの位置を入れ替えましょう。</p>
+      <pre class="code-block"><code>function isAdjacentToEmpty(index) {
+  var emptyIdx = getEmptyIndex();
+  var emptyRow = Math.floor(emptyIdx / SIZE);
+  var emptyCol = emptyIdx % SIZE;
+  var tileRow = Math.floor(index / SIZE);
+  var tileCol = index % SIZE;
+
+  var rowDiff = Math.abs(emptyRow - tileRow);
+  var colDiff = Math.abs(emptyCol - tileCol);
+
+  return (rowDiff === 1 &amp;&amp; colDiff === 0) ||
+         (rowDiff === 0 &amp;&amp; colDiff === 1);
+}
+
+function moveTile(index) {
+  if (!isAdjacentToEmpty(index)) return false;
+  var emptyIdx = getEmptyIndex();
+  board[emptyIdx] = board[index];
+  board[index] = 0;
+  moves++;
+  return true;
+}</code></pre>
+      <p>隣接判定では、行の差と列の差を計算して「片方が1でもう片方が0」なら上下左右のいずれかで隣接していると判断できます。斜めは隣接とみなさないので、両方とも1の場合は移動できません。タイルの移動は、空白マスとのスワップで実現しています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>解法判定（Solvability Check）を実装しよう</h2>
+      <p>ランダムにシャッフルした15パズルは、約半分の確率で解けない配置になります。「転倒数」という数学的な概念を使って、必ず解ける配置だけを生成しましょう。</p>
+      <pre class="code-block"><code>function countInversions(arr) {
+  var inversions = 0;
+  for (var i = 0; i &lt; arr.length; i++) {
+    if (arr[i] === 0) continue;
+    for (var j = i + 1; j &lt; arr.length; j++) {
+      if (arr[j] === 0) continue;
+      if (arr[i] &gt; arr[j]) inversions++;
+    }
+  }
+  return inversions;
+}
+
+function isSolvable(arr) {
+  var inversions = countInversions(arr);
+  var emptyIndex = arr.indexOf(0);
+  var emptyRowFromBottom = SIZE - Math.floor(emptyIndex / SIZE);
+
+  if (emptyRowFromBottom % 2 === 0) {
+    return inversions % 2 === 1;
+  } else {
+    return inversions % 2 === 0;
+  }
+}</code></pre>
+      <p>「転倒数」とは、ある数字より後ろにそれより小さい数字がいくつあるかの合計です。4x4パズルでは、空白マスの位置と転倒数の偶奇の組み合わせで解けるかどうかが決まります。解けない場合は、0以外の最初の2つの要素を入れ替えるだけで解ける配置に変わりますよ。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、1次元配列での盤面管理、隣接判定によるタイル移動、転倒数を使った解法判定を学びました。発展として、タイルの移動にスライドアニメーションをつけたり、手数とタイムのランキング機能を追加してみましょう。キーボードの矢印キーでも操作できるようにすると、さらに遊びやすくなります。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../2048/tutorial/">2048の作り方</a></li>
+        <li><a href="../../sokoban/tutorial/">倉庫番の作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

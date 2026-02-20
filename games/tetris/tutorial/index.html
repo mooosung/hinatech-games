@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>テトリスの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="テトリスをJavaScriptで作る方法をステップごとにやさしく解説。テトロミノ回転や行消去の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="テトリスの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="テトリスをJavaScriptで作る方法をステップごとにやさしく解説。テトロミノ回転や行消去が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/tetris/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "テトリスの作り方",
+    "description": "JavaScriptでテトリスを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "DOMベースのボードとJavaScriptの基本セットアップを行います"},
+      {"@type": "HowToStep", "name": "テトロミノの定義と回転", "text": "7種類のテトロミノの形状と回転を定義します"},
+      {"@type": "HowToStep", "name": "落下タイマーと行消去", "text": "自動落下の仕組みと、揃った行を消す処理を実装します"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>テトリスの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/tetris" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>テトリスは、落ちてくるブロック（テトロミノ）を回転させながら積み上げ、横一列を揃えて消していく世界的に有名なパズルゲームです。テトロミノの回転データの扱い方、タイマーを使った自動落下、そして揃った行を消す処理など、ゲームプログラミングの重要なテクニックをたくさん学べます。</p>
+      <ul class="concept-list">
+        <li>テトロミノの回転（4つの回転状態を配列で管理）</li>
+        <li>行消去（揃った行を見つけて詰める処理）</li>
+        <li>落下タイマー（setTimeoutで自動落下を管理）</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>HTMLとCanvasの準備をしよう</h2>
+      <p>テトリスのボードは10列x20行のグリッドです。DOMのdiv要素で各セルを生成し、CSSグリッドで並べましょう。セルの2次元配列を作っておくと、高速に色を変更できます。</p>
+      <pre class="code-block"><code>var COLS = 10;  // 横のマス数
+var ROWS = 20;  // 縦のマス数
+
+var board = [];   // ボード配列 [row][col] = '' or 色名
+var cells = [];   // DOMセルの2次元配列
+
+function createBoard() {
+  boardEl.innerHTML = '';
+  cells = [];
+  for (var y = 0; y &lt; ROWS; y++) {
+    cells[y] = [];
+    for (var x = 0; x &lt; COLS; x++) {
+      var cell = document.createElement('div');
+      cell.className = 'tetris-cell';
+      boardEl.appendChild(cell);
+      cells[y][x] = cell;
+    }
+  }
+}
+
+function initBoard() {
+  board = [];
+  for (var y = 0; y &lt; ROWS; y++) {
+    board[y] = [];
+    for (var x = 0; x &lt; COLS; x++) {
+      board[y][x] = '';
+    }
+  }
+}</code></pre>
+      <p><code>board</code>配列がゲームのデータ、<code>cells</code>配列が描画用のDOM要素です。データと表示を分けることで、ロジックがすっきりします。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>テトロミノの定義と回転を作ろう</h2>
+      <h3>7種類のブロックを配列で定義する</h3>
+      <p>テトリスには7種類のテトロミノ（I, O, T, S, Z, J, L）があり、それぞれ4つの回転状態を持ちます。各状態を座標の配列として定義することで、回転処理がとてもシンプルになります。</p>
+      <pre class="code-block"><code>var TETROMINOS = {
+  I: {
+    shapes: [
+      [[0,0],[1,0],[2,0],[3,0]],  // 横向き
+      [[0,0],[0,1],[0,2],[0,3]],  // 縦向き
+      [[0,0],[1,0],[2,0],[3,0]],
+      [[0,0],[0,1],[0,2],[0,3]]
+    ],
+    color: 'I'
+  },
+  T: {
+    shapes: [
+      [[0,0],[1,0],[2,0],[1,1]],
+      [[0,0],[0,1],[0,2],[1,1]],
+      [[1,0],[0,1],[1,1],[2,1]],
+      [[1,0],[1,1],[1,2],[0,1]]
+    ],
+    color: 'T'
+  }
+  // ... S, Z, J, L, O も同様に定義
+};</code></pre>
+      <p>各テトロミノの4つの回転状態を事前に定義しておくアプローチです。回転時は<code>rotation</code>の値を0〜3の間で循環させるだけで済みます。</p>
+
+      <h3>衝突判定と回転処理</h3>
+      <p>ピースを動かしたり回転させたりする前に、移動先が有効な位置かどうかをチェックする必要があります。ボードの範囲外や、既に他のブロックがある場所には移動できません。</p>
+      <pre class="code-block"><code>function isValidPosition(piece) {
+  var shape = TETROMINOS[piece.type].shapes[piece.rotation];
+  for (var i = 0; i &lt; shape.length; i++) {
+    var newX = piece.x + shape[i][0];
+    var newY = piece.y + shape[i][1];
+    if (newX &lt; 0 || newX &gt;= COLS || newY &lt; 0 || newY &gt;= ROWS) {
+      return false;
+    }
+    if (board[newY][newX] !== '') {
+      return false;
+    }
+  }
+  return true;
+}
+
+function rotatePiece() {
+  var newRotation = (currentPiece.rotation + 1) % 4;
+  var testPiece = {
+    type: currentPiece.type,
+    rotation: newRotation,
+    x: currentPiece.x,
+    y: currentPiece.y
+  };
+
+  if (isValidPosition(testPiece)) {
+    currentPiece.rotation = newRotation;
+    render();
+    return;
+  }
+  // ウォールキック: 左右にずらして試す
+  var kicks = [1, -1, 2, -2];
+  for (var i = 0; i &lt; kicks.length; i++) {
+    testPiece.x = currentPiece.x + kicks[i];
+    if (isValidPosition(testPiece)) {
+      currentPiece.rotation = newRotation;
+      currentPiece.x = testPiece.x;
+      render();
+      return;
+    }
+  }
+}</code></pre>
+      <p>回転が壁にぶつかる場合は、左右にずらして試す「ウォールキック」を実装しています。これにより、壁際でも快適に回転操作ができます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>落下タイマーと行消去を実装しよう</h2>
+      <h3>自動落下のゲームループ</h3>
+      <p>テトロミノは一定間隔で自動的に1マスずつ下に落ちます。<code>setTimeout</code>を使って落下タイマーを管理し、レベルが上がるにつれて速度を上げましょう。</p>
+      <pre class="code-block"><code>var INITIAL_SPEED = 800;  // 初期落下速度（ms）
+var MIN_SPEED = 80;       // 最速
+var SPEED_DECREASE = 60;  // レベルごとの速度減少
+
+function gameStep() {
+  if (!gameRunning || !currentPiece) return;
+  var testPiece = {
+    type: currentPiece.type,
+    rotation: currentPiece.rotation,
+    x: currentPiece.x,
+    y: currentPiece.y + 1
+  };
+  if (isValidPosition(testPiece)) {
+    currentPiece.y++;
+    render();
+    gameLoopTimer = setTimeout(gameStep, currentSpeed);
+  } else {
+    // 接地 → ロック → 行消去 → 次のピース
+    lockPiece();
+    clearLines();
+    currentPiece = spawnPiece();
+    if (!currentPiece) { gameOver(); return; }
+    render();
+    gameLoopTimer = setTimeout(gameStep, currentSpeed);
+  }
+}
+
+function calcSpeed() {
+  var speed = INITIAL_SPEED - ((level - 1) * SPEED_DECREASE);
+  return Math.max(speed, MIN_SPEED);
+}</code></pre>
+
+      <h3>揃った行を消す処理</h3>
+      <p>横一列がすべて埋まったら、その行を消して上の行を落とします。一度に消した行数に応じてスコアにボーナスがつきます。</p>
+      <pre class="code-block"><code>var LINE_SCORES = { 1: 100, 2: 300, 3: 500, 4: 800 };
+
+function clearLines() {
+  var linesToClear = [];
+  for (var y = ROWS - 1; y &gt;= 0; y--) {
+    var full = true;
+    for (var x = 0; x &lt; COLS; x++) {
+      if (board[y][x] === '') { full = false; break; }
+    }
+    if (full) linesToClear.push(y);
+  }
+
+  if (linesToClear.length &gt; 0) {
+    // ラインを削除して上に空行を追加
+    for (var i = linesToClear.length - 1; i &gt;= 0; i--) {
+      board.splice(linesToClear[i], 1);
+    }
+    for (var i = 0; i &lt; linesToClear.length; i++) {
+      var emptyRow = [];
+      for (var x = 0; x &lt; COLS; x++) emptyRow.push('');
+      board.unshift(emptyRow);
+    }
+    // スコア加算
+    var lineScore = LINE_SCORES[linesToClear.length] || 200;
+    score += lineScore * level;
+  }
+}</code></pre>
+      <p><code>board.splice</code>で揃った行を削除し、<code>board.unshift</code>で上に空行を追加します。配列の操作だけで行を詰める処理が実現できるのがポイントです。4行同時消し（テトリス）は800点と大きなボーナスがつきます。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、テトロミノの回転データの管理、衝突判定とウォールキック、タイマーによる自動落下、そして行消去の仕組みを学びました。さらに発展させるなら、ホールド機能（ピースの一時保管）、Tスピン判定、ネクストピースの複数表示、スコアランキングなどを追加してみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../2048/tutorial/">2048の作り方</a></li>
+        <li><a href="../../snake/tutorial/">スネークの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

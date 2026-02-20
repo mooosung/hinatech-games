@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>三目並べの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="三目並べをJavaScriptで作る方法をステップごとにやさしく解説。ミニマックスAIや勝利判定の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="三目並べの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="三目並べをJavaScriptで作る方法をステップごとにやさしく解説。ミニマックスAIや勝利判定が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/tictactoe/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "三目並べの作り方",
+    "description": "JavaScriptで三目並べを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "3x3の盤面とJavaScriptの基本セットアップを行います"},
+      {"@type": "HowToStep", "name": "勝利判定とターン管理", "text": "8つの勝利パターンとターン交代を実装します"},
+      {"@type": "HowToStep", "name": "ミニマックスAI", "text": "再帰的なミニマックスアルゴリズムでCPUの最善手を求めます"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>三目並べの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/tictactoe" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>三目並べ（Tic-Tac-Toe）は、3x3のマスに交互に印をつけ、先に3つ揃えた方が勝ちというシンプルなゲームです。シンプルだからこそ、勝利判定やターン管理の基本がしっかり身につきます。さらに、「ミニマックス」という有名なAIアルゴリズムを実装して、絶対に負けないCPUを作ってみましょう。</p>
+      <ul class="concept-list">
+        <li>ミニマックスAI（再帰的な最善手探索）</li>
+        <li>勝利判定（8つの勝利パターンをチェック）</li>
+        <li>ターン管理（プレイヤーとCPUの交代）</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>HTMLとCanvasの準備をしよう</h2>
+      <p>三目並べの盤面は、HTMLで3x3のグリッドを作ります。各マスをクリックしたときにイベントが発生するように、クリックイベントを設定しましょう。</p>
+      <pre class="code-block"><code>var EMPTY = '';
+var PLAYER = 'O'; // プレイヤー
+var AI = 'X';     // コンピュータ
+
+// 勝利パターン（8通り）
+var WIN_PATTERNS = [
+  [0, 1, 2], // 横1行目
+  [3, 4, 5], // 横2行目
+  [6, 7, 8], // 横3行目
+  [0, 3, 6], // 縦1列目
+  [1, 4, 7], // 縦2列目
+  [2, 5, 8], // 縦3列目
+  [0, 4, 8], // 斜め（左上→右下）
+  [2, 4, 6]  // 斜め（右上→左下）
+];
+
+var board = [];
+
+function initBoard() {
+  board = [EMPTY, EMPTY, EMPTY,
+           EMPTY, EMPTY, EMPTY,
+           EMPTY, EMPTY, EMPTY];
+  currentTurn = PLAYER;
+  gameOver = false;
+  renderBoard();
+}</code></pre>
+      <p>盤面は1次元配列で管理します。0〜8のインデックスが左上から右下のマスに対応します。<code>WIN_PATTERNS</code>には、3つ揃えて勝ちになるインデックスの組み合わせ8パターンを定義しています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>勝利判定とターン管理を作ろう</h2>
+      <h3>8パターンの勝利判定</h3>
+      <p>毎回の手の後に、8つの勝利パターンをすべてチェックします。3つのマスが同じ印で揃っていたら勝利です。すべてのマスが埋まって勝者がいなければ引き分けになります。</p>
+      <pre class="code-block"><code>function checkWinner(b) {
+  for (var i = 0; i &lt; WIN_PATTERNS.length; i++) {
+    var p = WIN_PATTERNS[i];
+    if (b[p[0]] !== EMPTY &amp;&amp;
+        b[p[0]] === b[p[1]] &amp;&amp;
+        b[p[1]] === b[p[2]]) {
+      return { winner: b[p[0]], pattern: p };
+    }
+  }
+  return null;
+}
+
+function isDraw(b) {
+  for (var i = 0; i &lt; 9; i++) {
+    if (b[i] === EMPTY) return false;
+  }
+  return true;
+}</code></pre>
+      <p><code>b[p[0]] === b[p[1]] &amp;&amp; b[p[1]] === b[p[2]]</code>で3マスが同じかどうかを判定しています。勝利パターンのインデックスも返すことで、勝ちラインをハイライト表示に使えます。</p>
+
+      <h3>ターン交代の処理</h3>
+      <p>プレイヤーがマスをクリックしたら印を置き、勝敗判定をした後、CPUのターンへ切り替えます。CPUの手は少し遅延させることで、考えている感じを演出しましょう。</p>
+      <pre class="code-block"><code>function onCellClick(e) {
+  if (gameOver || currentTurn !== PLAYER) return;
+  var index = parseInt(e.currentTarget.dataset.index, 10);
+  if (board[index] !== EMPTY) return;
+
+  placeMark(index, PLAYER);
+
+  var result = checkWinner(board);
+  if (result) { endGame(result.winner, result.pattern); return; }
+  if (isDraw(board)) { endGame(null, null); return; }
+
+  // AIのターンへ
+  currentTurn = AI;
+  var delay = 300 + Math.floor(Math.random() * 400);
+  setTimeout(function () {
+    var move = getBestMove();
+    placeMark(move, AI);
+
+    var aiResult = checkWinner(board);
+    if (aiResult) { endGame(aiResult.winner, aiResult.pattern); return; }
+    if (isDraw(board)) { endGame(null, null); return; }
+
+    currentTurn = PLAYER;
+  }, delay);
+}</code></pre>
+      <p><code>setTimeout</code>で300〜700ミリ秒のランダムな遅延を入れると、CPUが考えているようなリアルな感じになります。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ミニマックスAIを実装しよう</h2>
+      <p>ミニマックスアルゴリズムは、「自分はスコアを最大化し、相手はスコアを最小化する」という考え方で全ての手を探索します。三目並べは盤面が小さいので、すべての可能性を調べ尽くすことができ、絶対に負けないAIが作れます。</p>
+      <pre class="code-block"><code>function minimax(b, depth, isMaximizing) {
+  var result = checkWinner(b);
+  if (result) {
+    if (result.winner === AI) return 10 - depth;
+    if (result.winner === PLAYER) return depth - 10;
+  }
+  if (isDraw(b)) return 0;
+
+  if (isMaximizing) {
+    var bestScore = -Infinity;
+    for (var i = 0; i &lt; 9; i++) {
+      if (b[i] === EMPTY) {
+        b[i] = AI;
+        var score = minimax(b, depth + 1, false);
+        b[i] = EMPTY;
+        if (score &gt; bestScore) bestScore = score;
+      }
+    }
+    return bestScore;
+  } else {
+    var bestScore = Infinity;
+    for (var i = 0; i &lt; 9; i++) {
+      if (b[i] === EMPTY) {
+        b[i] = PLAYER;
+        var score = minimax(b, depth + 1, true);
+        b[i] = EMPTY;
+        if (score &lt; bestScore) bestScore = score;
+      }
+    }
+    return bestScore;
+  }
+}
+
+function getBestMove() {
+  var bestScore = -Infinity;
+  var bestMoves = [];
+  for (var i = 0; i &lt; 9; i++) {
+    if (board[i] === EMPTY) {
+      board[i] = AI;
+      var score = minimax(board, 0, false);
+      board[i] = EMPTY;
+      if (score &gt; bestScore) {
+        bestScore = score;
+        bestMoves = [i];
+      } else if (score === bestScore) {
+        bestMoves.push(i);
+      }
+    }
+  }
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+}</code></pre>
+      <p><code>depth</code>（深さ）を使うことで、早く勝てる手を優先します（<code>10 - depth</code>で浅い方がスコアが高い）。同じスコアの手が複数あるときはランダムに選ぶことで、毎回同じ展開にならないようにしています。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、勝利パターンの判定、ターン管理の仕組み、そしてミニマックスAIの実装を学びました。発展として、盤面を4x4や5x5に拡張する、AI同士を対戦させる、オンライン対戦機能を追加する、AIの強さを調節できるようにする（ランダム性を加える）、といったアイデアに挑戦してみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../reversi/tutorial/">リバーシの作り方</a></li>
+        <li><a href="../../pong/tutorial/">ポンの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

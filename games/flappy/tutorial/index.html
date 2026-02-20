@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>フラッピーバードの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="フラッピーバードをJavaScriptで作る方法をステップごとにやさしく解説。重力シミュレーションやパイプ生成、当たり判定の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="フラッピーバードの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="フラッピーバードをJavaScriptで作る方法をステップごとにやさしく解説。重力シミュレーションやパイプ生成、当たり判定が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/flappy/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "フラッピーバードの作り方",
+    "description": "JavaScriptでフラッピーバードを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "鳥と重力シミュレーション", "text": "鳥のキャラクターを描画し、重力による落下とはばたきジャンプを実装します。"},
+      {"@type": "HowToStep", "name": "パイプの生成とスクロール", "text": "上下のパイプを一定間隔で生成し、左にスクロールさせます。"},
+      {"@type": "HowToStep", "name": "当たり判定とスコア", "text": "鳥とパイプ・地面の衝突判定、パイプ通過時のスコア加算を実装します。"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>フラッピーバードの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/flappy" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>フラッピーバードは、タップやクリックで鳥をはばたかせて、迫りくるパイプの隙間をくぐり抜けるゲームです。シンプルなルールですが、重力シミュレーションや当たり判定など、ゲーム開発の基本がぎゅっと詰まっています。このゲームを作ることで、物理演算の基礎やオブジェクト管理のスキルが身につきます。</p>
+      <ul class="concept-list">
+        <li>重力と速度による鳥の物理シミュレーション</li>
+        <li>パイプ（障害物）の自動生成とスクロール</li>
+        <li>鳥とパイプの矩形による当たり判定</li>
+        <li>requestAnimationFrameを使ったゲームループ</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ1: 鳥と重力のシミュレーションを作ろう</h2>
+      <p>フラッピーバードの核心は「重力」と「はばたき」です。鳥は常に下に引っ張られ、クリック（はばたき）で上に跳ねます。これを速度と加速度で表現しましょう。</p>
+      <pre class="code-block"><code>var GRAVITY = 0.45;            // 重力
+var FLAP_FORCE = -7.5;         // はばたきの力（上方向）
+var MAX_FALL_SPEED = 10;       // 最大落下速度
+
+var birdY = 0;                 // 鳥のY座標
+var birdVelocity = 0;          // 鳥の速度
+
+// 毎フレームの物理演算
+function update() {
+  birdVelocity += GRAVITY;
+  if (birdVelocity &gt; MAX_FALL_SPEED) {
+    birdVelocity = MAX_FALL_SPEED;
+  }
+  birdY += birdVelocity;
+}
+
+// はばたき処理
+function flap() {
+  if (gameOverFlag) return;
+
+  if (!gameRunning) {
+    startGame();
+    return;
+  }
+
+  birdVelocity = FLAP_FORCE;
+}</code></pre>
+      <p>毎フレーム<code>GRAVITY</code>（0.45）を速度に加算することで、鳥が徐々に速く落ちていきます。<code>flap()</code>が呼ばれると速度が負の値（上方向）に変わり、鳥が上に跳ねます。<code>MAX_FALL_SPEED</code>で落下速度に上限を設けているのは、あまりに速く落ちるとゲームが難しくなりすぎるためです。</p>
+      <h3>鳥の描画と回転アニメーション</h3>
+      <pre class="code-block"><code>function drawBird() {
+  ctx.save();
+  ctx.translate(BIRD_X, birdY);
+
+  // 速度に応じて傾く
+  var targetRotation = birdVelocity * 3;
+  if (targetRotation &gt; 70) targetRotation = 70;
+  if (targetRotation &lt; -30) targetRotation = -30;
+  birdRotation += (targetRotation - birdRotation) * 0.15;
+  ctx.rotate(birdRotation * Math.PI / 180);
+
+  // 胴体（楕円形）
+  ctx.fillStyle = '#F5C842';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, BIRD_RADIUS + 2, BIRD_RADIUS, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 目（白い部分）
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.arc(8, -5, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // くちばし
+  ctx.fillStyle = '#E67E22';
+  ctx.beginPath();
+  ctx.moveTo(12, 0);
+  ctx.lineTo(22, 2);
+  ctx.lineTo(12, 6);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}</code></pre>
+      <p><code>ctx.save()</code>と<code>ctx.restore()</code>で描画状態を保存・復元しています。<code>translate</code>で鳥の位置に移動してから<code>rotate</code>で回転させると、鳥の中心を基準に傾きます。<code>birdRotation += (target - birdRotation) * 0.15</code>の補間で、なめらかに傾きが変化します。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ2: パイプの生成とスクロールを作ろう</h2>
+      <p>パイプは一定間隔で画面右端に生成され、左にスクロールしていきます。上と下のパイプの間に隙間を設け、そこを鳥がくぐり抜けます。</p>
+      <pre class="code-block"><code>var PIPE_WIDTH = 52;           // 土管の幅
+var PIPE_GAP = 140;            // 上下間の隙間
+var PIPE_SPEED = 2.5;          // 移動速度
+var PIPE_SPAWN_INTERVAL = 100; // 生成間隔（フレーム数）
+var pipes = [];
+
+function spawnPipe() {
+  var maxTop = CANVAS_H - GROUND_HEIGHT - PIPE_GAP - PIPE_MAX_TOP_MARGIN;
+  var topHeight = PIPE_MIN_TOP + Math.floor(Math.random() * (maxTop - PIPE_MIN_TOP));
+
+  pipes.push({
+    x: CANVAS_W,
+    topHeight: topHeight,
+    scored: false
+  });
+}</code></pre>
+      <p><code>topHeight</code>は上のパイプの高さで、ランダムに決まります。<code>PIPE_GAP</code>（140ピクセル）の隙間が毎回違う位置にできるので、プレイヤーは瞬時に判断してはばたく必要があります。</p>
+      <h3>パイプの移動とスコア判定</h3>
+      <pre class="code-block"><code>// 毎フレームの更新
+for (var i = pipes.length - 1; i &gt;= 0; i--) {
+  pipes[i].x -= PIPE_SPEED;
+
+  // スコア判定（鳥がパイプを通過した）
+  if (!pipes[i].scored &amp;&amp; pipes[i].x + PIPE_WIDTH &lt; BIRD_X) {
+    pipes[i].scored = true;
+    score++;
+    updateScoreDisplay();
+  }
+
+  // 画面外に出たパイプを削除
+  if (pipes[i].x + PIPE_WIDTH + 10 &lt; 0) {
+    pipes.splice(i, 1);
+  }
+}
+
+// 一定間隔でパイプを生成
+if (frameCount % PIPE_SPAWN_INTERVAL === 0) {
+  spawnPipe();
+}</code></pre>
+      <p>パイプの右端が鳥の位置を通過したタイミングでスコアを1点追加します。<code>scored</code>フラグで二重カウントを防いでいます。画面外に出たパイプは<code>splice</code>で配列から削除してメモリを節約します。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ3: 当たり判定とゲームループを実装しよう</h2>
+      <p>鳥がパイプや地面、天井にぶつかったらゲームオーバーです。当たり判定はX軸とY軸の重なりをチェックするシンプルな方式です。</p>
+      <pre class="code-block"><code>function checkCollision() {
+  var bx = BIRD_X;
+  var by = birdY;
+  var br = BIRD_RADIUS - 2; // 少し甘めの判定
+
+  // 地面との衝突
+  if (by + br &gt;= CANVAS_H - GROUND_HEIGHT) return true;
+
+  // 天井との衝突
+  if (by - br &lt;= 0) return true;
+
+  // パイプとの衝突
+  for (var i = 0; i &lt; pipes.length; i++) {
+    var pipe = pipes[i];
+    var topH = pipe.topHeight;
+    var bottomY = topH + PIPE_GAP;
+    var lipWidth = 6;
+
+    var pipeLeft = pipe.x - lipWidth;
+    var pipeRight = pipe.x + PIPE_WIDTH + lipWidth;
+
+    // X軸の重なりチェック
+    if (bx + br &gt; pipeLeft &amp;&amp; bx - br &lt; pipeRight) {
+      if (by - br &lt; topH) return true;  // 上の土管
+      if (by + br &gt; bottomY) return true; // 下の土管
+    }
+  }
+  return false;
+}</code></pre>
+      <p>鳥の半径を少しだけ小さく（<code>-2</code>）して判定することで、見た目より少し甘めの当たり判定にしています。パイプのリップ（口の出っ張り部分）の幅も考慮しているのがポイントです。このような「少し甘めの判定」はプロのゲーム開発でもよく使われるテクニックで、プレイヤーの気持ちよさを保つ効果があります。</p>
+      <h3>ゲームループとイベント</h3>
+      <pre class="code-block"><code>document.addEventListener('keydown', function (e) {
+  if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+    e.preventDefault();
+    flap();
+  }
+});
+
+canvas.addEventListener('click', function (e) {
+  e.preventDefault();
+  flap();
+});
+
+canvas.addEventListener('touchstart', function (e) {
+  e.preventDefault();
+  flap();
+}, { passive: false });</code></pre>
+      <p>スペースキー、矢印キー、クリック、タッチの4つの操作方法に対応しています。<code>e.preventDefault()</code>でページのスクロールを防ぎ、<code>{ passive: false }</code>でタッチイベントのデフォルト動作をキャンセルしています。どの環境でも快適に遊べるようにすることが大切です。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>おつかれさまでした！フラッピーバードの基本が完成しました。重力シミュレーション、障害物の自動生成、矩形の当たり判定という3つの重要なテクニックを学びました。発展として、パイプの間隔や速度をスコアに応じて変えたり、鳥のスキンを切り替えられるようにしたり、BGMや効果音を付けてみましょう。背景に雲をスクロールさせるとさらに雰囲気が出ます。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../slime-jump/tutorial/">スライムジャンプの作り方</a></li>
+        <li><a href="../../breakout/tutorial/">ブロック崩しの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

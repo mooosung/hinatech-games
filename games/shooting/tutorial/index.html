@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>シューティングゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="シューティングゲームをJavaScriptで作る方法をステップごとにやさしく解説。弾丸管理や敵生成パターンの基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="シューティングゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="シューティングゲームをJavaScriptで作る方法をステップごとにやさしく解説。弾丸管理や当たり判定が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/shooting/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "シューティングゲームの作り方",
+    "description": "JavaScriptでシューティングゲームを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "Canvas要素を用意し、プレイヤーの自機を描画します"},
+      {"@type": "HowToStep", "name": "弾丸管理と敵の生成", "text": "配列で弾丸と敵を管理し、発射間隔とスポーンパターンを実装します"},
+      {"@type": "HowToStep", "name": "当たり判定と難易度調整", "text": "弾丸と敵、プレイヤーと敵の衝突判定とスコアに応じた難易度上昇を作ります"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>シューティングゲームの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/shooting" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>シューティングゲームは、自機を操作して敵を撃ち落とすアクションゲームです。このチュートリアルでは、JavaScriptとCanvasを使って縦スクロールシューティングを作る方法を学びましょう。弾丸の管理、敵の生成パターン、当たり判定など、アクションゲーム開発に欠かせない技術が身につきます。</p>
+      <ul class="concept-list">
+        <li>配列で管理する弾丸の発射と削除のしくみ</li>
+        <li>タイマーを使った敵の生成パターン</li>
+        <li>矩形と円の当たり判定アルゴリズム</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>プレイヤーと弾丸の管理を準備しよう</h2>
+      <p>シューティングでは、画面上に多数の弾丸や敵が同時に存在します。これらを配列で管理し、毎フレーム位置を更新して、画面外に出たものを削除するのが基本パターンです。弾丸には発射間隔を設けて連射を制御しましょう。</p>
+      <pre class="code-block"><code>var BULLET_SPEED = 7;
+var FIRE_INTERVAL = 180; // ミリ秒
+var bullets = [];
+var lastFireTime = 0;
+
+function fireBullet() {
+  var now = Date.now();
+  if (now - lastFireTime &lt; FIRE_INTERVAL) return;
+  lastFireTime = now;
+
+  bullets.push({
+    x: playerX - BULLET_WIDTH / 2,
+    y: playerY - playerHeight / 2 - BULLET_HEIGHT,
+    width: BULLET_WIDTH,
+    height: BULLET_HEIGHT
+  });
+}
+
+function updateBullets() {
+  for (var i = bullets.length - 1; i &gt;= 0; i--) {
+    bullets[i].y -= BULLET_SPEED;
+    if (bullets[i].y + bullets[i].height &lt; 0) {
+      bullets.splice(i, 1);
+    }
+  }
+}</code></pre>
+      <p><code>Date.now()</code>で前回の発射からの経過時間をチェックし、180ミリ秒未満なら発射しないようにしています。<code>updateBullets</code>ではループを逆順で回しているのがポイントです。<code>splice</code>で要素を削除すると配列の長さが変わるので、逆順にしないとインデックスがずれてバグの原因になります。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>敵の生成パターンを作ろう</h2>
+      <h3>複数の敵タイプとスポーン管理</h3>
+      <p>敵にはサイズ、色、形状の違う複数のタイプを用意すると、ゲームに変化が出ます。一定間隔でランダムに敵をスポーンさせ、スコアに応じて間隔を短くしていきましょう。</p>
+      <pre class="code-block"><code>var ENEMY_TYPES = [
+  { width: 0.06, height: 0.04, color: '#E74C3C', shape: 'rect' },
+  { width: 0.08, height: 0.05, color: '#E67E22', shape: 'rect' },
+  { width: 0.05, height: 0.05, color: '#3498DB', shape: 'circle' },
+  { width: 0.07, height: 0.07, color: '#2ECC71', shape: 'circle' },
+];
+
+function spawnEnemy() {
+  var now = Date.now();
+  if (now - lastSpawnTime &lt; spawnInterval) return;
+  lastSpawnTime = now;
+
+  var type = ENEMY_TYPES[Math.floor(Math.random() * ENEMY_TYPES.length)];
+  var w = canvasWidth * type.width;
+  var h = canvasHeight * type.height;
+  var x = Math.random() * (canvasWidth - w) + w / 2;
+
+  enemies.push({
+    x: x, y: -h,
+    width: w, height: h,
+    color: type.color, shape: type.shape,
+    speed: enemySpeed + Math.random() * 0.5
+  });
+}</code></pre>
+      <p>敵のサイズをキャンバス幅の比率で定義しているので、画面サイズが変わっても自然に見えます。<code>y: -h</code>で画面上端の外からスポーンさせることで、にゅっと現れる自然な演出になります。スポーン間隔は最初1200ミリ秒ですが、スコアが上がると最短400ミリ秒まで縮まります。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>当たり判定と難易度調整を実装しよう</h2>
+      <p>弾丸と敵の衝突判定は、敵の形状（矩形か円か）によって計算方法が変わります。矩形同士はAABBテスト、円と矩形は最近接点からの距離で判定しましょう。</p>
+      <pre class="code-block"><code>function checkBulletEnemyCollisions() {
+  for (var i = enemies.length - 1; i &gt;= 0; i--) {
+    var e = enemies[i];
+    for (var j = bullets.length - 1; j &gt;= 0; j--) {
+      var b = bullets[j];
+      var hit = false;
+
+      if (e.shape === 'circle') {
+        var bCenterX = b.x + b.width / 2;
+        var bCenterY = b.y + b.height / 2;
+        var dx = bCenterX - e.x;
+        var dy = bCenterY - e.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        hit = dist &lt; e.width / 2 + b.width / 2;
+      } else {
+        hit = b.x &lt; e.x + e.width / 2 &amp;&amp;
+              b.x + b.width &gt; e.x - e.width / 2 &amp;&amp;
+              b.y &lt; e.y + e.height / 2 &amp;&amp;
+              b.y + b.height &gt; e.y - e.height / 2;
+      }
+
+      if (hit) {
+        spawnParticles(e.x, e.y, e.color);
+        enemies.splice(i, 1);
+        bullets.splice(j, 1);
+        score += POINTS_PER_ENEMY;
+        break;
+      }
+    }
+  }
+}</code></pre>
+      <p>円形の敵は中心間の距離が半径の合計より小さいかで判定します。矩形の敵はAABB（軸に平行な矩形同士）の重なりチェックです。敵を倒したときに<code>spawnParticles</code>でパーティクルエフェクトを出すと、爽快感が増しますね。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、弾丸の配列管理、敵のスポーンパターン、形状別の当たり判定の3つを学びました。さらに発展させるなら、ボス敵の追加、パワーアップアイテム（3way弾やシールド）、ステージ制の実装に挑戦してみましょう。背景に流れる星のアニメーションも、宇宙空間の雰囲気を演出する良い練習になりますよ。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../breakout/tutorial/">ブロック崩しの作り方</a></li>
+        <li><a href="../../tower-defense/tutorial/">タワーディフェンスの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

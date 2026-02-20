@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数独の作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="数独をJavaScriptで作る方法をステップごとにやさしく解説。バックトラッキングや制約チェックの基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="数独の作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="数独をJavaScriptで作る方法をステップごとにやさしく解説。バックトラッキングや制約チェックが学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/sudoku/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "数独の作り方",
+    "description": "JavaScriptで数独を作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "DOMベースの数独盤面とJavaScriptの基本セットアップを行います"},
+      {"@type": "HowToStep", "name": "制約チェックとバックトラッキング", "text": "行・列・ブロックの制約をチェックし、再帰で盤面を解きます"},
+      {"@type": "HowToStep", "name": "パズル生成", "text": "完成盤面からセルを削除してパズルを生成します"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>数独の作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/sudoku" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>数独は、9x9のマスに1〜9の数字を重複なく埋めるパズルゲームです。プログラミングで数独を作ると、「バックトラッキング」という再帰的な探索アルゴリズムや、行・列・ブロックの制約チェックなど、とても実用的な考え方が身につきます。このチュートリアルで、パズルを自動生成する仕組みも一緒に学びましょう。</p>
+      <ul class="concept-list">
+        <li>バックトラッキング（再帰的な探索アルゴリズム）</li>
+        <li>制約チェック（行・列・3x3ブロックの重複判定）</li>
+        <li>パズル生成（完成盤面からセルを削除する手法）</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>HTMLとCanvasの準備をしよう</h2>
+      <p>数独はCanvasではなく、DOM要素（divタグ）で盤面を作ります。9x9=81個のセルをJavaScriptで動的に生成し、クリックでセルを選択できるようにしましょう。</p>
+      <pre class="code-block"><code>var SIZE = 9;
+var BOX = 3;
+
+// ゲーム状態
+var solution = [];   // 完成盤面 solution[r][c] = 1-9
+var puzzle = [];     // パズル盤面（0 = 空きマス）
+var userGrid = [];   // ユーザー入力 userGrid[r][c] = 0-9
+var fixed = [];      // fixed[r][c] = true ならプリセット
+
+// ボード描画
+function renderBoard() {
+  boardEl.innerHTML = '';
+  for (var r = 0; r &lt; SIZE; r++) {
+    for (var c = 0; c &lt; SIZE; c++) {
+      var cell = document.createElement('div');
+      cell.className = 'sudoku-cell';
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      if (fixed[r][c]) {
+        cell.classList.add('fixed');
+        cell.textContent = userGrid[r][c];
+      }
+      boardEl.appendChild(cell);
+    }
+  }
+}</code></pre>
+      <p>9x9のグリッドをCSSグリッドで並べます。<code>fixed</code>配列で最初から表示されている数字（ヒント）を区別し、ユーザーが変更できないようにしています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>制約チェックとバックトラッキングを作ろう</h2>
+      <h3>数字を置けるかどうかの判定</h3>
+      <p>数独のルールでは、同じ行・同じ列・同じ3x3ブロックに同じ数字を置くことはできません。この制約をチェックする関数を作りましょう。これが数独の中核となるロジックです。</p>
+      <pre class="code-block"><code>function isValidPlacement(board, row, col, num) {
+  // 行チェック
+  for (var c = 0; c &lt; SIZE; c++) {
+    if (board[row][c] === num) return false;
+  }
+  // 列チェック
+  for (var r = 0; r &lt; SIZE; r++) {
+    if (board[r][col] === num) return false;
+  }
+  // 3x3ブロックチェック
+  var boxRow = Math.floor(row / BOX) * BOX;
+  var boxCol = Math.floor(col / BOX) * BOX;
+  for (var r2 = boxRow; r2 &lt; boxRow + BOX; r2++) {
+    for (var c2 = boxCol; c2 &lt; boxCol + BOX; c2++) {
+      if (board[r2][c2] === num) return false;
+    }
+  }
+  return true;
+}</code></pre>
+      <p><code>Math.floor(row / BOX) * BOX</code>で3x3ブロックの左上の座標を計算できます。たとえば行が5なら<code>Math.floor(5/3)*3 = 3</code>で、3行目〜5行目のブロックが対象になります。</p>
+
+      <h3>バックトラッキングで盤面を解く</h3>
+      <p>バックトラッキングは「試して、ダメなら戻る」という探索手法です。空のマスに1〜9を順に試し、制約に合えば次のマスへ進みます。行き詰まったら前のマスに戻って別の数字を試します。</p>
+      <pre class="code-block"><code>function solveBoard(board) {
+  var empty = findEmpty(board);
+  if (!empty) return true; // 全て埋まった = 完成
+
+  var r = empty.r;
+  var c = empty.c;
+  var candidates = shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+  for (var i = 0; i &lt; candidates.length; i++) {
+    var num = candidates[i];
+    if (isValidPlacement(board, r, c, num)) {
+      board[r][c] = num;
+      if (solveBoard(board)) return true;
+      board[r][c] = 0; // 戻す（バックトラック）
+    }
+  }
+  return false;
+}
+
+function findEmpty(board) {
+  for (var r = 0; r &lt; SIZE; r++) {
+    for (var c = 0; c &lt; SIZE; c++) {
+      if (board[r][c] === 0) return { r: r, c: c };
+    }
+  }
+  return null;
+}</code></pre>
+      <p><code>shuffleArray</code>で候補をランダムにすることで、毎回違う盤面が生成されます。<code>board[r][c] = 0</code>で値を元に戻すのがバックトラッキングの核心部分です。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>パズル生成を実装しよう</h2>
+      <p>完成した盤面からランダムにセルを削除して、パズルを作ります。ただし、解が1つだけになるように注意が必要です。セルを1つ削除するたびに、解の数が1つであることを確認しましょう。</p>
+      <pre class="code-block"><code>function generatePuzzle(solvedBoard, clueCount) {
+  var puz = [];
+  for (var r = 0; r &lt; SIZE; r++) {
+    puz[r] = solvedBoard[r].slice();
+  }
+
+  // 全セルのインデックスをシャッフル
+  var cells = [];
+  for (var r2 = 0; r2 &lt; SIZE; r2++) {
+    for (var c2 = 0; c2 &lt; SIZE; c2++) {
+      cells.push({ r: r2, c: c2 });
+    }
+  }
+  cells = shuffleArray(cells);
+
+  var removed = 0;
+  var target = SIZE * SIZE - clueCount;
+
+  for (var i = 0; i &lt; cells.length &amp;&amp; removed &lt; target; i++) {
+    var cr = cells[i].r;
+    var cc = cells[i].c;
+    var backup = puz[cr][cc];
+    puz[cr][cc] = 0;
+
+    // 唯一解チェック
+    if (countSolutions(puz, 2) === 1) {
+      removed++;
+    } else {
+      puz[cr][cc] = backup; // 戻す
+    }
+  }
+  return puz;
+}</code></pre>
+      <p><code>clueCount</code>で残すヒントの数を指定します。削除前の値を<code>backup</code>に保存しておき、解が複数になってしまう場合は元に戻します。この仕組みで、必ず1通りの解を持つパズルが作れます。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、バックトラッキングで盤面を解く方法、3つの制約チェック、そして唯一解を保証するパズル生成を学びました。発展として、難易度選択（ヒント数を変える）、鉛筆メモ機能、ヒント機能（1マスだけ答えを教える）、解答チェック機能などを追加すると、より本格的な数独ゲームになります。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../minesweeper/tutorial/">マインスイーパーの作り方</a></li>
+        <li><a href="../../reversi/tutorial/">リバーシの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

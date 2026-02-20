@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>お絵かきクイズ｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="お題に合わせて絵を描こう！AIが何の絵か当てるよ。制限時間内にたくさんのお題をクリアしてハイスコアを目指そう。PC・スマホ対応。">
+  <!-- OGP -->
+  <meta property="og:title" content="お絵かきクイズ｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="お題に合わせて絵を描こう！AIが何の絵か当てるよ。制限時間内にたくさんのお題をクリアしよう。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/drawing-quiz/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "お絵かきクイズ",
+    "description": "お題に合わせて絵を描こう！AIが何の絵か当てるよ。制限時間内にたくさんのお題をクリアしてハイスコアを目指そう。PC・スマホ対応。",
+    "url": "https://hinata-ya.tech/games/games/drawing-quiz/",
+    "genre": ["お絵かき", "クイズ"],
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">お絵かきクイズ</h1>
+    <div class="game-page-tags">
+      <span class="tag">お絵かき</span>
+      <span class="tag">クイズ</span>
+    </div>
+
+    <div class="game-container">
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">スコア</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">ベスト</span>
+          <span class="score-value" id="best-score">0</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">New Game</button>
+      </div>
+
+      <div class="game-hud">
+        <div class="hud-item">
+          <span class="hud-label">お題</span>
+          <span class="hud-value" id="theme-text">-</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">残り時間</span>
+          <span class="hud-value" id="timer">20</span>
+        </div>
+      </div>
+
+      <div class="draw-tools">
+        <button class="tool-btn selected" data-tool="pen" id="btn-pen">🖊 ペン</button>
+        <button class="tool-btn" data-tool="eraser" id="btn-eraser">消しゴム</button>
+        <button class="tool-btn" id="btn-clear-canvas">全消し</button>
+        <div class="pen-sizes">
+          <button class="size-btn selected" data-size="4">細</button>
+          <button class="size-btn" data-size="8">中</button>
+          <button class="size-btn" data-size="16">太</button>
+        </div>
+      </div>
+
+      <div class="color-palette" id="color-palette">
+        <button class="color-btn selected" data-color="#000000" style="background:#000000"></button>
+        <button class="color-btn" data-color="#E74C3C" style="background:#E74C3C"></button>
+        <button class="color-btn" data-color="#E67E22" style="background:#E67E22"></button>
+        <button class="color-btn" data-color="#F1C40F" style="background:#F1C40F"></button>
+        <button class="color-btn" data-color="#2ECC71" style="background:#2ECC71"></button>
+        <button class="color-btn" data-color="#3498DB" style="background:#3498DB"></button>
+        <button class="color-btn" data-color="#9B59B6" style="background:#9B59B6"></button>
+        <button class="color-btn" data-color="#8B4513" style="background:#8B4513"></button>
+      </div>
+
+      <div class="board-wrapper">
+        <canvas id="game-canvas"></canvas>
+
+        <div class="answer-buttons" id="answer-buttons"></div>
+
+        <div class="game-overlay" id="game-over-overlay">
+          <div class="overlay-content">
+            <h2>タイムアップ！</h2>
+            <p>スコア: <span id="final-score">0</span></p>
+            <p class="best-result" id="best-result"></p>
+            <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
+          </div>
+        </div>
+
+        <div class="game-overlay active" id="game-start-overlay">
+          <div class="overlay-content">
+            <h2>お絵かきクイズ</h2>
+            <p>お題の絵を描いて<br>当ててもらおう！</p>
+            <button class="btn-primary" id="btn-start">ゲームスタート</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li><strong>PC</strong>: マウスで描く。左クリックでペン、ツールバーで切り替え</li>
+        <li><strong>スマホ</strong>: 指で直接描く</li>
+        <li>お題が表示されたら、制限時間内にお題の絵を描こう</li>
+        <li>描き終わったら4つの選択肢から正しいお題を選んでもらう</li>
+        <li>正解するとスコア獲得！残り時間が多いほど高得点</li>
+        <li>全10問のお題にチャレンジ！</li>
+        <li>ペンの太さ・色を使い分けて上手に描こう</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        Canvas描画、イベント処理、ゲーム進行管理など<br>
+        プログラミングの楽しい要素が詰まっています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="tutorial/" class="btn-primary">このゲームの作り方を見る →</a>
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/drawing-quiz" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">&larr; 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

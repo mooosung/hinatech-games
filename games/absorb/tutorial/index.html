@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>おさかなサバイバルの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="おさかなサバイバルをJavaScriptで作る方法をステップごとにやさしく解説。Canvas描画や円の当たり判定の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="おさかなサバイバルの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="おさかなサバイバルをJavaScriptで作る方法をステップごとにやさしく解説。Canvas描画や円の当たり判定が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/absorb/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "おさかなサバイバルの作り方",
+    "description": "JavaScriptでおさかなサバイバルを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "HTMLにCanvas要素を配置し、描画用のコンテキストを取得します。"},
+      {"@type": "HowToStep", "name": "プレイヤーとNPCの魚を描画する", "text": "Canvasの楕円描画でプレイヤーの魚とNPC魚を画面に表示します。"},
+      {"@type": "HowToStep", "name": "マウス追従と当たり判定を実装する", "text": "マウスの位置にプレイヤーが追従し、円同士の距離で衝突判定を行います。"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>おさかなサバイバルの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/absorb" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>おさかなサバイバルは、自分より小さな魚を食べて大きくなるゲームです。このゲームを作ることで、Canvas描画の基本やマウス追従、円同士の当たり判定など、ゲーム開発で欠かせないテクニックが身につきます。</p>
+      <ul class="concept-list">
+        <li>Canvas APIを使った描画（円・楕円・グラデーション）</li>
+        <li>マウス座標の取得とプレイヤーの追従移動</li>
+        <li>円同士の距離による当たり判定</li>
+        <li>requestAnimationFrameによるゲームループ</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ1: Canvasの準備とプレイヤーの初期化</h2>
+      <p>まずはCanvasを設定しましょう。Canvas要素を取得して描画コンテキスト（ctx）を準備します。高解像度ディスプレイにも対応するために、devicePixelRatioを使います。</p>
+      <pre class="code-block"><code>var canvas = document.getElementById('game-canvas');
+var ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  var wrapper = canvas.parentElement;
+  var rect = wrapper.getBoundingClientRect();
+  var dpr = window.devicePixelRatio || 1;
+  canvasW = rect.width;
+  canvasH = rect.height;
+  canvas.width = canvasW * dpr;
+  canvas.height = canvasH * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}</code></pre>
+      <p><code>getContext('2d')</code>で2D描画用のコンテキストを取得します。<code>devicePixelRatio</code>を掛けることで、Retinaディスプレイなどでもくっきり表示できます。</p>
+      <h3>プレイヤーの魚を作る</h3>
+      <p>プレイヤーの魚はオブジェクトで管理します。位置(x, y)と半径(radius)が基本の情報です。</p>
+      <pre class="code-block"><code>var player = {
+  x: canvasW / 2,
+  y: canvasH / 2,
+  radius: 12,
+  color: '#3498DB',
+  vx: 0, vy: 0,
+  tailPhase: 0
+};</code></pre>
+      <p>画面の中央からスタートするように、<code>canvasW / 2</code>と<code>canvasH / 2</code>を使っています。<code>tailPhase</code>は尾びれのアニメーション用です。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ2: マウス追従とNPC魚を作ろう</h2>
+      <p>プレイヤーの魚をマウスに追従させましょう。マウスの座標を取得して、少しずつプレイヤーを近づけるとなめらかな動きになります。</p>
+      <pre class="code-block"><code>var targetX, targetY;
+var PLAYER_LERP = 0.08;
+
+canvas.addEventListener('mousemove', function (e) {
+  var rect = canvas.getBoundingClientRect();
+  targetX = e.clientX - rect.left;
+  targetY = e.clientY - rect.top;
+});
+
+// update関数内
+var dx = targetX - player.x;
+var dy = targetY - player.y;
+var d = Math.sqrt(dx * dx + dy * dy);
+if (d &gt; 1) {
+  var speed = Math.min(3.5 + player.radius * 0.02, d * PLAYER_LERP + 1.75);
+  player.vx = (dx / d) * speed;
+  player.vy = (dy / d) * speed;
+  player.x += player.vx;
+  player.y += player.vy;
+}</code></pre>
+      <p><code>PLAYER_LERP</code>(線形補間)を使うことで、マウスにぴったりくっつくのではなく、ゆるやかに近づく自然な動きを実現できます。</p>
+      <h3>NPC魚の生成</h3>
+      <p>NPC魚は画面の端からランダムに出現させましょう。プレイヤーのサイズに応じて、小さい魚と大きい魚のバランスを調整します。</p>
+      <pre class="code-block"><code>function createNPC() {
+  var radius = rand(5, 40);
+  var edge = Math.floor(Math.random() * 4);
+  var x, y;
+  if (edge === 0) { x = rand(radius, canvasW - radius); y = -radius * 3; }
+  else if (edge === 1) { x = rand(radius, canvasW - radius); y = canvasH + radius * 3; }
+  else if (edge === 2) { x = -radius * 3; y = rand(radius, canvasH - radius); }
+  else { x = canvasW + radius * 3; y = rand(radius, canvasH - radius); }
+
+  return {
+    x: x, y: y, radius: radius,
+    color: FISH_COLORS[Math.floor(Math.random() * FISH_COLORS.length)],
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed
+  };
+}</code></pre>
+      <p>4つの辺（上下左右）からランダムに出現位置を決め、画面の中心に向かって泳がせています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ3: 当たり判定とゲームループを実装しよう</h2>
+      <p>円同士の当たり判定は「2つの円の中心間の距離」と「2つの半径の合計」を比べるだけです。距離が半径の合計より小さければ衝突しています。</p>
+      <pre class="code-block"><code>function dist(x1, y1, x2, y2) {
+  var dx = x1 - x2;
+  var dy = y1 - y2;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+// 衝突判定
+var d = dist(player.x, player.y, npc.x, npc.y);
+var touchDist = player.radius + npc.radius;
+
+if (d &lt; touchDist * 0.7) {
+  if (player.radius &gt; npc.radius) {
+    // 自分より小さい魚を食べる
+    score += Math.ceil(npc.radius);
+    player.radius += npc.radius * 0.4 / player.radius * 5;
+  } else {
+    // 自分より大きい魚に食べられる → ゲームオーバー
+    gameOver();
+  }
+}</code></pre>
+      <p><code>touchDist * 0.7</code>と少し余裕を持たせることで、見た目的に自然な衝突判定になります。自分より大きい魚に触れるとゲームオーバー、小さい魚に触れるとスコア獲得＆成長します。</p>
+      <h3>ゲームループ</h3>
+      <p>最後に、毎フレーム「更新→描画」を繰り返すゲームループを作りましょう。</p>
+      <pre class="code-block"><code>function gameLoop() {
+  update();
+  draw();
+  if (gameRunning) {
+    animFrameId = requestAnimationFrame(gameLoop);
+  }
+}</code></pre>
+      <p><code>requestAnimationFrame</code>は、ブラウザの描画タイミングに合わせて関数を呼び出してくれます。通常は1秒間に約60回呼ばれるので、なめらかなアニメーションになります。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>おつかれさまでした！Canvas描画、マウス追従、円の当たり判定、ゲームループという4つの基本テクニックを使って、おさかなサバイバルの仕組みが分かりましたね。発展として、泡や水草などの背景エフェクトを追加したり、魚の種類を増やしたり、パワーアップアイテムを実装してみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../catching/tutorial/">キャッチゲームの作り方</a></li>
+        <li><a href="../../flappy/tutorial/">フラッピーバードの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

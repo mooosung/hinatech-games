@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>神経衰弱の作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="神経衰弱（メモリーマッチ）をJavaScriptで作る方法をステップごとにやさしく解説。配列シャッフルや状態管理、マッチングロジックの基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="神経衰弱の作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="神経衰弱をJavaScriptで作る方法をステップごとにやさしく解説。配列シャッフルや状態管理、マッチングロジックが学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/memory/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "神経衰弱の作り方",
+    "description": "JavaScriptで神経衰弱（メモリーマッチ）を作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "カードの生成とシャッフル", "text": "絵文字のペアを作り、Fisher-Yatesアルゴリズムでシャッフルします。"},
+      {"@type": "HowToStep", "name": "カードのめくりとマッチング判定", "text": "カードをクリックしてめくり、2枚の絵柄が一致するか判定します。"},
+      {"@type": "HowToStep", "name": "マッチ・ミスマッチ処理と操作ロック", "text": "ペア成立時と不成立時の処理、操作ロックによる不正防止を実装します。"},
+      {"@type": "HowToStep", "name": "ゲームクリアと評価システム", "text": "全ペア成立でクリア。手数に応じた星評価とベストスコア管理を実装します。"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>神経衰弱の作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/memory" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>神経衰弱（メモリーマッチ）は、裏返されたカードを2枚ずつめくって同じ絵柄のペアを探すゲームです。記憶力を使うシンプルなルールですが、配列のシャッフル、カードの状態管理、マッチング判定など、プログラミングの基本がたくさん詰まっています。難易度設定や星評価の仕組みも学べます。</p>
+      <ul class="concept-list">
+        <li>Fisher-Yatesアルゴリズムによる配列のシャッフル</li>
+        <li>カードの状態管理（裏・表・マッチ済み）</li>
+        <li>2枚のカードのマッチング判定とロック制御</li>
+        <li>難易度設定と星評価のスコアシステム</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ1: カードの生成とシャッフルを作ろう</h2>
+      <p>まずは絵文字のペアを作ってシャッフルしましょう。Fisher-Yatesアルゴリズムは、配列を偏りなくランダムに並び替える有名な手法です。難易度ごとにカードの枚数を変える仕組みも用意します。</p>
+      <pre class="code-block"><code>// 配列をシャッフル（Fisher-Yates）
+function shuffle(array) {
+  var arr = array.slice();
+  for (var i = arr.length - 1; i &gt; 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+  return arr;
+}</code></pre>
+      <p>配列の末尾から順に、ランダムな位置の要素と入れ替えていきます。<code>array.slice()</code>でコピーを作ってからシャッフルするので、元の配列は変更されません。このアルゴリズムは偏りのない完全なランダム並べ替えを保証します。</p>
+      <h3>難易度設定とペアの作成</h3>
+      <pre class="code-block"><code>var DIFFICULTY_CONFIG = {
+  easy:   { rows: 3, cols: 4, pairs: 6  },
+  normal: { rows: 4, cols: 4, pairs: 8  },
+  hard:   { rows: 4, cols: 6, pairs: 12 }
+};
+
+function createCards() {
+  var config = DIFFICULTY_CONFIG[currentDifficulty];
+  totalPairs = config.pairs;
+
+  // 絵文字をシャッフルして必要な数だけ取得
+  var shuffledEmoji = shuffle(EMOJI_POOL);
+  var selectedEmoji = shuffledEmoji.slice(0, totalPairs);
+
+  // ペアを作る（各絵文字を2つずつ）
+  var cardValues = [];
+  for (var i = 0; i &lt; selectedEmoji.length; i++) {
+    cardValues.push(selectedEmoji[i]);
+    cardValues.push(selectedEmoji[i]);
+  }
+
+  // シャッフル
+  cardValues = shuffle(cardValues);
+  return cardValues;
+}</code></pre>
+      <p>難易度ごとにペア数が異なります（かんたん6組、ふつう8組、むずかしい12組）。24種類の絵文字プールからランダムに選び、各絵文字を2枚ずつ配置します。シャッフルが2回登場するのがポイントで、1回目は使う絵文字の選択、2回目はカードの配置場所をランダムにしています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ2: カードのめくりとマッチング判定を作ろう</h2>
+      <p>カードをクリックしたらめくり、2枚めくったところでペアが一致するかを判定します。既にめくられたカードやマッチ済みのカードは無視する必要があります。</p>
+      <pre class="code-block"><code>var flippedCards = [];
+var isLocked = false;
+
+function onCardClick(e) {
+  // ロック中は何もしない
+  if (isLocked) return;
+
+  var cardEl = e.currentTarget;
+  var id = parseInt(cardEl.getAttribute('data-id'), 10);
+  var card = cards[id];
+
+  // 既にめくられている or マッチ済みは無視
+  if (card.isFlipped || card.isMatched) return;
+
+  // 同じカードの二重クリック防止
+  if (flippedCards.length === 1 &amp;&amp; flippedCards[0].id === id) return;
+
+  // 最初のカードをめくった時にタイマー開始
+  if (!gameStarted) {
+    gameStarted = true;
+    startTimer();
+  }
+
+  // カードをめくる
+  card.isFlipped = true;
+  cardEl.classList.add('flipped');
+  flippedCards.push(card);
+
+  // 2枚めくった場合
+  if (flippedCards.length === 2) {
+    moves++;
+    movesEl.textContent = moves;
+
+    var card1 = flippedCards[0];
+    var card2 = flippedCards[1];
+
+    if (card1.value === card2.value) {
+      handleMatch(card1, card2);
+    } else {
+      handleMismatch(card1, card2);
+    }
+  }
+}</code></pre>
+      <p><code>isLocked</code>フラグは、2枚めくって比較中のときに別のカードをめくれないようにするためのものです。<code>flippedCards</code>配列に現在めくられているカードを保持し、2枚になったら<code>value</code>を比較します。タイマーは最初のカードをめくった瞬間に開始するので、考える時間が無駄になりません。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ3: マッチ・ミスマッチの処理を作ろう</h2>
+      <p>ペアが一致した場合はカードを表のまま固定し、不一致の場合は少し見せてから裏に戻します。この「ちょっとだけ見せる」時間が神経衰弱の醍醐味です。</p>
+      <pre class="code-block"><code>function handleMatch(card1, card2) {
+  card1.isMatched = true;
+  card2.isMatched = true;
+  matchedPairs++;
+
+  // マッチのDOM更新
+  var el1 = cardGrid.querySelector('[data-id="' + card1.id + '"]');
+  var el2 = cardGrid.querySelector('[data-id="' + card2.id + '"]');
+
+  setTimeout(function () {
+    if (el1) el1.classList.add('matched');
+    if (el2) el2.classList.add('matched');
+  }, 300);
+
+  flippedCards = [];
+
+  // 全ペア完了チェック
+  if (matchedPairs === totalPairs) {
+    setTimeout(function () {
+      handleGameComplete();
+    }, 600);
+  }
+}
+
+function handleMismatch(card1, card2) {
+  isLocked = true;
+  cardGrid.classList.add('locked');
+
+  // 800ms後にカードを裏返す
+  setTimeout(function () {
+    card1.isFlipped = false;
+    card2.isFlipped = false;
+
+    var el1 = cardGrid.querySelector('[data-id="' + card1.id + '"]');
+    var el2 = cardGrid.querySelector('[data-id="' + card2.id + '"]');
+    if (el1) el1.classList.remove('flipped');
+    if (el2) el2.classList.remove('flipped');
+
+    flippedCards = [];
+    isLocked = false;
+    cardGrid.classList.remove('locked');
+  }, 800);
+}</code></pre>
+      <p>マッチしたカードは<code>isMatched = true</code>に設定し、表向きのまま固定します。<code>matched</code>クラスでキラキラするアニメーションも付けられます。ミスマッチの場合は800ミリ秒間だけ表を見せてから裏に戻し、その間は<code>isLocked = true</code>で操作をブロックします。</p>
+      <h3>星評価とベストスコア</h3>
+      <pre class="code-block"><code>function calculateStars(moves, pairs) {
+  var ratio = moves / pairs;
+  if (ratio &lt;= 1.5) return 3;  // 星3: 手数がペア数の1.5倍以内
+  if (ratio &lt;= 2.5) return 2;  // 星2: 手数がペア数の2.5倍以内
+  return 1;                     // 星1: それ以上
+}
+
+function saveBestScore(difficulty, moves, time) {
+  var current = getBestScore(difficulty);
+  // 手数が少ない方が良い。同じならタイムが短い方が良い
+  if (!current || moves &lt; current.moves ||
+      (moves === current.moves &amp;&amp; time &lt; current.time)) {
+    localStorage.setItem(
+      bestScoreKey(difficulty),
+      JSON.stringify({ moves: moves, time: time })
+    );
+    return true; // 新記録
+  }
+  return false;
+}</code></pre>
+      <p>ペア数に対する手数の比率で星を決めています。normalモード（8ペア）なら、12手以内で星3、20手以内で星2です。ベストスコアは難易度ごとに<code>localStorage</code>に保存し、手数が最優先、同じなら時間が短い方がベストとなります。<code>JSON.stringify</code>で複数の値をまとめて保存しているのもポイントです。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>おつかれさまでした！神経衰弱の基本が完成しました。Fisher-Yatesシャッフル、カードの状態管理とマッチング判定、操作ロック、星評価システムを学びました。発展として、カードをめくるときの3Dフリップアニメーションをより凝ったものにしたり、テーマ（動物・食べ物など）を切り替えられるようにしたり、オンライン対戦モードを実装してみるのも面白いですよ。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../simon/tutorial/">サイモンゲームの作り方</a></li>
+        <li><a href="../../color-match/tutorial/">カラーマッチの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

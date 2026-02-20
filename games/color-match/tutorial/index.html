@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カラーマッチの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="カラーマッチをJavaScriptで作る方法をステップごとにやさしく解説。DOM操作やタイマー、ランダム色生成の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="カラーマッチの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="カラーマッチをJavaScriptで作る方法をステップごとにやさしく解説。DOM操作やタイマー、ランダム色生成が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/color-match/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "カラーマッチの作り方",
+    "description": "JavaScriptでカラーマッチを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "色の定義とストループ問題の生成", "text": "色の名前と表示色をずらして出題するストループ効果を実装します。"},
+      {"@type": "HowToStep", "name": "回答処理とフィードバック表示", "text": "プレイヤーの回答を判定し、正解・不正解のフィードバックを表示します。"},
+      {"@type": "HowToStep", "name": "カウントダウンタイマーの実装", "text": "制限時間のカウントダウンとタイマーバーの視覚表現を実装します。"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>カラーマッチの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/color-match" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>カラーマッチは、画面に表示された「色の名前」の文字が何色で書かれているかではなく、文字が示す色名を当てるゲームです。いわゆる「ストループ効果」を利用した脳トレ系ゲームで、制限時間内にたくさん正解するとハイスコアになります。Canvasを使わずにDOM操作だけでゲームを作る方法が学べます。</p>
+      <ul class="concept-list">
+        <li>DOM操作で文字色と文字内容を動的に変更する方法</li>
+        <li>setIntervalを使った制限時間タイマーの実装</li>
+        <li>ランダムな色の組み合わせ生成（ストループ効果）</li>
+        <li>正解・不正解のフィードバック表示とスコア管理</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ1: 色の定義とストループ問題を生成しよう</h2>
+      <p>まず、ゲームで使う色を定義しましょう。各色には「ひらがなの名前」「キー（識別用）」「CSSカラー」の3つの情報を持たせます。出題のポイントは、表示する文字の意味と表示色をわざとずらすことです。</p>
+      <pre class="code-block"><code>var COLORS = [
+  { name: 'あか',   key: 'red',    css: '#E74C3C' },
+  { name: 'あお',   key: 'blue',   css: '#3498DB' },
+  { name: 'みどり', key: 'green',  css: '#2ECC71' },
+  { name: 'きいろ', key: 'yellow', css: '#D4AC0D' }
+];
+
+// 配列からランダムな要素を返す（除外指定可能）
+function randomFrom(arr, exclude) {
+  var filtered = exclude ? arr.filter(function (item) {
+    return item.key !== exclude.key;
+  }) : arr;
+  return filtered[Math.floor(Math.random() * filtered.length)];
+}</code></pre>
+      <p><code>COLORS</code>配列に4色を定義しています。<code>randomFrom</code>関数では、<code>exclude</code>に指定した色を除外してランダム選択できます。これで「文字の意味と同じ色で表示」されることを防ぎます。</p>
+      <h3>問題の生成（ストループ効果）</h3>
+      <p>「あか」という文字を青色で表示する、といった問題を生成します。</p>
+      <pre class="code-block"><code>function generateQuestion() {
+  // テキストの意味（色名）をランダムに選択
+  currentTextColor = randomFrom(COLORS);
+
+  // 表示色はテキストの意味と異なる色を選択（ストループ効果）
+  currentDisplayColor = randomFrom(COLORS, currentTextColor);
+
+  // 色ワードを更新
+  colorWordEl.textContent = currentTextColor.name;
+  colorWordEl.style.color = currentDisplayColor.css;
+
+  // ポップアニメーション
+  colorWordEl.classList.remove('pop');
+  void colorWordEl.offsetWidth;
+  colorWordEl.classList.add('pop');
+}</code></pre>
+      <p><code>textContent</code>で文字を、<code>style.color</code>で表示色を変えます。<code>void colorWordEl.offsetWidth</code>はCSSアニメーションをリセットするテクニックで、レイアウトを再計算させることで同じアニメーションをもう一度再生できます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ2: 回答処理とフィードバックを作ろう</h2>
+      <p>プレイヤーが色ボタンをクリックしたとき、選んだ色が「文字の意味する色」と一致するかを判定します。正解なら+10点、不正解なら-5点です。連打を防ぐためのロック機構も重要です。</p>
+      <pre class="code-block"><code>function handleAnswer(selectedColorKey, btn) {
+  if (!gameRunning || inputLocked) return;
+
+  // 連打防止
+  inputLocked = true;
+
+  var isCorrect = (selectedColorKey === currentTextColor.key);
+
+  if (isCorrect) {
+    score += CORRECT_POINTS;
+    correctCount++;
+  } else {
+    score += WRONG_POINTS;
+    if (score &lt; 0) score = 0;
+    wrongCount++;
+  }
+
+  updateScore();
+  showFeedback(isCorrect);
+  flashButton(btn, isCorrect);
+
+  // 次の問題を生成
+  generateQuestion();
+
+  // 短い遅延後にロック解除（連打防止）
+  setTimeout(function () {
+    inputLocked = false;
+  }, 150);
+}</code></pre>
+      <p><code>selectedColorKey</code>と<code>currentTextColor.key</code>を比較するだけのシンプルな判定です。<code>inputLocked</code>フラグで連打を防止し、150ミリ秒後にロック解除。ゲームの操作感を保ちつつ不正な連打を防いでいます。</p>
+      <h3>フィードバックとボタンフラッシュ</h3>
+      <pre class="code-block"><code>function showFeedback(isCorrect) {
+  if (feedbackTimer) clearTimeout(feedbackTimer);
+
+  feedbackEl.textContent = isCorrect ? '+10' : '-5';
+  feedbackEl.className = 'feedback show ' + (isCorrect ? 'correct' : 'wrong');
+
+  feedbackTimer = setTimeout(function () {
+    feedbackEl.classList.remove('show');
+    feedbackTimer = null;
+  }, 400);
+}
+
+function flashButton(btn, isCorrect) {
+  var cls = isCorrect ? 'flash-correct' : 'flash-wrong';
+  btn.classList.remove('flash-correct', 'flash-wrong');
+  void btn.offsetWidth;
+  btn.classList.add(cls);
+
+  setTimeout(function () {
+    btn.classList.remove(cls);
+  }, 300);
+}</code></pre>
+      <p>正解なら「+10」、不正解なら「-5」を表示し、400ミリ秒後に消えます。ボタン自体も光るエフェクトで、視覚的なフィードバックを強化しています。CSSクラスの付け替えでアニメーションを制御するのは、UI演出の基本テクニックです。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ3: タイマーとゲーム進行を実装しよう</h2>
+      <p>30秒の制限時間を設けて、時間切れでゲームオーバーにしましょう。タイマーバーの幅をリアルタイムに変化させ、残り時間が少なくなったら色を変えて緊張感を出します。</p>
+      <pre class="code-block"><code>var GAME_DURATION = 30;
+var WARNING_TIME = 10;
+var DANGER_TIME = 5;
+
+function startTimer() {
+  var lastTime = Date.now();
+
+  timerInterval = setInterval(function () {
+    var now = Date.now();
+    var delta = (now - lastTime) / 1000;
+    lastTime = now;
+
+    timeRemaining -= delta;
+
+    if (timeRemaining &lt;= 0) {
+      timeRemaining = 0;
+      updateTimerDisplay();
+      gameOver();
+      return;
+    }
+
+    updateTimerDisplay();
+  }, 100);
+}</code></pre>
+      <p><code>Date.now()</code>で実時間の経過を計測しています。<code>setInterval</code>の間隔は正確でないことがあるため、前回の呼び出し時刻との差分（delta）を使って計算するのがベストプラクティスです。</p>
+      <h3>タイマーバーの視覚的な演出</h3>
+      <pre class="code-block"><code>function updateTimerDisplay() {
+  var seconds = Math.ceil(timeRemaining);
+  timerEl.textContent = seconds;
+
+  // タイマーバーの幅を更新
+  var percent = (timeRemaining / GAME_DURATION) * 100;
+  timerBarEl.style.width = percent + '%';
+
+  // 警告・危険状態のクラス管理
+  timerBarEl.classList.remove('warning', 'danger');
+  timerEl.classList.remove('warning', 'danger');
+
+  if (timeRemaining &lt;= DANGER_TIME) {
+    timerBarEl.classList.add('danger');
+    timerEl.classList.add('danger');
+  } else if (timeRemaining &lt;= WARNING_TIME) {
+    timerBarEl.classList.add('warning');
+    timerEl.classList.add('warning');
+  }
+}</code></pre>
+      <p>残り時間の割合でバーの幅を変え、10秒以下で黄色（warning）、5秒以下で赤（danger）に切り替えています。CSSクラスで色を変えるので、デザインの調整が簡単です。数字とバーの両方に色を付けることで、緊迫感が増します。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>おつかれさまでした！カラーマッチの基本が完成しました。DOM操作で文字と色を動的に変更し、タイマーで制限時間を管理し、フィードバック演出でゲームの手触りを良くする方法を学びました。Canvasを使わなくてもDOM操作だけでゲームが作れることが実感できたと思います。発展として、色の数を増やして難易度を上げたり、正解するたびに制限時間が少し延びるモードを作ったり、効果音を付けてみるのも面白いですよ。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../simon/tutorial/">サイモンゲームの作り方</a></li>
+        <li><a href="../../memory/tutorial/">神経衰弱の作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

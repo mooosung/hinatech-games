@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>リバーシの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="リバーシをJavaScriptで作る方法をステップごとにやさしく解説。ボードゲームAIや石反転ロジックの基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="リバーシの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="リバーシをJavaScriptで作る方法をステップごとにやさしく解説。ボードゲームAIや石反転ロジックが学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/reversi/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "リバーシの作り方",
+    "description": "JavaScriptでリバーシを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとボードの準備", "text": "8x8の盤面を2次元配列で管理し、初期配置を設定します"},
+      {"@type": "HowToStep", "name": "石反転ロジックと有効手判定", "text": "8方向に挟んだ石を探して反転する処理と、どこに置けるかの判定を実装します"},
+      {"@type": "HowToStep", "name": "CPU対戦AIの実装", "text": "重み付き評価マップを使って強いAIを作ります"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>リバーシの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/reversi" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>リバーシ（オセロ）は、盤面に黒白の石を置いて相手の石を挟んでひっくり返すボードゲームです。このチュートリアルでは、JavaScriptでリバーシを作る方法を学びましょう。8方向の探索、石の反転ロジック、そしてCPU対戦のためのAIアルゴリズムなど、ボードゲーム開発の基本が身につきます。</p>
+      <ul class="concept-list">
+        <li>重み付き評価マップを使ったボードゲームAI</li>
+        <li>8方向探索による石反転ロジック</li>
+        <li>有効手の判定と盤面評価のしくみ</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>盤面のデータ構造を準備しよう</h2>
+      <p>リバーシの盤面は8x8の2次元配列で管理します。各マスは「空(0)」「黒(1)」「白(2)」の3つの状態を持ちます。8方向の探索に使うオフセット配列も用意しましょう。</p>
+      <pre class="code-block"><code>var EMPTY = 0, BLACK = 1, WHITE = 2;
+var BOARD_SIZE = 8;
+
+var DIRECTIONS = [
+  [-1, 0], [-1, 1], [0, 1], [1, 1],
+  [1, 0], [1, -1], [0, -1], [-1, -1]
+];
+
+var board = [];
+for (var r = 0; r &lt; BOARD_SIZE; r++) {
+  board[r] = [];
+  for (var c = 0; c &lt; BOARD_SIZE; c++) {
+    board[r][c] = EMPTY;
+  }
+}
+// 初期配置（中央に黒白を2つずつ）
+board[3][3] = WHITE;
+board[3][4] = BLACK;
+board[4][3] = BLACK;
+board[4][4] = WHITE;</code></pre>
+      <p><code>DIRECTIONS</code>は上、右上、右、右下、下、左下、左、左上の8方向を表す配列です。石を置いたとき、この8方向それぞれに「相手の石が続いて最後に自分の石がある」パターンを探します。初期配置は中央の4マスに黒白を交互に置くのがルールです。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>石反転ロジックと有効手判定を作ろう</h2>
+      <h3>8方向に挟んだ石を見つける</h3>
+      <p>リバーシの核心は「石を挟んでひっくり返す」処理です。ある場所に石を置いたとき、8方向それぞれに相手の石が続き、その先に自分の石があれば、間の石をすべてひっくり返せます。</p>
+      <pre class="code-block"><code>function getFlippableStones(row, col, player) {
+  if (board[row][col] !== EMPTY) return [];
+  var opponent = player === BLACK ? WHITE : BLACK;
+  var allFlippable = [];
+
+  for (var d = 0; d &lt; DIRECTIONS.length; d++) {
+    var dr = DIRECTIONS[d][0];
+    var dc = DIRECTIONS[d][1];
+    var flippable = [];
+    var r = row + dr;
+    var c = col + dc;
+
+    while (r &gt;= 0 &amp;&amp; r &lt; BOARD_SIZE &amp;&amp;
+           c &gt;= 0 &amp;&amp; c &lt; BOARD_SIZE &amp;&amp;
+           board[r][c] === opponent) {
+      flippable.push({ row: r, col: c });
+      r += dr;
+      c += dc;
+    }
+
+    if (flippable.length &gt; 0 &amp;&amp;
+        r &gt;= 0 &amp;&amp; r &lt; BOARD_SIZE &amp;&amp;
+        c &gt;= 0 &amp;&amp; c &lt; BOARD_SIZE &amp;&amp;
+        board[r][c] === player) {
+      allFlippable = allFlippable.concat(flippable);
+    }
+  }
+  return allFlippable;
+}</code></pre>
+      <p><code>while</code>ループで相手の石が続く限り進み、最後に自分の石があれば挟んでいると判定します。この関数が空配列を返さない場所が「有効手」です。有効手がない場合はパス、両者とも有効手がなければゲーム終了になります。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>CPU対戦AIを実装しよう</h2>
+      <p>強いAIを作るために、盤面の各マスに「重み」を設定しましょう。角は最も価値が高く、角の隣は危険なので低い値を設定します。これに加えて、ひっくり返せる石の数や相手の角取りを防げるかも評価に加えます。</p>
+      <pre class="code-block"><code>var WEIGHT_MAP = [
+  [100, -20,  10,   5,   5,  10, -20, 100],
+  [-20, -50,  -2,  -2,  -2,  -2, -50, -20],
+  [ 10,  -2,   1,   1,   1,   1,  -2,  10],
+  [  5,  -2,   1,   0,   0,   1,  -2,   5],
+  [  5,  -2,   1,   0,   0,   1,  -2,   5],
+  [ 10,  -2,   1,   1,   1,   1,  -2,  10],
+  [-20, -50,  -2,  -2,  -2,  -2, -50, -20],
+  [100, -20,  10,   5,   5,  10, -20, 100]
+];</code></pre>
+      <p>角（100点）は取られると絶対にひっくり返されないので最高評価です。角の隣（-20, -50）は相手に角を取られるきっかけになるので低評価。AIはこの重みマップを使い、さらにひっくり返せる石の数や相手の次の手もシミュレーションして最善手を選びます。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、8方向探索による石反転ロジック、有効手判定、重みマップを使ったAIの3つを学びました。さらに発展させるなら、ミニマックス法（数手先を読むアルゴリズム）でAIを強化したり、石を返すアニメーション、対戦モードの追加に挑戦してみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../tictactoe/tutorial/">三目並べの作り方</a></li>
+        <li><a href="../../sudoku/tutorial/">数独の作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

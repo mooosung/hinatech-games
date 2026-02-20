@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>単語探しの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="単語探しをJavaScriptで作る方法をステップごとにやさしく解説。2次元配列や単語配置アルゴリズムの基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="単語探しの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="単語探しをJavaScriptで作る方法をステップごとにやさしく解説。2次元配列や単語配置アルゴリズムが学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/word-search/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "単語探しの作り方",
+    "description": "JavaScriptで単語探しを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "10x10のレターグリッドとJavaScriptの基本セットアップを行います"},
+      {"@type": "HowToStep", "name": "単語配置アルゴリズム", "text": "2次元配列にランダムに単語を配置するロジックを作ります"},
+      {"@type": "HowToStep", "name": "ドラッグ選択と単語判定", "text": "マウスやタッチでの文字選択と正解チェックを実装します"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>単語探しの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/word-search" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>単語探し（ワードサーチ）は、アルファベットが並んだグリッドの中から隠された単語を見つけ出すパズルゲームです。2次元配列への単語の配置、ランダムな文字で空マスを埋める処理、マウスのドラッグで文字を選択する操作など、パズルゲーム制作に役立つテクニックが学べます。</p>
+      <ul class="concept-list">
+        <li>2次元配列（グリッドデータの管理と操作）</li>
+        <li>単語配置アルゴリズム（衝突チェックしながらランダムに配置）</li>
+        <li>ドラッグ選択（マウス/タッチで文字列を選ぶインタラクション）</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>HTMLとCanvasの準備をしよう</h2>
+      <p>単語探しは10x10のアルファベットグリッドをDOM要素で作ります。単語プールを用意し、毎回ランダムに6〜8単語を選んでグリッドに配置しましょう。</p>
+      <pre class="code-block"><code>var GRID_SIZE = 10;
+
+var WORD_POOL = [
+  'GAME', 'CODE', 'HTML', 'JAVA', 'PYTHON',
+  'REACT', 'MOUSE', 'CLICK', 'PIXEL', 'DEBUG',
+  'ARRAY', 'CLASS', 'STYLE', 'LINUX', 'INPUT',
+  'STACK', 'QUERY', 'SWIFT', 'LOGIC', 'PARSE'
+];
+
+var grid = [];           // 10x10の2次元配列
+var placedWords = [];    // 配置済みの単語リスト
+var foundWords = [];     // 見つけた単語リスト
+
+// 空のグリッドを生成
+function createEmptyGrid() {
+  var g = [];
+  for (var r = 0; r &lt; GRID_SIZE; r++) {
+    var row = [];
+    for (var c = 0; c &lt; GRID_SIZE; c++) {
+      row.push('');
+    }
+    g.push(row);
+  }
+  return g;
+}</code></pre>
+      <p>まず空のグリッド（全マスが空文字の2次元配列）を作ります。この後、単語を配置し、残った空マスをランダムな文字で埋めます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>単語配置アルゴリズムを作ろう</h2>
+      <h3>衝突チェックと配置処理</h3>
+      <p>単語をグリッドに配置するときは、(1) グリッドの範囲内に収まるか、(2) 既に配置された文字と矛盾しないか、をチェックします。水平と垂直の2方向で配置を試み、ランダムな位置に置いていきます。</p>
+      <pre class="code-block"><code>// 単語が配置できるかチェック
+function canPlaceWord(g, word, row, col, direction) {
+  var len = word.length;
+  if (direction === 'horizontal') {
+    if (col + len &gt; GRID_SIZE) return false;
+    for (var i = 0; i &lt; len; i++) {
+      var existing = g[row][col + i];
+      if (existing !== '' &amp;&amp; existing !== word[i]) return false;
+    }
+  } else {
+    if (row + len &gt; GRID_SIZE) return false;
+    for (var i = 0; i &lt; len; i++) {
+      var existing = g[row + i][col];
+      if (existing !== '' &amp;&amp; existing !== word[i]) return false;
+    }
+  }
+  return true;
+}
+
+// 単語をグリッドに配置
+function placeWord(g, word, row, col, direction) {
+  var cells = [];
+  if (direction === 'horizontal') {
+    for (var i = 0; i &lt; word.length; i++) {
+      g[row][col + i] = word[i];
+      cells.push({ row: row, col: col + i });
+    }
+  } else {
+    for (var i = 0; i &lt; word.length; i++) {
+      g[row + i][col] = word[i];
+      cells.push({ row: row + i, col: col });
+    }
+  }
+  return cells;
+}</code></pre>
+      <p>既にある文字と同じ文字なら重ねて配置できます（<code>existing !== '' &amp;&amp; existing !== word[i]</code>のチェック）。これにより、交差する単語が自然に配置されます。</p>
+
+      <h3>グリッド全体の生成</h3>
+      <pre class="code-block"><code>function generateGrid() {
+  var g = createEmptyGrid();
+  var shuffled = shuffle(WORD_POOL);
+  var placed = [];
+
+  for (var w = 0; w &lt; shuffled.length; w++) {
+    if (placed.length &gt;= 8) break;
+    var word = shuffled[w];
+    var directions = shuffle(['horizontal', 'vertical']);
+
+    for (var d = 0; d &lt; directions.length; d++) {
+      var positions = shuffle(/* 全座標 */);
+      for (var p = 0; p &lt; positions.length; p++) {
+        if (canPlaceWord(g, word, positions[p].row, positions[p].col, directions[d])) {
+          placeWord(g, word, positions[p].row, positions[p].col, directions[d]);
+          placed.push({ word: word, cells: cells });
+          break;
+        }
+      }
+    }
+  }
+
+  // 空セルをランダムな文字で埋める
+  for (var r = 0; r &lt; GRID_SIZE; r++) {
+    for (var c = 0; c &lt; GRID_SIZE; c++) {
+      if (g[r][c] === '') {
+        g[r][c] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      }
+    }
+  }
+  return { grid: g, words: placed };
+}</code></pre>
+      <p>単語と方向と位置をすべてシャッフルしてから試すことで、毎回異なるパズルが生まれます。空マスにランダムな大文字アルファベットを埋めて、単語を見つけにくくしています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ドラッグ選択と単語判定を実装しよう</h2>
+      <p>プレイヤーはマウスのドラッグ（またはタッチスワイプ）で、グリッド上の文字を水平・垂直方向に選択します。選択された文字列が配置済みの単語と一致すれば、その単語を「発見済み」にします。</p>
+      <pre class="code-block"><code>// 2つのセル間の直線上のセルを取得
+function getLineCells(startCell, endCell) {
+  var cells = [];
+  if (startCell.row === endCell.row) {
+    // 水平
+    var minC = Math.min(startCell.col, endCell.col);
+    var maxC = Math.max(startCell.col, endCell.col);
+    for (var c = minC; c &lt;= maxC; c++) {
+      cells.push({ row: startCell.row, col: c });
+    }
+  } else if (startCell.col === endCell.col) {
+    // 垂直
+    var minR = Math.min(startCell.row, endCell.row);
+    var maxR = Math.max(startCell.row, endCell.row);
+    for (var r = minR; r &lt;= maxR; r++) {
+      cells.push({ row: r, col: startCell.col });
+    }
+  }
+  return cells;
+}
+
+// 選択が有効な単語かチェック
+function checkSelection(cells) {
+  if (cells.length &lt; 2) return null;
+  var selectedText = '';
+  for (var i = 0; i &lt; cells.length; i++) {
+    selectedText += grid[cells[i].row][cells[i].col];
+  }
+  for (var i = 0; i &lt; placedWords.length; i++) {
+    if (foundWords.indexOf(placedWords[i].word) !== -1) continue;
+    if (selectedText === placedWords[i].word) {
+      return placedWords[i];
+    }
+  }
+  return null;
+}</code></pre>
+      <p>ドラッグの開始点と終了点から直線上のセルを取得し、その文字列を繋げて配置済み単語と比較します。一致すれば正解です。見つけた単語のセルにCSSクラスを追加して、ハイライト表示にしましょう。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、2次元配列でのグリッド管理、衝突チェック付きの単語配置アルゴリズム、ドラッグによる文字選択の仕組みを学びました。さらに発展させるなら、斜め方向の単語配置と選択、日本語（カタカナ）版の作成、難易度選択（グリッドサイズの変更）、ヒント機能（1文字だけハイライト）などに挑戦してみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../typing/tutorial/">タイピングゲームの作り方</a></li>
+        <li><a href="../../maze/tutorial/">迷路の作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

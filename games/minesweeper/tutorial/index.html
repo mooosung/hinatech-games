@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マインスイーパーの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="マインスイーパーをJavaScriptで作る方法をステップごとにやさしく解説。再帰処理(flood fill)やグリッド操作の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="マインスイーパーの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="マインスイーパーをJavaScriptで作る方法をステップごとにやさしく解説。再帰処理(flood fill)やグリッド操作が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/minesweeper/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "マインスイーパーの作り方",
+    "description": "JavaScriptでマインスイーパーを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとグリッドの準備", "text": "CSSグリッドを使って盤面を作り、セルのデータ構造を定義します"},
+      {"@type": "HowToStep", "name": "地雷の配置と隣接数の計算", "text": "最初のクリックを安全にしつつ、ランダムに地雷を配置し隣接地雷数を数えます"},
+      {"@type": "HowToStep", "name": "フラッドフィル（再帰的展開）の実装", "text": "空白セルをクリックしたとき周囲を自動で開く再帰処理を実装します"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>マインスイーパーの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/minesweeper" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>マインスイーパーは、地雷の位置を推理しながらセルを開いていくパズルゲームです。このチュートリアルでは、JavaScriptでマインスイーパーを一から作る方法を学びましょう。グリッドの管理、再帰的なセル展開（フラッドフィル）、地雷の配置アルゴリズムなど、ゲーム開発で役立つ技術がたくさん身につきます。</p>
+      <ul class="concept-list">
+        <li>再帰処理（flood fill）で空白セルを自動展開するしくみ</li>
+        <li>2次元配列を使ったグリッド操作の基本</li>
+        <li>最初のクリックを安全にする爆弾配置アルゴリズム</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ボードのデータ構造を準備しよう</h2>
+      <p>まず、盤面の各セルが持つ情報を決めましょう。マインスイーパーでは、各セルに「地雷かどうか」「開いたかどうか」「旗を立てたか」「隣接する地雷の数」の4つの情報が必要です。2次元配列で盤面を管理します。</p>
+      <pre class="code-block"><code>var NEIGHBORS = [
+  [-1, -1], [-1, 0], [-1, 1],
+  [0,  -1],          [0,  1],
+  [1,  -1], [1,  0], [1,  1]
+];
+
+var board = [];
+for (var r = 0; r &lt; rows; r++) {
+  board[r] = [];
+  for (var c = 0; c &lt; cols; c++) {
+    board[r][c] = {
+      mine: false,
+      revealed: false,
+      flagged: false,
+      adjacentMines: 0
+    };
+  }
+}</code></pre>
+      <p><code>NEIGHBORS</code>は8方向のオフセットを表す配列です。あるセルの周囲8マスを調べるときに使います。<code>board</code>は2次元配列で、各セルをオブジェクトとして管理しています。最初は地雷を置かず、プレイヤーの最初のクリック後に配置するのがポイントです。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>地雷の配置と隣接数の計算を作ろう</h2>
+      <h3>最初のクリックが安全になるしくみ</h3>
+      <p>マインスイーパーでは、最初のクリックで地雷を踏まないようにするのがお約束です。クリックされた場所とその周囲を「安全ゾーン」として記録してから、地雷をランダムに配置しましょう。</p>
+      <pre class="code-block"><code>function placeMines(safeRow, safeCol) {
+  var safeSet = {};
+  safeSet[safeRow + ',' + safeCol] = true;
+  for (var i = 0; i &lt; NEIGHBORS.length; i++) {
+    var nr = safeRow + NEIGHBORS[i][0];
+    var nc = safeCol + NEIGHBORS[i][1];
+    if (nr &gt;= 0 &amp;&amp; nr &lt; rows &amp;&amp; nc &gt;= 0 &amp;&amp; nc &lt; cols) {
+      safeSet[nr + ',' + nc] = true;
+    }
+  }
+
+  var placed = 0;
+  while (placed &lt; totalMines) {
+    var r = Math.floor(Math.random() * rows);
+    var c = Math.floor(Math.random() * cols);
+    if (!board[r][c].mine &amp;&amp; !safeSet[r + ',' + c]) {
+      board[r][c].mine = true;
+      placed++;
+    }
+  }
+}</code></pre>
+      <p><code>safeSet</code>でクリック位置とその周囲を記録し、そこには地雷を置かないようにしています。<code>while</code>ループでランダムな位置に地雷を1つずつ配置していきます。地雷の配置後は、各セルの周囲にある地雷の数を数えて<code>adjacentMines</code>に格納します。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>フラッドフィル（再帰的展開）を実装しよう</h2>
+      <p>マインスイーパーの面白さは、空白セルをクリックすると周囲の空白が一気に開くところです。これを「フラッドフィル」という再帰処理で実現しましょう。隣接地雷数が0のセルを見つけたら、その周囲のセルも再帰的に開いていきます。</p>
+      <pre class="code-block"><code>function floodReveal(r, c) {
+  if (r &lt; 0 || r &gt;= rows || c &lt; 0 || c &gt;= cols) return;
+  var cellData = board[r][c];
+  if (cellData.revealed || cellData.flagged || cellData.mine) return;
+
+  cellData.revealed = true;
+  revealedCount++;
+  updateCellDisplay(r, c);
+
+  if (cellData.adjacentMines === 0) {
+    for (var i = 0; i &lt; NEIGHBORS.length; i++) {
+      floodReveal(r + NEIGHBORS[i][0], c + NEIGHBORS[i][1]);
+    }
+  }
+}</code></pre>
+      <p>この関数のポイントは3つです。まず、範囲外チェックで配列の外にアクセスしないようにしています。次に、すでに開いたセル・旗付き・地雷のセルは処理をスキップします。そして<code>adjacentMines === 0</code>のとき、8方向すべてに対して自分自身を呼び出す「再帰」を行います。再帰の終了条件がしっかり書かれているので、無限ループにはなりません。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、マインスイーパーの核となる3つの仕組みを学びました。2次元配列によるグリッド管理、安全な地雷配置、そしてフラッドフィルによる再帰的展開です。ここからさらに、難易度の切り替え機能やタイマー、旗を立てる機能を追加すると、本格的なマインスイーパーが完成します。右クリックや長押しで旗を立てる操作も、イベント処理の良い練習になりますよ。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../maze/tutorial/">迷路ゲームの作り方</a></li>
+        <li><a href="../../sudoku/tutorial/">数独の作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

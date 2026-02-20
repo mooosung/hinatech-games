@@ -1,0 +1,255 @@
+/* ============================================
+   倉庫番 - 固有スタイル
+   ============================================ */
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.score-box {
+  background: #3d2b1f;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 70px;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #c4a45a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-new-game {
+  margin-left: auto;
+  background: #8B4513;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-new-game:hover {
+  background: #6b3410;
+}
+
+/* HUD */
+.game-hud {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hud-item {
+  background: #5a3d2b;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  text-align: center;
+  flex: 1;
+}
+
+.hud-btn {
+  cursor: pointer;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.hud-btn:hover {
+  background: #6b4a33;
+}
+
+.hud-btn:active {
+  background: #7a5940;
+}
+
+.hud-label {
+  display: block;
+  font-size: 0.6rem;
+  color: #c4a45a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hud-value {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ゲームボード */
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  touch-action: none;
+}
+
+#game-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #2b1810;
+  border-radius: 8px;
+  display: block;
+}
+
+/* Dパッド */
+.dpad {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 4px;
+  max-width: 180px;
+  margin: 0.75rem auto 0;
+}
+
+.dpad-btn {
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 10px;
+  background: #5a3d2b;
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dpad-btn:hover {
+  background: #6b4a33;
+}
+
+.dpad-btn:active {
+  background: #8B4513;
+}
+
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* ゲームオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(43, 24, 16, 0.92);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.3s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.overlay-content h2 {
+  font-size: 1.75rem;
+  color: #c4a45a;
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content p {
+  font-size: 1.1rem;
+  color: #d4c9a0;
+  margin-bottom: 0.75rem;
+}
+
+.overlay-content .best-result {
+  font-size: 0.95rem;
+  color: #F1C40F;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.overlay-content .btn-primary {
+  margin-bottom: 0.5rem;
+}
+
+/* レスポンシブ */
+@media (max-width: 500px) {
+  .board-wrapper {
+    border-radius: 6px;
+  }
+
+  #game-canvas {
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .score-area {
+    gap: 0.5rem;
+  }
+
+  .score-box {
+    padding: 0.4rem 0.75rem;
+    min-width: 55px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+
+  .score-label {
+    font-size: 0.6rem;
+  }
+
+  .dpad-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 1rem;
+  }
+}

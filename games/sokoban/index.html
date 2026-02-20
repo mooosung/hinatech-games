@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>倉庫番｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="箱を押してゴールに乗せよう！頭を使う定番パズルゲーム。全30ステージ。PC・スマホ対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="倉庫番｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="箱を押してゴールに乗せよう！頭を使う定番パズルゲーム。全30ステージ。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/sokoban/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "倉庫番",
+    "description": "箱を押してゴールに乗せよう！頭を使う定番パズルゲーム。全30ステージ。PC・スマホ対応の無料ブラウザゲーム。",
+    "url": "https://hinata-ya.tech/games/games/sokoban/",
+    "genre": ["パズル", "ロジック"],
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">倉庫番</h1>
+    <div class="game-page-tags">
+      <span class="tag">パズル</span>
+      <span class="tag">ロジック</span>
+    </div>
+
+    <div class="game-container">
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">ステージ</span>
+          <span class="score-value" id="score">1</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">クリア数</span>
+          <span class="score-value" id="best-score">0</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">リセット</button>
+      </div>
+
+      <div class="game-hud">
+        <div class="hud-item">
+          <span class="hud-label">手数</span>
+          <span class="hud-value" id="moves">0</span>
+        </div>
+        <div class="hud-item hud-btn" id="btn-undo">
+          <span class="hud-value">↩ 戻す</span>
+        </div>
+        <div class="hud-item hud-btn" id="btn-restart">
+          <span class="hud-value">↺ やり直し</span>
+        </div>
+      </div>
+
+      <div class="board-wrapper">
+        <canvas id="game-canvas"></canvas>
+
+        <div class="game-overlay" id="game-over-overlay">
+          <div class="overlay-content">
+            <h2>ステージクリア！</h2>
+            <p>手数: <span id="final-score">0</span></p>
+            <p class="best-result" id="best-result"></p>
+            <button class="btn-primary" id="btn-retry">次のステージへ</button>
+          </div>
+        </div>
+
+        <div class="game-overlay active" id="game-start-overlay">
+          <div class="overlay-content">
+            <h2>倉庫番</h2>
+            <p>箱を押してゴールに<br>乗せよう！</p>
+            <button class="btn-primary" id="btn-start">ゲームスタート</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dpad" id="dpad">
+        <button class="dpad-btn dpad-up" data-dir="up">▲</button>
+        <button class="dpad-btn dpad-left" data-dir="left">◀</button>
+        <button class="dpad-btn dpad-right" data-dir="right">▶</button>
+        <button class="dpad-btn dpad-down" data-dir="down">▼</button>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li><strong>PC</strong>: ← → ↑ ↓ キーまたは WASD キーで移動</li>
+        <li><strong>スマホ</strong>: 方向ボタンで移動、またはスワイプ</li>
+        <li>プレイヤー（😊）を動かして箱（📦）をゴール（✕印）の上に押し込もう</li>
+        <li>箱は押すことしかできない。引くことはできないよ</li>
+        <li>行き詰まったら「戻す」で一手戻すか「やり直し」でステージ最初から</li>
+        <li>全部の箱をゴールに乗せるとクリア！</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        2次元配列、当たり判定、ステージデータ管理など<br>
+        プログラミングの基本が詰まっています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="tutorial/" class="btn-primary">このゲームの作り方を見る →</a>
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/sokoban" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">&larr; 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

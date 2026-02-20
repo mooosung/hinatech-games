@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スライムジャンパーの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="スライムジャンパーをJavaScriptで作る方法をステップごとにやさしく解説。重力シミュレーションやプラットフォーム判定の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="スライムジャンパーの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="スライムジャンパーをJavaScriptで作る方法をステップごとにやさしく解説。重力シミュレーションやカメラスクロールが学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/slime-jump/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "スライムジャンパーの作り方",
+    "description": "JavaScriptでスライムジャンパーを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "Canvas要素を用意し、プレイヤーと足場のデータ構造を定義します"},
+      {"@type": "HowToStep", "name": "重力シミュレーションとジャンプ", "text": "重力加速度をかけてプレイヤーを落下させ、足場に着地したら跳ねる仕組みを作ります"},
+      {"@type": "HowToStep", "name": "カメラスクロールと足場の動的生成", "text": "プレイヤーの上昇に合わせてカメラを追従させ、新しい足場を生成します"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>スライムジャンパーの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/slime-jump" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>スライムジャンパーは、かわいいスライムが足場を跳びながらどこまでも上を目指すジャンプゲームです。このチュートリアルでは、JavaScriptとCanvasを使ってジャンプゲームを作る方法を学びましょう。重力の物理シミュレーション、足場との衝突判定、カメラのスクロール処理など、プラットフォーマーゲームの基本が身につきます。</p>
+      <ul class="concept-list">
+        <li>重力加速度を使ったジャンプの物理シミュレーション</li>
+        <li>足場との衝突判定とバウンスのしくみ</li>
+        <li>プレイヤーに追従するカメラスクロールの実装</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>プレイヤーと足場のデータ構造を準備しよう</h2>
+      <p>まず、スライム（プレイヤー）と足場の基本的なデータ構造を定義しましょう。プレイヤーはX/Y座標と速度を持ち、足場にはタイプ（通常・動く・壊れる・バネ）があります。</p>
+      <pre class="code-block"><code>var GRAVITY = 0.35;
+var JUMP_FORCE = -9.5;
+var SPRING_FORCE = -14;
+var MOVE_SPEED = 5;
+
+var PLAT_NORMAL = 0;
+var PLAT_MOVING = 1;
+var PLAT_BREAK = 2;
+var PLAT_SPRING = 3;
+
+function createPlayer() {
+  return {
+    x: W / 2 - SLIME_WIDTH / 2,
+    y: H - 50 - SLIME_HEIGHT,
+    w: SLIME_WIDTH, h: SLIME_HEIGHT,
+    vy: JUMP_FORCE,
+    vx: 0,
+    squash: 0
+  };
+}
+
+function createPlatform(x, y, type) {
+  return {
+    x: x, y: y,
+    w: W * PLATFORM_WIDTH_RATIO,
+    h: PLATFORM_HEIGHT,
+    type: type || PLAT_NORMAL,
+    broken: false,
+    moveDir: (Math.random() &lt; 0.5 ? 1 : -1),
+    moveSpeed: 1 + Math.random() * 1.5
+  };
+}</code></pre>
+      <p><code>GRAVITY</code>は毎フレーム速度に加算される加速度です。<code>JUMP_FORCE</code>がマイナスなのは、画面上方向がマイナスだからです。足場には4種類あり、<code>PLAT_BREAK</code>は乗ると壊れ、<code>PLAT_SPRING</code>は通常より高くジャンプできます。<code>squash</code>はスライムの潰れ具合で、着地したときのバウンス演出に使います。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>重力とプラットフォーム判定を作ろう</h2>
+      <h3>落下中だけ衝突判定を行う</h3>
+      <p>重力シミュレーションの基本は「毎フレーム速度に重力を加え、速度を位置に加える」ことです。足場との衝突判定は、上昇中は通り抜けて落下中にだけ判定するのがポイントです。</p>
+      <pre class="code-block"><code>// 重力
+player.vy += GRAVITY;
+player.y += player.vy;
+
+// 足場との衝突判定（落下中のみ）
+if (player.vy &gt; 0) {
+  for (var i = 0; i &lt; platforms.length; i++) {
+    var p = platforms[i];
+    if (p.broken) continue;
+
+    var py = player.y + player.h;
+    var prevPy = py - player.vy;
+
+    if (player.x + player.w &gt; p.x &amp;&amp;
+        player.x &lt; p.x + p.w &amp;&amp;
+        py &gt;= p.y &amp;&amp; prevPy &lt;= p.y + p.h) {
+
+      if (p.type === PLAT_BREAK) {
+        p.broken = true;
+        spawnParticles(p.x + p.w / 2, p.y, '#E67E22', 8);
+        continue;
+      }
+
+      player.y = p.y - player.h;
+      if (p.type === PLAT_SPRING) {
+        player.vy = SPRING_FORCE;
+        player.squash = 0.8;
+      } else {
+        player.vy = JUMP_FORCE;
+        player.squash = 0.5;
+      }
+    }
+  }
+}</code></pre>
+      <p><code>prevPy</code>（前フレームの足元位置）と<code>py</code>（現フレームの足元位置）を比較することで、足場を「通過した瞬間」を検出しています。こうすることで、高速で落下しても足場をすり抜けません。壊れる足場は<code>broken = true</code>にしてスキップし、バネ足場はより大きな力で跳ねます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>カメラスクロールと足場の動的生成を実装しよう</h2>
+      <p>プレイヤーが上に進むと、カメラも追従して画面をスクロールさせる必要があります。さらに、画面上部に新しい足場を生成し、画面下部に消えた足場を削除して、無限に上を目指せるようにしましょう。</p>
+      <pre class="code-block"><code>// カメラ追従
+var targetY = player.y - H * 0.35;
+if (targetY &lt; cameraY) {
+  cameraY += (targetY - cameraY) * 0.1;
+}
+
+// スコア更新（高さに基づく）
+var currentHeight = Math.floor((H - 50 - player.y) / 10);
+if (currentHeight &gt; score) {
+  score = currentHeight;
+}
+
+// 新しい足場を上に生成
+var topY = cameraY - 100;
+while (highestPlatY &gt; topY) {
+  var nx = Math.random() * (W - pw);
+  var ny = highestPlatY - spacing * (0.7 + Math.random() * 0.6);
+  var type = PLAT_NORMAL;
+  var difficulty = Math.min(score / 200, 1);
+  var r = Math.random();
+  if (r &lt; 0.12 + difficulty * 0.08) type = PLAT_MOVING;
+  else if (r &lt; 0.20 + difficulty * 0.12) type = PLAT_BREAK;
+  platforms.push(createPlatform(nx, ny, type));
+  highestPlatY = ny;
+}
+
+// ゲームオーバー判定
+if (player.y - cameraY &gt; H + 50) {
+  gameOver();
+}</code></pre>
+      <p>カメラは<code>cameraY += (targetY - cameraY) * 0.1</code>で滑らかに追従します。0.1の値を変えるとカメラの追従速度が変わります。スコアが上がるほど壊れる足場や動く足場の出現率が上がり、難易度が自然に上昇します。プレイヤーが画面下に落ちるとゲームオーバーです。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、重力シミュレーション、プラットフォーム衝突判定、カメラスクロールの3つを学びました。ここからさらに発展させるなら、敵キャラの追加、アイテム（ジェットパックやバリア）の実装、ジャイロセンサーでのスマホ操作対応に挑戦してみましょう。スライムの表情をつけるのも楽しいですよ。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../flappy/tutorial/">フラッピーバードの作り方</a></li>
+        <li><a href="../../catching/tutorial/">キャッチゲームの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

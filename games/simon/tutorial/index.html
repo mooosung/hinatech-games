@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サイモンゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="サイモンゲームをJavaScriptで作る方法をステップごとにやさしく解説。シーケンス記憶や配列比較の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="サイモンゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="サイモンゲームをJavaScriptで作る方法をステップごとにやさしく解説。シーケンス記憶や視覚フィードバックが学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/simon/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "サイモンゲームの作り方",
+    "description": "JavaScriptでサイモンゲームを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとボタンの準備", "text": "4色のボタンをHTMLで作り、ゲームの状態変数を定義します"},
+      {"@type": "HowToStep", "name": "シーケンスの再生と視覚フィードバック", "text": "色のシーケンスを記録し、setIntervalで順番にボタンを光らせます"},
+      {"@type": "HowToStep", "name": "プレイヤー入力の判定", "text": "配列の比較でプレイヤーの入力が正しいかチェックする仕組みを作ります"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>サイモンゲームの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/simon" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>サイモンゲームは、コンピュータが示す色の順番を記憶して、同じ順番でボタンを押していく記憶力ゲームです。このチュートリアルでは、JavaScriptでサイモンゲームを作る方法を学びましょう。配列でシーケンスを管理する方法、タイマーを使った視覚フィードバック、プレイヤーの入力を配列で比較する技術が身につきます。</p>
+      <ul class="concept-list">
+        <li>配列を使ったシーケンス（色の順番）の記憶管理</li>
+        <li>配列の要素比較によるプレイヤー入力の判定</li>
+        <li>CSSクラスの切り替えによる視覚フィードバック</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ゲームの状態とボタンを準備しよう</h2>
+      <p>サイモンゲームの核心は「色のシーケンス（配列）」です。ラウンドごとにランダムな色を1つ追加していき、プレイヤーが正しい順番で再現できるかを判定します。まず、必要な状態変数とボタンの参照を用意しましょう。</p>
+      <pre class="code-block"><code>var COLORS = ['green', 'red', 'yellow', 'blue'];
+
+var FLASH_DURATION = 400;   // ボタンが光る時間
+var FLASH_GAP = 150;        // ボタン間の間隔
+var PLAYER_FLASH = 200;     // プレイヤータップ時の光る時間
+
+var sequence = [];           // コンピュータの色シーケンス
+var playerIndex = 0;         // プレイヤーが現在入力中の位置
+var isShowingSequence = false;
+var isPlayerTurn = false;
+
+// ボタンのDOM要素を取得
+var simonBtns = {};
+COLORS.forEach(function (color) {
+  simonBtns[color] = document.getElementById('btn-' + color);
+});</code></pre>
+      <p><code>sequence</code>配列がゲームの心臓部です。例えば<code>['green', 'red', 'blue']</code>なら、緑→赤→青の順番で光り、プレイヤーも同じ順番で押す必要があります。<code>playerIndex</code>でプレイヤーがシーケンスのどこまで入力したかを追跡します。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>シーケンスの再生を作ろう</h2>
+      <h3>タイマーで順番にボタンを光らせる</h3>
+      <p>シーケンスを再生するには、<code>setInterval</code>を使って一定間隔でボタンを光らせます。CSSの<code>active</code>クラスを一時的に追加して、一定時間後に外すことで「光って消える」演出を実現しましょう。</p>
+      <pre class="code-block"><code>function flashButton(color, duration) {
+  var btn = simonBtns[color];
+  btn.classList.add('active');
+  setTimeout(function () {
+    btn.classList.remove('active');
+  }, duration);
+}
+
+function playSequence() {
+  isShowingSequence = true;
+  isPlayerTurn = false;
+  disableButtons();
+
+  var i = 0;
+  var intervalId = setInterval(function () {
+    if (i &gt;= sequence.length) {
+      clearInterval(intervalId);
+      setTimeout(function () {
+        startPlayerTurn();
+      }, FLASH_GAP + 200);
+      return;
+    }
+    flashButton(sequence[i], FLASH_DURATION);
+    i++;
+  }, FLASH_DURATION + FLASH_GAP);
+}</code></pre>
+      <p><code>flashButton</code>はCSSクラスを追加→一定時間後に削除するシンプルな関数です。<code>playSequence</code>では<code>setInterval</code>で0.55秒（400+150ms）ごとに次の色を光らせます。全部光り終わったら<code>clearInterval</code>で止めて、プレイヤーの番に切り替えます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>プレイヤーの入力判定を実装しよう</h2>
+      <p>プレイヤーがボタンを押したとき、シーケンスの該当位置の色と一致するかをチェックします。全部正解ならスコアを更新して次のラウンドへ。間違えたらゲームオーバーです。</p>
+      <pre class="code-block"><code>function handlePlayerInput(color) {
+  if (!isPlayerTurn || isShowingSequence) return;
+
+  flashButton(color, PLAYER_FLASH);
+  var expected = sequence[playerIndex];
+
+  if (color === expected) {
+    playerIndex++;
+
+    if (playerIndex &gt;= sequence.length) {
+      // シーケンス全て正解！次のラウンドへ
+      isPlayerTurn = false;
+      disableButtons();
+      score = sequence.length;
+      setTimeout(function () {
+        nextRound();
+      }, 600);
+    }
+  } else {
+    // 間違い → ゲームオーバー
+    handleGameOver();
+  }
+}
+
+function nextRound() {
+  var randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+  sequence.push(randomColor);
+  playSequence();
+}</code></pre>
+      <p>判定のポイントは<code>sequence[playerIndex]</code>と入力された<code>color</code>の比較です。配列のインデックスを使うことで「何番目の入力か」を正確に追跡できます。<code>nextRound</code>ではランダムな色を1つ追加してシーケンスを伸ばしていくので、ラウンドが進むほど記憶が難しくなります。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、配列でシーケンスを管理する方法、タイマーによる視覚フィードバック、入力と配列の比較判定の3つを学びました。発展として、Web Audio APIでボタンごとに異なる音を鳴らしたり、難易度設定（光る速度を変える）を追加したり、色覚に配慮した記号付きボタンを実装してみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../memory/tutorial/">神経衰弱の作り方</a></li>
+        <li><a href="../../rhythm/tutorial/">リズムゲームの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

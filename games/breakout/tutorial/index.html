@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ブロック崩しの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="ブロック崩しをJavaScriptで作る方法をステップごとにやさしく解説。ボール物理や反射角計算の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="ブロック崩しの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="ブロック崩しをJavaScriptで作る方法をステップごとにやさしく解説。ボール物理や反射角計算が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/breakout/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "ブロック崩しの作り方",
+    "description": "JavaScriptでブロック崩しを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "Canvas要素を配置し、ボール・パドル・ブロックの描画準備をします。"},
+      {"@type": "HowToStep", "name": "ボールの物理と反射を実装する", "text": "ボールの移動と壁・パドルでの反射処理を作ります。"},
+      {"@type": "HowToStep", "name": "ブロックの当たり判定を実装する", "text": "ブロックとボールの衝突判定と破壊処理を実装します。"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>ブロック崩しの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/breakout" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>ブロック崩しは、パドルでボールを打ち返してブロックを壊すゲームです。このゲームを作ることで、ボールの物理演算、反射角の計算、矩形同士の当たり判定といったゲーム開発の重要なスキルが身につきます。</p>
+      <ul class="concept-list">
+        <li>ボールの移動と壁での反射処理</li>
+        <li>パドルの当たった位置で反射角を変える計算</li>
+        <li>ブロックとボールの衝突判定</li>
+        <li>ライフ制とレベルアップの仕組み</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ1: ブロックを並べて描画しよう</h2>
+      <p>まずはブロックを2次元配列で管理して画面に描画しましょう。行と列のループで位置を計算し、色分けした矩形を描きます。</p>
+      <pre class="code-block"><code>var BRICK_ROWS = 6;
+var BRICK_COLS = 8;
+var BRICK_COLORS = [
+  '#E74C3C', '#E67E22', '#F1C40F',
+  '#2ECC71', '#3498DB', '#9B59B6'
+];
+
+function createBricks() {
+  bricks = [];
+  for (var row = 0; row &lt; BRICK_ROWS; row++) {
+    bricks[row] = [];
+    for (var col = 0; col &lt; BRICK_COLS; col++) {
+      bricks[row][col] = {
+        x: BRICK_PADDING + col * (brickWidth + BRICK_PADDING),
+        y: BRICK_TOP_OFFSET + row * (brickHeight + BRICK_PADDING),
+        width: brickWidth,
+        height: brickHeight,
+        alive: true,
+        color: BRICK_COLORS[row % BRICK_COLORS.length]
+      };
+    }
+  }
+}</code></pre>
+      <p>各ブロックは位置(x, y)、サイズ(width, height)、生存状態(alive)、色(color)を持っています。<code>alive</code>がfalseになったブロックは描画をスキップします。</p>
+      <h3>パドルとボールの描画</h3>
+      <pre class="code-block"><code>function drawPaddle() {
+  ctx.fillStyle = '#8F7A66';
+  ctx.beginPath();
+  roundRect(ctx, paddleX, paddleY, paddleWidth, paddleHeight, 4);
+  ctx.fill();
+}
+
+function drawBall() {
+  ctx.fillStyle = '#F9F6F2';
+  ctx.beginPath();
+  ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+  ctx.fill();
+}</code></pre>
+      <p>パドルは角丸の矩形、ボールは<code>arc</code>で円を描きます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ2: ボールの物理と反射を作ろう</h2>
+      <p>ボールは毎フレーム一定の速度で移動します。壁に当たったら跳ね返り、パドルに当たった位置によって反射角が変わるようにしましょう。</p>
+      <pre class="code-block"><code>function updateBall() {
+  ballX += ballDX;
+  ballY += ballDY;
+
+  // 左右の壁との衝突
+  if (ballX - ballRadius &lt;= 0) {
+    ballX = ballRadius;
+    ballDX = Math.abs(ballDX);
+  }
+  if (ballX + ballRadius &gt;= canvasWidth) {
+    ballX = canvasWidth - ballRadius;
+    ballDX = -Math.abs(ballDX);
+  }
+
+  // 上の壁との衝突
+  if (ballY - ballRadius &lt;= 0) {
+    ballY = ballRadius;
+    ballDY = Math.abs(ballDY);
+  }
+
+  // 下に落ちた場合 → ライフ減少
+  if (ballY - ballRadius &gt; canvasHeight) {
+    loseLife();
+  }
+}</code></pre>
+      <p><code>ballDX</code>と<code>ballDY</code>がボールの速度です。壁に当たったら速度の符号を反転させることで跳ね返りを表現します。</p>
+      <h3>パドルの反射角</h3>
+      <p>パドルのどこに当たったかで反射角を変えると、戦略性が生まれます。</p>
+      <pre class="code-block"><code>// パドルの当たった位置に応じて反射角を変える
+var hitPos = (ballX - paddleX) / paddleWidth; // 0.0〜1.0
+hitPos = Math.max(0, Math.min(1, hitPos));
+
+// 角度: 左端で150度、中央で90度、右端で30度
+var angle = (150 - hitPos * 120) * Math.PI / 180;
+ballDX = ballSpeed * Math.cos(angle);
+ballDY = -ballSpeed * Math.sin(angle);</code></pre>
+      <p>パドルの左端に当たると左方向に、右端なら右方向に飛んでいきます。中央なら真上に返ります。これがブロック崩しの面白さの源です。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ3: ブロックの当たり判定を実装しよう</h2>
+      <p>ボールがブロックに当たったら、ブロックを壊してスコアを加算します。反射方向は、どの辺に当たったかで決まります。</p>
+      <pre class="code-block"><code>function checkBrickCollision() {
+  for (var row = 0; row &lt; BRICK_ROWS; row++) {
+    for (var col = 0; col &lt; BRICK_COLS; col++) {
+      var brick = bricks[row][col];
+      if (!brick.alive) continue;
+
+      if (ballX + ballRadius &gt; brick.x &amp;&amp;
+          ballX - ballRadius &lt; brick.x + brick.width &amp;&amp;
+          ballY + ballRadius &gt; brick.y &amp;&amp;
+          ballY - ballRadius &lt; brick.y + brick.height) {
+
+        brick.alive = false;
+        score += 10;
+
+        // 反射方向の判定
+        var overlapLeft = (ballX + ballRadius) - brick.x;
+        var overlapRight = (brick.x + brick.width) - (ballX - ballRadius);
+        var overlapTop = (ballY + ballRadius) - brick.y;
+        var overlapBottom = (brick.y + brick.height) - (ballY - ballRadius);
+
+        var minOverlapX = Math.min(overlapLeft, overlapRight);
+        var minOverlapY = Math.min(overlapTop, overlapBottom);
+
+        if (minOverlapX &lt; minOverlapY) {
+          ballDX = -ballDX;
+        } else {
+          ballDY = -ballDY;
+        }
+        return;
+      }
+    }
+  }
+}</code></pre>
+      <p>矩形の当たり判定は「4辺すべてが重なっているか」をチェックします。反射方向は、X方向とY方向のめり込み量を比較して、浅い方の軸で反転させます。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>おつかれさまでした！ブロック崩しの基本が完成しました。ボールの物理、反射角の計算、ブロックの当たり判定という3つのテクニックを学びましたね。発展として、パワーアップアイテム（ボールが大きくなる、パドルが伸びるなど）を追加したり、壊れにくい特殊ブロックを作ったりしてみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../pong/tutorial/">ポンゲームの作り方</a></li>
+        <li><a href="../../shooting/tutorial/">シューティングの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

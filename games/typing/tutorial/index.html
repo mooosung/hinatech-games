@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>タイピングゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="タイピングゲームをJavaScriptで作る方法をステップごとにやさしく解説。キーイベントや文字列比較の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="タイピングゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="タイピングゲームをJavaScriptで作る方法をステップごとにやさしく解説。キーイベントや文字列比較が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/typing/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "タイピングゲームの作り方",
+    "description": "JavaScriptでタイピングゲームを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "入力フィールドとワード表示のHTML構造を作ります"},
+      {"@type": "HowToStep", "name": "キーイベントと文字列比較", "text": "入力イベントで文字を1文字ずつ比較する仕組みを作ります"},
+      {"@type": "HowToStep", "name": "WPM計算とスコア", "text": "タイピング速度と正確さを計算して表示します"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>タイピングゲームの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/typing" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>タイピングゲームは、表示される単語をすばやく正確にタイプするゲームです。キーボードの入力イベントの扱い方、文字列を1文字ずつ比較する方法、タイピング速度（WPM）の計算など、テキスト処理の基本をしっかり学べます。制限時間内にどれだけタイプできるかを競う楽しいゲームを作りましょう。</p>
+      <ul class="concept-list">
+        <li>キーイベント（入力フィールドのinputイベント処理）</li>
+        <li>文字列比較（1文字ずつの一致チェックとハイライト）</li>
+        <li>WPM計算（タイピング速度と正確さの計測）</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>HTMLとCanvasの準備をしよう</h2>
+      <p>タイピングゲームでは、画面に表示するお題の単語と、ユーザーが入力するためのテキストフィールドが必要です。難易度別にワードリストを用意し、シャッフルして出題しましょう。</p>
+      <pre class="code-block"><code>var WORDS = {
+  easy: [
+    'cat', 'dog', 'sun', 'run', 'code', 'html', 'css', 'web',
+    'app', 'fun', 'box', 'map', 'key', 'log', 'red', 'blue'
+  ],
+  normal: [
+    'function', 'variable', 'array', 'loop', 'string',
+    'javascript', 'python', 'object', 'class', 'method'
+  ],
+  hard: [
+    'hello world', 'for loop', 'if else', 'game over',
+    'source code', 'dark mode', 'code review', 'pull request'
+  ]
+};
+
+var GAME_DURATION = 60; // 制限時間（秒）
+
+// 配列をシャッフル（Fisher-Yates）
+function shuffleArray(arr) {
+  var shuffled = arr.slice();
+  for (var i = shuffled.length - 1; i &gt; 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = shuffled[i];
+    shuffled[i] = shuffled[j];
+    shuffled[j] = temp;
+  }
+  return shuffled;
+}</code></pre>
+      <p>難易度ごとに単語の長さや難しさを変えています。Fisher-Yatesシャッフルで出題順をランダムにすることで、毎回違う体験になります。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>キーイベントと文字列比較を作ろう</h2>
+      <h3>入力を1文字ずつチェックする</h3>
+      <p>ユーザーが文字を入力するたびに、お題の文字列と1文字ずつ比較して、正しい・間違い・まだ入力していないの3状態でハイライト表示します。これがタイピングゲームの核心部分です。</p>
+      <pre class="code-block"><code>function updateWordDisplay(inputText) {
+  var html = '';
+  for (var i = 0; i &lt; currentWord.length; i++) {
+    var char = currentWord[i];
+    var displayChar = char === ' ' ? '&amp;nbsp;' : escapeHtml(char);
+
+    if (i &lt; inputText.length) {
+      if (inputText[i] === char) {
+        html += '&lt;span class="char-correct"&gt;' + displayChar + '&lt;/span&gt;';
+      } else {
+        html += '&lt;span class="char-wrong"&gt;' + displayChar + '&lt;/span&gt;';
+      }
+    } else if (i === inputText.length) {
+      html += '&lt;span class="char-cursor char-remaining"&gt;' + displayChar + '&lt;/span&gt;';
+    } else {
+      html += '&lt;span class="char-remaining"&gt;' + displayChar + '&lt;/span&gt;';
+    }
+  }
+  wordDisplay.innerHTML = html;
+}</code></pre>
+      <p>入力済みの部分は<code>char-correct</code>（緑）か<code>char-wrong</code>（赤）のクラスをつけ、現在のカーソル位置には<code>char-cursor</code>クラスをつけます。CSSでスタイルを変えるだけで、わかりやすいハイライト表示になります。</p>
+
+      <h3>入力イベントの処理</h3>
+      <pre class="code-block"><code>typingInput.addEventListener('input', function () {
+  if (!isPlaying) return;
+  var inputText = typingInput.value;
+
+  // 入力文字のカウント
+  if (inputText.length &gt; 0) {
+    totalCharsTyped++;
+    var lastIndex = inputText.length - 1;
+    if (lastIndex &lt; currentWord.length &amp;&amp;
+        inputText[lastIndex] === currentWord[lastIndex]) {
+      correctCharsTyped++;
+    }
+  }
+
+  updateWordDisplay(inputText);
+
+  // ワード完了判定
+  if (inputText === currentWord) {
+    wordsCompleted++;
+    setNewWord(); // 次のワードへ
+  }
+});</code></pre>
+      <p><code>input</code>イベントは文字が入力されるたびに発生します。入力内容がお題の単語と完全一致したら、次の単語に進みます。<code>totalCharsTyped</code>と<code>correctCharsTyped</code>を記録して、後で正確さを計算します。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>WPM計算とスコアを実装しよう</h2>
+      <p>タイピングの速さはWPM（Words Per Minute＝1分あたりの単語数）で測ります。正確さ（Accuracy）と合わせて、プレイヤーのタイピング力をスコアとして表示しましょう。</p>
+      <pre class="code-block"><code>// WPMの計算
+function calculateWPM() {
+  var elapsedSeconds = GAME_DURATION - timeRemaining;
+  if (elapsedSeconds === 0) return 0;
+  var elapsedMinutes = elapsedSeconds / 60;
+  return Math.round((correctCharsTyped / 5) / elapsedMinutes);
+}
+
+// 正確さの計算
+function calculateAccuracy() {
+  if (totalCharsTyped === 0) return 100;
+  return Math.round((correctCharsTyped / totalCharsTyped) * 100);
+}
+
+// スコア計算（難易度ボーナス付き）
+function calculateScore() {
+  var difficultyMultiplier = { easy: 1, normal: 2, hard: 3 };
+  return wordsCompleted * 10 * difficultyMultiplier[difficulty];
+}</code></pre>
+      <p>WPMは「正しく入力した文字数 / 5 / 経過分数」という標準的な計算式を使います。英語では平均的な1単語が5文字なので、5で割って単語数に換算します。難しいモードほどスコアの倍率が高くなる仕組みです。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、入力イベントの扱い方、文字列の1文字比較、WPMと正確さの計算方法を学びました。さらに発展させるなら、日本語（ローマ字入力）対応、タイピング音の追加、リアルタイムのWPMグラフ表示、オンラインランキング、練習モード（時間制限なし）などを追加してみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../word-search/tutorial/">単語探しの作り方</a></li>
+        <li><a href="../../rhythm/tutorial/">リズムゲームの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

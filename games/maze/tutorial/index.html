@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>迷路ゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="迷路ゲームをJavaScriptで作る方法をステップごとにやさしく解説。迷路生成アルゴリズムや再帰、グリッド操作の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="迷路ゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="迷路ゲームをJavaScriptで作る方法をステップごとにやさしく解説。迷路生成アルゴリズムや再帰、グリッド操作が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/maze/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "迷路ゲームの作り方",
+    "description": "JavaScriptで迷路ゲームを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "グリッドの初期化と迷路生成", "text": "2次元配列で壁と通路を管理し、再帰バックトラッキングで迷路を自動生成します。"},
+      {"@type": "HowToStep", "name": "DOMで迷路を描画する", "text": "CSSグリッドを使って迷路のセルを画面に描画します。"},
+      {"@type": "HowToStep", "name": "プレイヤー移動とゴール判定", "text": "キーボードとスワイプでプレイヤーを移動させ、ゴール到達を判定します。"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>迷路ゲームの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/maze" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>迷路ゲームは、自動生成された迷路の中をスタートからゴールまで進むゲームです。このゲームの最大のポイントは、プログラムで迷路を自動生成するアルゴリズムです。「再帰バックトラッキング」という手法を使って、毎回違う迷路を作り出します。アルゴリズムの基本やグリッド操作のスキルが身につく、とても学びの多いゲームです。</p>
+      <ul class="concept-list">
+        <li>再帰バックトラッキングによる迷路自動生成</li>
+        <li>2次元配列とグリッド座標の操作</li>
+        <li>CSSグリッドを使ったDOM描画</li>
+        <li>キーボードとスワイプによるプレイヤー移動</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ1: 迷路を自動生成しよう</h2>
+      <p>迷路は「壁」と「通路」の2種類のセルで構成されます。最初は全て壁で埋めてから、通路を掘り進めていきます。スタックを使った実装で、行き止まりになったら前の分岐点に戻って別の道を掘ります。これが「再帰バックトラッキング」です。</p>
+      <pre class="code-block"><code>var MAZE_SIZE = 15;
+var GRID_SIZE = MAZE_SIZE * 2 + 1; // 壁含む: 31x31
+var WALL = 0;
+var PATH = 1;
+
+var DIRS = [
+  { dx:  0, dy: -1 },  // 上
+  { dx:  0, dy:  1 },  // 下
+  { dx: -1, dy:  0 },  // 左
+  { dx:  1, dy:  0 }   // 右
+];
+
+function generateMaze() {
+  // グリッドをすべて壁で初期化
+  grid = [];
+  for (var y = 0; y &lt; GRID_SIZE; y++) {
+    grid[y] = [];
+    for (var x = 0; x &lt; GRID_SIZE; x++) {
+      grid[y][x] = WALL;
+    }
+  }
+
+  // スタックベースの再帰バックトラッキング
+  var stack = [];
+  mazeVisited[0][0] = true;
+  grid[1][1] = PATH;
+  stack.push({ cx: 0, cy: 0 });</code></pre>
+      <p>15x15の論理サイズに対して、壁を挟むため実際のグリッドは31x31になります。論理座標(cx, cy)からグリッド座標への変換は <code>cx * 2 + 1</code> です。間の偶数座標が壁になる仕組みです。</p>
+      <h3>バックトラッキングの核心部分</h3>
+      <pre class="code-block"><code>  while (stack.length &gt; 0) {
+    var current = stack[stack.length - 1];
+    var cx = current.cx;
+    var cy = current.cy;
+
+    // 未訪問の隣接セルを取得
+    var neighbors = [];
+    for (var d = 0; d &lt; DIRS.length; d++) {
+      var nx = cx + DIRS[d].dx;
+      var ny = cy + DIRS[d].dy;
+      if (nx &gt;= 0 &amp;&amp; nx &lt; MAZE_SIZE &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; MAZE_SIZE
+          &amp;&amp; !mazeVisited[ny][nx]) {
+        neighbors.push({ nx: nx, ny: ny, dx: DIRS[d].dx, dy: DIRS[d].dy });
+      }
+    }
+
+    if (neighbors.length === 0) {
+      stack.pop(); // 行き止まり: バックトラック
+    } else {
+      var chosen = neighbors[Math.floor(Math.random() * neighbors.length)];
+
+      // 壁を壊す（現在セルと選択セルの間の壁）
+      var wallGX = cx * 2 + 1 + chosen.dx;
+      var wallGY = cy * 2 + 1 + chosen.dy;
+      grid[wallGY][wallGX] = PATH;
+
+      // 選択セルを通路にする
+      grid[chosen.ny * 2 + 1][chosen.nx * 2 + 1] = PATH;
+
+      mazeVisited[chosen.ny][chosen.nx] = true;
+      stack.push({ cx: chosen.nx, cy: chosen.ny });
+    }
+  }
+}</code></pre>
+      <p>ランダムに隣接セルを選ぶことで、毎回違う迷路が生成されます。行き止まりに達したらスタックからポップして前の分岐点に戻り（バックトラック）、別の道を探します。壁を壊す際には、現在セルと次のセルの中間にある壁をPATHに変えています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ2: 迷路をDOMで描画しよう</h2>
+      <p>生成した迷路データをCSSグリッドを使って画面に表示します。31x31のセルをdiv要素で作り、壁・通路・プレイヤー・ゴールそれぞれにCSSクラスを付けて色分けします。</p>
+      <pre class="code-block"><code>function createBoard() {
+  board.innerHTML = '';
+  board.style.gridTemplateColumns = 'repeat(' + GRID_SIZE + ', 1fr)';
+  board.style.gridTemplateRows = 'repeat(' + GRID_SIZE + ', 1fr)';
+  cells = [];
+
+  for (var y = 0; y &lt; GRID_SIZE; y++) {
+    cells[y] = [];
+    for (var x = 0; x &lt; GRID_SIZE; x++) {
+      var cell = document.createElement('div');
+      cell.className = 'maze-cell';
+      board.appendChild(cell);
+      cells[y][x] = cell;
+    }
+  }
+}
+
+function render() {
+  for (var y = 0; y &lt; GRID_SIZE; y++) {
+    for (var x = 0; x &lt; GRID_SIZE; x++) {
+      var cell = cells[y][x];
+
+      if (x === playerX &amp;&amp; y === playerY) {
+        cell.className = 'maze-cell player';
+      } else if (x === goalX &amp;&amp; y === goalY) {
+        cell.className = 'maze-cell goal';
+      } else if (grid[y][x] === WALL) {
+        cell.className = 'maze-cell wall';
+      } else if (visited[x + ',' + y]) {
+        cell.className = 'maze-cell visited';
+      } else {
+        cell.className = 'maze-cell path';
+      }
+    }
+  }
+}</code></pre>
+      <p><code>gridTemplateColumns</code>と<code>gridTemplateRows</code>で31列31行のグリッドを定義しています。CSSクラスを切り替えるだけで壁は暗い色、通路は明るい色、プレイヤーは目立つ色で表示できます。<code>visited</code>で通った道を色分けする演出も効果的です。<code>cells</code>配列にDOM要素を保持しておくと、毎回DOMを検索する必要がなくなり高速です。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ3: プレイヤー移動とゴール判定を作ろう</h2>
+      <p>プレイヤーはキーボードの矢印キーやWASDキーで上下左右に移動します。壁にはぶつかって進めないようにし、ゴールに到達したらクリアです。スワイプにも対応しましょう。</p>
+      <pre class="code-block"><code>var DIR = {
+  UP:    { x:  0, y: -1 },
+  DOWN:  { x:  0, y:  1 },
+  LEFT:  { x: -1, y:  0 },
+  RIGHT: { x:  1, y:  0 }
+};
+
+function movePlayer(dir) {
+  if (!gameRunning || gameCleared) return;
+
+  var newX = playerX + dir.x;
+  var newY = playerY + dir.y;
+
+  // 範囲チェック
+  if (newX &lt; 0 || newX &gt;= GRID_SIZE || newY &lt; 0 || newY &gt;= GRID_SIZE) return;
+
+  // 壁チェック
+  if (grid[newY][newX] === WALL) return;
+
+  // 現在位置を訪問済みに
+  visited[playerX + ',' + playerY] = true;
+
+  // プレイヤーを移動
+  playerX = newX;
+  playerY = newY;
+
+  // 描画更新
+  render();
+
+  // ゴール判定
+  if (playerX === goalX &amp;&amp; playerY === goalY) {
+    gameClear();
+  }
+}</code></pre>
+      <p>移動先が壁（<code>WALL</code>）でないことを確認してからプレイヤーの座標を更新します。移動前の位置を<code>visited</code>に記録することで、通った道が色付きで表示されます。ゴール座標は迷路の右下角（GRID_SIZE - 2, GRID_SIZE - 2）に固定しています。</p>
+      <h3>スワイプ操作（モバイル対応）</h3>
+      <pre class="code-block"><code>boardWrapper.addEventListener('touchend', function (e) {
+  if (e.changedTouches.length === 0) return;
+
+  var dx = e.changedTouches[0].clientX - touchStartX;
+  var dy = e.changedTouches[0].clientY - touchStartY;
+  var dt = Date.now() - touchStartTime;
+
+  var minDist = 20;
+  var maxTime = 400;
+
+  if (dt &gt; maxTime) return;
+  if (Math.abs(dx) &lt; minDist &amp;&amp; Math.abs(dy) &lt; minDist) return;
+
+  var dir;
+  if (Math.abs(dx) &gt; Math.abs(dy)) {
+    dir = dx &gt; 0 ? DIR.RIGHT : DIR.LEFT;
+  } else {
+    dir = dy &gt; 0 ? DIR.DOWN : DIR.UP;
+  }
+
+  movePlayer(dir);
+});</code></pre>
+      <p>タッチの開始位置と終了位置の差分、およびスワイプにかかった時間から方向を判定しています。<code>minDist</code>で誤タッチを、<code>maxTime</code>で長押しを除外し、X方向とY方向の移動量を比較して大きい方の軸で方向を決めます。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>おつかれさまでした！迷路ゲームの基本が完成しました。再帰バックトラッキングによる迷路自動生成、CSSグリッドでの描画、プレイヤー移動とゴール判定を学びました。発展として、迷路のサイズを変えられるようにしたり、最短ルートを表示するヒント機能を追加したり、別の生成アルゴリズム（壁伸ばし法など）を試してみましょう。タイムアタックのランキング機能も面白いですよ。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../sokoban/tutorial/">倉庫番の作り方</a></li>
+        <li><a href="../../minesweeper/tutorial/">マインスイーパーの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

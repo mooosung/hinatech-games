@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お絵かきクイズの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="お絵かきクイズをJavaScriptで作る方法をステップごとにやさしく解説。Canvas描画APIやイベント処理、フェーズ管理の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="お絵かきクイズの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="お絵かきクイズをJavaScriptで作る方法をステップごとにやさしく解説。Canvas描画APIやイベント処理、フェーズ管理が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/drawing-quiz/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "お絵かきクイズの作り方",
+    "description": "JavaScriptでお絵かきクイズを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "Canvasで自由に線を描く", "text": "マウスやタッチのイベントを使ってCanvas上にお絵かきできるようにします。"},
+      {"@type": "HowToStep", "name": "お題と選択肢を管理する", "text": "お題をランダムに選び、カテゴリに応じた選択肢を生成します。"},
+      {"@type": "HowToStep", "name": "描画フェーズと回答フェーズを切り替える", "text": "描画と回答の2つのフェーズでゲームの進行を管理します。"},
+      {"@type": "HowToStep", "name": "タイマーとスコアを実装する", "text": "制限時間と残り時間ボーナスのスコア計算を実装します。"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>お絵かきクイズの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/drawing-quiz" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>お絵かきクイズは、お題に合わせて絵を描き、描いた絵を見て何を描いたかを4択で当てるゲームです。描画フェーズと回答フェーズの2つのモードを切り替えながら10ラウンド進みます。このゲームを作ることで、Canvas描画APIの使い方、マウス・タッチイベント処理、ゲームのフェーズ管理といった重要なスキルが身につきます。</p>
+      <ul class="concept-list">
+        <li>CanvasのlineTo/strokeを使った自由描画の実装</li>
+        <li>マウスとタッチの両方に対応するイベント処理</li>
+        <li>描画フェーズと回答フェーズの切り替え管理</li>
+        <li>お題のランダム選択と選択肢の生成ロジック</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ1: Canvasで自由に線を描こう</h2>
+      <p>まずはCanvas上でマウスやタッチを使って自由に線を描ける仕組みを作りましょう。描画用に別のキャンバスを用意し、メインキャンバスに転写する方式にすると、描画内容の管理がしやすくなります。</p>
+      <pre class="code-block"><code>var drawing = false;
+var penColor = '#000000';
+var penSize = 4;
+var tool = 'pen'; // 'pen' | 'eraser'
+var lastX = 0, lastY = 0;
+
+function drawLine(x1, y1, x2, y2) {
+  drawCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawCtx.beginPath();
+  drawCtx.moveTo(x1, y1);
+  drawCtx.lineTo(x2, y2);
+  drawCtx.strokeStyle = tool === 'eraser' ? '#ffffff' : penColor;
+  drawCtx.lineWidth = tool === 'eraser' ? penSize * 3 : penSize;
+  drawCtx.lineCap = 'round';
+  drawCtx.lineJoin = 'round';
+  drawCtx.stroke();
+  render();
+}</code></pre>
+      <p><code>drawLine</code>関数で、前の座標(x1, y1)から現在の座標(x2, y2)まで線を引きます。<code>lineCap = 'round'</code>にすると線の端が丸くなり、なめらかな描画になります。消しゴムは白色で太めの線を描くことで実現しています。<code>dpr</code>（デバイスピクセル比）を使って高解像度ディスプレイにも対応しています。</p>
+      <h3>マウスとタッチのイベント処理</h3>
+      <pre class="code-block"><code>function getCanvasPos(e) {
+  var rect = canvas.getBoundingClientRect();
+  var clientX, clientY;
+  if (e.touches) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+  return {
+    x: clientX - rect.left,
+    y: clientY - rect.top
+  };
+}
+
+function onDrawStart(e) {
+  if (!running || phase !== 'draw') return;
+  e.preventDefault();
+  drawing = true;
+  var pos = getCanvasPos(e);
+  lastX = pos.x;
+  lastY = pos.y;
+  drawLine(lastX, lastY, lastX + 0.1, lastY + 0.1);
+}
+
+function onDrawMove(e) {
+  if (!drawing || !running || phase !== 'draw') return;
+  e.preventDefault();
+  var pos = getCanvasPos(e);
+  drawLine(lastX, lastY, pos.x, pos.y);
+  lastX = pos.x;
+  lastY = pos.y;
+}</code></pre>
+      <p><code>getCanvasPos</code>で、マウスでもタッチでも同じ座標形式に変換しています。<code>getBoundingClientRect()</code>でキャンバスの位置を取得し、クリック位置との差分でキャンバス内の座標を計算します。<code>phase !== 'draw'</code>のチェックで、回答フェーズ中に描画できないようにしています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ2: お題と選択肢を管理しよう</h2>
+      <p>お題はカテゴリごとに分類しておき、選択肢は同じカテゴリから優先して作ることで、クイズの難易度を適切に保ちます。使用済みのお題を記録して重複を防ぎましょう。</p>
+      <pre class="code-block"><code>var THEMES = [
+  { word: 'ねこ', category: '動物' },
+  { word: 'いぬ', category: '動物' },
+  { word: 'りんご', category: '食べ物' },
+  { word: 'くるま', category: '乗り物' },
+  { word: 'いえ', category: 'もの' },
+  // ... 50種類以上のお題
+];
+
+function pickTheme() {
+  var available = THEMES.filter(function (t) {
+    return usedThemes.indexOf(t.word) === -1;
+  });
+  if (available.length === 0) {
+    usedThemes = [];
+    available = THEMES.slice();
+  }
+  var idx = Math.floor(Math.random() * available.length);
+  currentTheme = available[idx];
+  usedThemes.push(currentTheme.word);
+}</code></pre>
+      <p><code>usedThemes</code>配列で既に出題したお題を記録し、同じお題が繰り返し出ないようにしています。全て出題し終わったらリセットします。</p>
+      <h3>選択肢の生成</h3>
+      <pre class="code-block"><code>function generateChoices() {
+  choices = [currentTheme.word];
+  // 同カテゴリから優先して偽選択肢を選ぶ
+  var sameCategory = THEMES.filter(function (t) {
+    return t.category === currentTheme.category &amp;&amp; t.word !== currentTheme.word;
+  });
+  var others = THEMES.filter(function (t) {
+    return t.category !== currentTheme.category;
+  });
+
+  shuffle(sameCategory);
+  shuffle(others);
+
+  // 同カテゴリから2つ、別カテゴリから1つ
+  var pool = sameCategory.slice(0, 2).concat(others.slice(0, 1));
+
+  for (var i = 0; i &lt; pool.length &amp;&amp; choices.length &lt; CHOICES_COUNT; i++) {
+    choices.push(pool[i].word);
+  }
+
+  shuffle(choices);
+}</code></pre>
+      <p>正解を含む4択を作ります。同じカテゴリの選択肢を多くすることで、単純に消去法で答えにくくしています。最後に<code>shuffle</code>で並び順をランダムにするのを忘れずに。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ3: フェーズの切り替えでゲームの流れを作ろう</h2>
+      <p>このゲームは「描くフェーズ（draw）」と「答えるフェーズ（answer）」の2つを交互に繰り返します。フェーズを変数で管理し、各フェーズで異なるUIを表示しましょう。</p>
+      <pre class="code-block"><code>var phase = 'draw'; // 'draw' | 'answer'
+var TIME_PER_ROUND = 20;
+var TOTAL_ROUNDS = 10;
+
+function startRound() {
+  phase = 'draw';
+  pickTheme();
+  clearDrawing();
+  render();
+  elThemeText.textContent = '「' + currentTheme.word + '」を描こう！';
+  elAnswerButtons.classList.remove('active');
+  startTimer();
+}
+
+function showAnswerPhase() {
+  phase = 'answer';
+  answered = false;
+  if (timerId) clearInterval(timerId);
+
+  generateChoices();
+  elAnswerButtons.innerHTML = '';
+  for (var i = 0; i &lt; choices.length; i++) {
+    var btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = choices[i];
+    btn.setAttribute('data-word', choices[i]);
+    elAnswerButtons.appendChild(btn);
+  }
+  elAnswerButtons.classList.add('active');
+  elThemeText.textContent = '何を描いた？';
+}</code></pre>
+      <p><code>phase</code>変数で今どのフェーズかを管理し、描画イベントは<code>phase === 'draw'</code>の時だけ有効にします。タイマーが0になるかスペースキーで描画フェーズが終了すると、回答フェーズに移ります。</p>
+      <h3>回答と残り時間ボーナス</h3>
+      <pre class="code-block"><code>function handleAnswer(word, btn) {
+  if (answered) return;
+  answered = true;
+
+  var btns = elAnswerButtons.querySelectorAll('.answer-btn');
+  if (word === currentTheme.word) {
+    btn.classList.add('correct');
+    var bonus = Math.floor(timeLeft * 10);
+    var roundScore = 100 + bonus;
+    score += roundScore;
+    elThemeText.textContent = '正解！ +' + roundScore;
+  } else {
+    btn.classList.add('wrong');
+    // 正解を表示
+    for (var i = 0; i &lt; btns.length; i++) {
+      if (btns[i].getAttribute('data-word') === currentTheme.word) {
+        btns[i].classList.add('correct');
+      }
+    }
+    elThemeText.textContent = '残念… 正解は「' + currentTheme.word + '」';
+  }
+
+  // 1.5秒後に次のラウンドへ
+  setTimeout(function () {
+    elAnswerButtons.classList.remove('active');
+    currentRound++;
+    if (currentRound &gt;= TOTAL_ROUNDS) {
+      gameOver();
+    } else {
+      startRound();
+    }
+  }, 1500);
+}</code></pre>
+      <p>正解すると基本100点に加え、残り時間に応じたボーナスがもらえます。<code>timeLeft * 10</code>なので、10秒残っていれば+100点のボーナスです。素早く特徴を捉えた絵を描くほど高得点になる仕組みです。不正解でも正解ボタンをハイライトして教えてくれるので、次回の参考になります。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>おつかれさまでした！お絵かきクイズの基本が完成しました。Canvasでの自由描画、マウス・タッチイベントの統一処理、フェーズ切り替えによるゲーム進行管理を学びました。発展として、色やペンサイズの切り替え機能を充実させたり、2人プレイモード（1人が描いてもう1人が当てる）を実装したり、描いた絵を画像として保存する機能を作ってみるのも楽しいですよ。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../word-search/tutorial/">ワードサーチの作り方</a></li>
+        <li><a href="../../typing/tutorial/">タイピングゲームの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

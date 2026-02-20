@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>へびゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="へびゲームをJavaScriptで作る方法をステップごとにやさしく解説。キュー操作やグリッド移動の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="へびゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="へびゲームをJavaScriptで作る方法をステップごとにやさしく解説。キュー操作や自己衝突判定が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/snake/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "へびゲームの作り方",
+    "description": "JavaScriptでへびゲームを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとグリッドの準備", "text": "20x20のグリッドをDOMで作成し、へびのデータ構造を定義します"},
+      {"@type": "HowToStep", "name": "へびの移動とキュー操作", "text": "配列の先頭に頭を追加し末尾を削除する「キュー操作」でへびを動かします"},
+      {"@type": "HowToStep", "name": "壁と自分自身への衝突判定", "text": "壁の外に出たり自分の体にぶつかったりしたらゲームオーバーにします"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>へびゲームの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/snake" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>へびゲームは、エサを食べてどんどん長くなるへびを操作するクラシックなゲームです。このチュートリアルでは、JavaScriptでへびゲームを作る方法を学びましょう。配列をキュー（先頭追加・末尾削除）として使うテクニック、グリッドベースの移動、壁や自分自身との衝突判定など、ゲームプログラミングの重要な基礎が身につきます。</p>
+      <ul class="concept-list">
+        <li>配列のキュー操作（unshift/pop）でへびを動かす方法</li>
+        <li>方向オブジェクトを使ったグリッド上の移動制御</li>
+        <li>壁との衝突と自己衝突の判定ロジック</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>グリッドとへびのデータ構造を準備しよう</h2>
+      <p>へびゲームはグリッド（マス目）上で動きます。へびの体は座標の配列で表し、配列の先頭が「頭」です。方向は<code>{x, y}</code>のオブジェクトで管理すると、移動の計算がとてもシンプルになります。</p>
+      <pre class="code-block"><code>var GRID_SIZE = 20;
+var INITIAL_SNAKE_LENGTH = 3;
+
+var DIR = {
+  UP:    { x:  0, y: -1 },
+  DOWN:  { x:  0, y:  1 },
+  LEFT:  { x: -1, y:  0 },
+  RIGHT: { x:  1, y:  0 }
+};
+
+var snake = [];
+var direction = DIR.RIGHT;
+var nextDirection = DIR.RIGHT;
+
+function initSnake() {
+  snake = [];
+  var startX = Math.floor(GRID_SIZE / 2);
+  var startY = Math.floor(GRID_SIZE / 2);
+
+  for (var i = 0; i &lt; INITIAL_SNAKE_LENGTH; i++) {
+    snake.push({ x: startX - i, y: startY });
+  }
+  direction = DIR.RIGHT;
+  nextDirection = DIR.RIGHT;
+}</code></pre>
+      <p><code>DIR</code>オブジェクトで4方向を定義しています。<code>nextDirection</code>と<code>direction</code>を分けているのは、1フレーム中に複数回キーを押したときに方向が2回変わるのを防ぐためです。へびの初期位置はグリッドの中央に置き、右方向に3マス分の体を作っています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>へびの移動とエサの処理を作ろう</h2>
+      <h3>キュー操作で自然な動きを実現</h3>
+      <p>へびの移動は「頭の前に新しいマスを追加し、尻尾のマスを削除する」というキュー操作で実現します。エサを食べたときは尻尾を削除しないことで、へびが1マス長くなります。</p>
+      <pre class="code-block"><code>function gameStep() {
+  direction = nextDirection;
+
+  // 新しい頭の位置を計算
+  var head = snake[0];
+  var newHead = {
+    x: head.x + direction.x,
+    y: head.y + direction.y
+  };
+
+  // 壁との衝突判定
+  if (newHead.x &lt; 0 || newHead.x &gt;= GRID_SIZE ||
+      newHead.y &lt; 0 || newHead.y &gt;= GRID_SIZE) {
+    gameOver();
+    return;
+  }
+
+  // 自分自身との衝突判定
+  for (var i = 0; i &lt; snake.length - 1; i++) {
+    if (snake[i].x === newHead.x &amp;&amp; snake[i].y === newHead.y) {
+      gameOver();
+      return;
+    }
+  }
+
+  // 頭を追加
+  snake.unshift(newHead);
+
+  // エサを食べたかチェック
+  if (food &amp;&amp; newHead.x === food.x &amp;&amp; newHead.y === food.y) {
+    score += 1;
+    spawnFood();
+  } else {
+    // 食べなかった → 尻尾を削除
+    snake.pop();
+  }
+}</code></pre>
+      <p><code>unshift</code>で配列の先頭に新しい頭を追加し、<code>pop</code>で末尾（尻尾）を削除します。エサを食べたときは<code>pop</code>しないので、へびが1マス伸びるわけです。このシンプルなキュー操作が、へびの「頭が進んで尻尾が追いかける」動きを自然に表現しています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>方向転換と逆走防止を実装しよう</h2>
+      <p>へびゲームでは、現在の進行方向と逆方向に転換できないルールがあります。右に進んでいるときに左を押しても無視する、という処理を実装しましょう。</p>
+      <pre class="code-block"><code>function changeDirection(newDir) {
+  // 逆方向のチェック
+  if (direction.x + newDir.x === 0 &amp;&amp;
+      direction.y + newDir.y === 0) {
+    return; // 逆方向は無視
+  }
+  nextDirection = newDir;
+}
+
+function spawnFood() {
+  var occupied = {};
+  for (var i = 0; i &lt; snake.length; i++) {
+    occupied[snake[i].x + ',' + snake[i].y] = true;
+  }
+
+  var emptyCells = [];
+  for (var y = 0; y &lt; GRID_SIZE; y++) {
+    for (var x = 0; x &lt; GRID_SIZE; x++) {
+      if (!occupied[x + ',' + y]) {
+        emptyCells.push({ x: x, y: y });
+      }
+    }
+  }
+
+  food = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+}</code></pre>
+      <p>逆方向の判定は<code>direction.x + newDir.x === 0</code>で行えます。右(1,0)と左(-1,0)を足すと(0,0)になるので逆方向とわかります。エサの配置では、へびが占めているマスを除外して空きマスだけをリストアップし、その中からランダムに選んでいます。へびが全マスを埋めたら勝利です。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、キュー操作によるへびの移動、方向転換と逆走防止、壁と自己衝突の判定の3つを学びました。さらに発展させるなら、壁をすり抜けるワープモード、特殊なエサ（ボーナスポイントや一時的なスピードアップ）、へびの見た目のカスタマイズ機能に挑戦してみましょう。スコアに応じてスピードが上がる仕組みも良い練習になりますよ。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../maze/tutorial/">迷路ゲームの作り方</a></li>
+        <li><a href="../../tetris/tutorial/">テトリスの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

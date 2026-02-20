@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>スライムジャンパー｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="スライムがどこまでも高く跳ぶ！足場を乗り継いでハイスコアを目指そう。PC・スマホ対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="スライムジャンパー｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="スライムがどこまでも高く跳ぶ！足場を乗り継いでハイスコアを目指そう。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/slime-jump/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "スライムジャンパー",
+    "description": "スライムがどこまでも高く跳ぶ！足場を乗り継いでハイスコアを目指そう。PC・スマホ対応の無料ブラウザゲーム。",
+    "url": "https://hinata-ya.tech/games/games/slime-jump/",
+    "genre": ["アクション", "ジャンプ"],
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">スライムジャンパー</h1>
+    <div class="game-page-tags">
+      <span class="tag">アクション</span>
+      <span class="tag">ジャンプ</span>
+    </div>
+
+    <div class="game-container">
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">スコア</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">ベスト</span>
+          <span class="score-value" id="best-score">0</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">New Game</button>
+      </div>
+
+      <div class="board-wrapper">
+        <canvas id="game-canvas"></canvas>
+
+        <div class="game-overlay" id="game-over-overlay">
+          <div class="overlay-content">
+            <h2>ゲームオーバー</h2>
+            <p>スコア: <span id="final-score">0</span></p>
+            <p class="best-result" id="best-result"></p>
+            <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
+          </div>
+        </div>
+
+        <div class="game-overlay active" id="game-start-overlay">
+          <div class="overlay-content">
+            <h2>スライムジャンパー</h2>
+            <p>左右に動いて<br>足場を乗り継ごう！</p>
+            <button class="btn-primary" id="btn-start">ゲームスタート</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li><strong>PC</strong>: ← → キーまたはA/Dキーでスライムを左右に移動</li>
+        <li><strong>スマホ</strong>: 端末を左右に傾けて移動、またはタッチで左右移動</li>
+        <li>スライムは自動でジャンプし続ける</li>
+        <li>足場に乗ると高く跳ぶ。どんどん上を目指そう！</li>
+        <li>画面の下に落ちるとゲームオーバー</li>
+        <li>壊れる足場やバネ足場など、特殊な足場もあるよ</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        重力、当たり判定、スクロール処理など<br>
+        ゲーム開発の基本が詰まっています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="tutorial/" class="btn-primary">このゲームの作り方を見る →</a>
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/slime-jump" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">&larr; 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

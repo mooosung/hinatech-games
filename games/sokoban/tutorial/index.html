@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>倉庫番の作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="倉庫番をJavaScriptで作る方法をステップごとにやさしく解説。2次元配列やプッシュ判定の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="倉庫番の作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="倉庫番をJavaScriptで作る方法をステップごとにやさしく解説。2次元配列やプッシュ判定が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/sokoban/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "倉庫番の作り方",
+    "description": "JavaScriptで倉庫番を作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "CanvasとJavaScriptの基本セットアップを行います"},
+      {"@type": "HowToStep", "name": "マップデータと2次元配列", "text": "ステージデータを2次元配列で管理し、マップを読み込みます"},
+      {"@type": "HowToStep", "name": "プレイヤー移動と箱のプッシュ判定", "text": "キー入力でプレイヤーを動かし、箱を押す判定を実装します"},
+      {"@type": "HowToStep", "name": "Undo機能（履歴管理）", "text": "履歴配列を使って一手戻る機能を実装します"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>倉庫番の作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/sokoban" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>倉庫番は、箱をゴールまで押して運ぶ定番パズルゲームです。シンプルなルールですが、2次元配列を使ったマップ管理や、箱を押せるかどうかの判定など、ゲームプログラミングの基本がたくさん詰まっています。このチュートリアルでは、JavaScriptとCanvasを使って倉庫番を一歩ずつ作っていきましょう。</p>
+      <ul class="concept-list">
+        <li>2次元配列でマップを管理する方法</li>
+        <li>プッシュ判定（箱を押せるかどうかの条件チェック）</li>
+        <li>Undo機能（履歴管理で一手戻る）</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>HTMLとCanvasの準備をしよう</h2>
+      <p>まずはゲームを描画するためのCanvasを準備しましょう。Canvas要素をHTMLに配置して、JavaScriptから描画できるようにします。デバイスの画面解像度に合わせて、高精細ディスプレイでもきれいに表示されるようにしましょう。</p>
+      <pre class="code-block"><code>var canvas, ctx, W, H, dpr;
+
+function initCanvas() {
+  canvas = document.getElementById('game-canvas');
+  ctx = canvas.getContext('2d');
+  dpr = window.devicePixelRatio || 1;
+  var rect = canvas.getBoundingClientRect();
+  W = rect.width;
+  H = rect.height;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+}</code></pre>
+      <p><code>devicePixelRatio</code>を使うと、Retinaディスプレイなどの高精細画面でもぼやけずに描画できます。<code>getContext('2d')</code>で取得した<code>ctx</code>を通じて、図形や文字を描いていきます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>マップデータと2次元配列を作ろう</h2>
+      <h3>ステージを文字列で定義する</h3>
+      <p>倉庫番のステージは、壁・床・箱・ゴール・プレイヤーの情報を持っています。文字列の配列として定義すると、見た目でステージの形がわかりやすくなります。この文字列を2次元の数値配列に変換して、ゲームのロジックで扱いやすくしましょう。</p>
+      <pre class="code-block"><code>// マップタイル定数
+var EMPTY = 0, WALL = 1, GOAL = 2;
+var BOX = 3, BOX_ON_GOAL = 4;
+
+// ステージデータ（文字列で視覚的に定義）
+var LEVELS = [
+  [
+    '  ###  ',
+    '  #.#  ',
+    '  # #  ',
+    '###$###',
+    '#. @ .#',
+    '###$###',
+    '  # #  ',
+    '  #.#  ',
+    '  ###  '
+  ]
+];
+
+// 文字列を2次元配列に変換
+function loadLevel(idx) {
+  var data = LEVELS[idx];
+  mapH = data.length;
+  mapW = 0;
+  for (var i = 0; i &lt; data.length; i++) {
+    if (data[i].length &gt; mapW) mapW = data[i].length;
+  }
+
+  map = [];
+  for (var y = 0; y &lt; mapH; y++) {
+    map[y] = [];
+    for (var x = 0; x &lt; mapW; x++) {
+      var ch = data[y][x] || ' ';
+      switch (ch) {
+        case '#': map[y][x] = WALL; break;
+        case '.': map[y][x] = GOAL; break;
+        case '$': map[y][x] = BOX; break;
+        case '*': map[y][x] = BOX_ON_GOAL; break;
+        case '@': map[y][x] = EMPTY;
+                  playerX = x; playerY = y; break;
+        default:  map[y][x] = EMPTY; break;
+      }
+    }
+  }
+}</code></pre>
+      <p><code>#</code>が壁、<code>.</code>がゴール、<code>$</code>が箱、<code>@</code>がプレイヤーです。switch文で1文字ずつ数値に変換し、<code>map[y][x]</code>の2次元配列に格納します。プレイヤーの位置も同時に記録しています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>プレイヤー移動と箱のプッシュ判定を実装しよう</h2>
+      <h3>移動の条件を1つずつチェックする</h3>
+      <p>プレイヤーが移動するとき、移動先のマスに何があるかによって動作が変わります。壁なら動けません。箱があるなら、箱の先も空いているかチェックが必要です。この「段階的な条件チェック」がプッシュ判定のポイントです。</p>
+      <pre class="code-block"><code>var DIR = {
+  up:    { dx: 0, dy: -1 },
+  down:  { dx: 0, dy: 1 },
+  left:  { dx: -1, dy: 0 },
+  right: { dx: 1, dy: 0 }
+};
+
+function move(dir) {
+  if (!running) return;
+  var d = DIR[dir];
+  var nx = playerX + d.dx;
+  var ny = playerY + d.dy;
+
+  // 範囲外チェック
+  if (nx &lt; 0 || nx &gt;= mapW || ny &lt; 0 || ny &gt;= mapH) return;
+  var target = map[ny][nx];
+
+  // 壁チェック
+  if (target === WALL) return;
+
+  // 箱の処理
+  if (target === BOX || target === BOX_ON_GOAL) {
+    var bx = nx + d.dx;
+    var by = ny + d.dy;
+    if (bx &lt; 0 || bx &gt;= mapW || by &lt; 0 || by &gt;= mapH) return;
+    var behind = map[by][bx];
+    if (behind === WALL || behind === BOX || behind === BOX_ON_GOAL) return;
+
+    // 箱を移動
+    map[by][bx] = (behind === GOAL) ? BOX_ON_GOAL : BOX;
+    map[ny][nx] = (target === BOX_ON_GOAL) ? GOAL : EMPTY;
+  }
+
+  playerX = nx;
+  playerY = ny;
+  moves++;
+  draw();
+  checkClear();
+}</code></pre>
+      <p>移動先に箱がある場合、さらにその先（<code>bx</code>, <code>by</code>）が壁や別の箱でないかチェックします。箱がゴールの上に乗ったかどうかは、<code>BOX_ON_GOAL</code>という特別なタイル値で管理しています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>Undo機能（履歴管理）を実装しよう</h2>
+      <p>パズルゲームでは「一手戻る」機能がとても重要です。移動のたびに、プレイヤーの位置と箱の状態を履歴配列に保存しておけば、いつでも前の状態に戻すことができます。</p>
+      <pre class="code-block"><code>var history = [];
+
+// 移動時に履歴を保存（move関数の中で呼ぶ）
+history.push({
+  px: playerX, py: playerY,
+  bfx: nx, bfy: ny, bft: target,
+  btx: bx, bty: by, btt: behind
+});
+
+// 一手戻る
+function undo() {
+  if (!running || history.length === 0) return;
+  var h = history.pop();
+
+  // 箱を戻す
+  if (h.bfx &gt;= 0) {
+    map[h.bfy][h.bfx] = h.bft;
+    map[h.bty][h.btx] = h.btt;
+  }
+
+  playerX = h.px;
+  playerY = h.py;
+  moves--;
+  draw();
+}</code></pre>
+      <p><code>history</code>配列に<code>push</code>で追加し、<code>pop</code>で取り出すことで「スタック」（後入れ先出し）の仕組みを使っています。箱の元の位置と元のタイル値を保存しているので、正確に元の状態に戻すことができます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>クリア判定を実装しよう</h2>
+      <p>すべての箱がゴールの上に乗ったらステージクリアです。マップ全体をスキャンして、ゴールに乗っていない箱（<code>BOX</code>）が1つも残っていなければクリアと判定します。</p>
+      <pre class="code-block"><code>function checkClear() {
+  for (var y = 0; y &lt; mapH; y++) {
+    for (var x = 0; x &lt; mapW; x++) {
+      if (map[y][x] === BOX) return; // ゴールに乗っていない箱がある
+    }
+  }
+  // クリア！
+  running = false;
+  saveProgress();
+}</code></pre>
+      <p>ゴールに乗っている箱は<code>BOX_ON_GOAL</code>なので、<code>BOX</code>が1つも見つからなければ全部ゴールに乗っている、と判断できるシンプルなロジックです。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、2次元配列でマップを管理し、箱を押せるかどうかのプッシュ判定を実装し、履歴管理でUndoを実現する方法を学びました。ここからさらに発展させるアイデアとして、ステージエディタを作ってオリジナルのパズルを作成したり、最小手数の記録機能を追加したり、アニメーション付きの移動を実装してみるのも楽しいでしょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../maze/tutorial/">迷路の作り方</a></li>
+        <li><a href="../../puzzle15/tutorial/">15パズルの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

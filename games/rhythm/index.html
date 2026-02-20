@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>リズムゲーム｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="落ちてくるノーツにタイミングを合わせてタップ！コンボをつなげてハイスコアを目指そう。PC・スマホ対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="リズムゲーム｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="落ちてくるノーツにタイミングを合わせてタップ！コンボをつなげてハイスコアを目指そう。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/rhythm/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "リズムゲーム",
+    "description": "落ちてくるノーツにタイミングを合わせてタップ！コンボをつなげてハイスコアを目指そう。PC・スマホ対応の無料ブラウザゲーム。",
+    "url": "https://hinata-ya.tech/games/games/rhythm/",
+    "genre": ["リズム", "音楽"],
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">リズムゲーム</h1>
+    <div class="game-page-tags">
+      <span class="tag">リズム</span>
+      <span class="tag">音楽</span>
+    </div>
+
+    <div class="game-container">
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">スコア</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">ベスト</span>
+          <span class="score-value" id="best-score">0</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">New Game</button>
+      </div>
+
+      <div class="game-hud">
+        <div class="hud-item">
+          <span class="hud-label">COMBO</span>
+          <span class="hud-value" id="combo">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">判定</span>
+          <span class="hud-value" id="judge">-</span>
+        </div>
+      </div>
+
+      <div class="board-wrapper">
+        <canvas id="game-canvas"></canvas>
+
+        <div class="lane-buttons" id="lane-buttons">
+          <button class="lane-btn" data-lane="0">D</button>
+          <button class="lane-btn" data-lane="1">F</button>
+          <button class="lane-btn" data-lane="2">J</button>
+          <button class="lane-btn" data-lane="3">K</button>
+        </div>
+
+        <div class="game-overlay" id="game-over-overlay">
+          <div class="overlay-content">
+            <h2>リザルト</h2>
+            <p>スコア: <span id="final-score">0</span></p>
+            <div class="result-detail" id="result-detail"></div>
+            <p class="best-result" id="best-result"></p>
+            <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
+          </div>
+        </div>
+
+        <div class="game-overlay active" id="game-start-overlay">
+          <div class="overlay-content">
+            <h2>リズムゲーム</h2>
+            <p>ノーツが判定ラインに来たら<br>タイミングよくタップ！</p>
+            <button class="btn-primary" id="btn-start">ゲームスタート</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li><strong>PC</strong>: D, F, J, K キーで左から4つのレーンに対応</li>
+        <li><strong>スマホ</strong>: 画面下の4つのボタンをタップ</li>
+        <li>ノーツが判定ラインに来たらタイミングよく押そう</li>
+        <li>PERFECT > GREAT > GOOD > MISS の4段階判定</li>
+        <li>コンボをつなげるとボーナスポイント！</li>
+        <li>曲が終わるまでにハイスコアを目指そう</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        タイミング判定、アニメーション、<br>
+        譜面データの管理など<br>
+        プログラミングの面白い要素が詰まっています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="tutorial/" class="btn-primary">このゲームの作り方を見る →</a>
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/rhythm" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">&larr; 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

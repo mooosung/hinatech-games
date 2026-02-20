@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <defs>
+    <linearGradient id="pond" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a6b8a"/>
+      <stop offset="50%" style="stop-color:#145a73"/>
+      <stop offset="100%" style="stop-color:#0d3d52"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" rx="12" fill="url(#pond)"/>
+  <!-- 水面の波 -->
+  <path d="M0,15 Q40,10 80,15 T160,15 T240,15 T320,15" stroke="rgba(255,255,255,0.1)" fill="none" stroke-width="2"/>
+  <path d="M0,22 Q40,17 80,22 T160,22 T240,22 T320,22" stroke="rgba(255,255,255,0.07)" fill="none" stroke-width="2"/>
+  <!-- 水草 -->
+  <path d="M50,200 Q55,160 48,140" stroke="#2ECC71" stroke-width="3" fill="none" opacity="0.3" stroke-linecap="round"/>
+  <path d="M260,200 Q255,155 262,130" stroke="#2ECC71" stroke-width="3" fill="none" opacity="0.3" stroke-linecap="round"/>
+  <!-- 泡 -->
+  <circle cx="80" cy="60" r="3" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
+  <circle cx="240" cy="80" r="4" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
+  <circle cx="180" cy="45" r="2.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+  <!-- 小さい魚（NPC） -->
+  <g transform="translate(60,70)" opacity="0.78">
+    <ellipse cx="0" cy="0" rx="12" ry="7" fill="#E74C3C"/>
+    <polygon points="-11,0 -18,-5 -13,0 -18,5" fill="#E74C3C"/>
+    <circle cx="5" cy="-2" r="2" fill="#fff"/><circle cx="5.5" cy="-2" r="1" fill="#111"/>
+    <text x="0" y="3" fill="#fff" font-size="6" font-weight="bold" text-anchor="middle" opacity="0.75">8</text>
+  </g>
+  <g transform="translate(250,55)" opacity="0.78">
+    <ellipse cx="0" cy="0" rx="9" ry="5.5" fill="#F1C40F"/>
+    <polygon points="-8,0 -13,-4 -9,0 -13,4" fill="#F1C40F"/>
+    <circle cx="4" cy="-1.5" r="1.5" fill="#fff"/><circle cx="4.3" cy="-1.5" r="0.8" fill="#111"/>
+    <text x="0" y="2.5" fill="#fff" font-size="5" font-weight="bold" text-anchor="middle" opacity="0.75">6</text>
+  </g>
+  <g transform="translate(100,150) scale(-1,1)" opacity="0.78">
+    <ellipse cx="0" cy="0" rx="11" ry="7" fill="#2ECC71"/>
+    <polygon points="-10,0 -16,-5 -12,0 -16,5" fill="#2ECC71"/>
+    <circle cx="5" cy="-2" r="2" fill="#fff"/><circle cx="5.5" cy="-2" r="1" fill="#111"/>
+    <text x="0" y="3" fill="#fff" font-size="5.5" font-weight="bold" text-anchor="middle" opacity="0.75" transform="scale(-1,1)">9</text>
+  </g>
+  <!-- 大きい魚（危険） -->
+  <g transform="translate(220,135) scale(-1,1)" opacity="0.75">
+    <ellipse cx="0" cy="0" rx="28" ry="17" fill="#E91E63"/>
+    <polygon points="-25,0 -38,-11 -30,0 -38,11" fill="#E91E63"/>
+    <path d="M5,-16 Q-2,-22 -10,-15" fill="#E91E63" opacity="0.6"/>
+    <circle cx="12" cy="-4" r="4" fill="#fff"/><circle cx="13" cy="-4" r="2.2" fill="#111"/>
+    <text x="0" y="5" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle" opacity="0.75" transform="scale(-1,1)">28</text>
+  </g>
+  <!-- プレイヤーの魚 -->
+  <g transform="translate(140,100)" opacity="0.92">
+    <ellipse cx="0" cy="0" rx="22" ry="13" fill="#3498DB"/>
+    <ellipse cx="-3" cy="-4" rx="9" ry="5" fill="rgba(255,255,255,0.15)" transform="rotate(-10)"/>
+    <polygon points="-19,0 -30,-9 -23,0 -30,9" fill="#3498DB"/>
+    <path d="M3,-12 Q-3,-17 -8,-11" fill="#3498DB" opacity="0.7"/>
+    <circle cx="10" cy="-3" r="3.5" fill="#fff"/><circle cx="11" cy="-3" r="2" fill="#111"/>
+    <ellipse cx="0" cy="0" rx="22" ry="13" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+    <text x="0" y="4" fill="#fff" font-size="9" font-weight="bold" text-anchor="middle" opacity="0.8">15</text>
+  </g>
+</svg>

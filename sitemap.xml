@@ -5,6 +5,30 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://hinata-ya.tech/games/games/slime-jump/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/rhythm/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/sokoban/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/drawing-quiz/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/tower-defense/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/absorb/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://hinata-ya.tech/games/games/2048/</loc>
     <priority>0.8</priority>
   </url>
@@ -83,6 +107,114 @@
   <url>
     <loc>https://hinata-ya.tech/games/games/shooting/</loc>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/tutorials/</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/2048/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/absorb/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/breakout/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/catching/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/color-match/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/drawing-quiz/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/flappy/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/maze/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/memory/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/minesweeper/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/pong/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/puzzle15/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/reversi/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/rhythm/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/shooting/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/simon/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/slime-jump/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/snake/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/sokoban/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/sudoku/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/tetris/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/tictactoe/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/tower-defense/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/typing/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/whack-a-mole/tutorial/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hinata-ya.tech/games/games/word-search/tutorial/</loc>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://hinata-ya.tech/games/about/</loc>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ポンゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="ポンゲームをJavaScriptで作る方法をステップごとにやさしく解説。Canvas描画やボール反射の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="ポンゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="ポンゲームをJavaScriptで作る方法をステップごとにやさしく解説。Canvas描画やボール反射が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/pong/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "ポンゲームの作り方",
+    "description": "JavaScriptでポンゲームを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "Canvas要素を用意し、描画コンテキストを取得してゲームの土台を作ります"},
+      {"@type": "HowToStep", "name": "ボールの反射とパドルの衝突判定", "text": "ボールが壁やパドルに当たったときの跳ね返り処理を実装します"},
+      {"@type": "HowToStep", "name": "AI対戦ロジックの実装", "text": "コンピュータがボールを予測して動くAIを作ります"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>ポンゲームの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/pong" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>ポンは世界初のビデオゲームのひとつで、2つのパドルでボールを打ち合うシンプルなゲームです。このチュートリアルでは、HTML5 Canvasを使ってポンゲームを作る方法を学びましょう。Canvasへの描画、ボールの物理的な反射、そしてAIの対戦ロジックなど、ゲーム開発の基礎が身につきます。</p>
+      <ul class="concept-list">
+        <li>HTML5 Canvasを使った2Dゲームの描画方法</li>
+        <li>ボールの反射角度と衝突判定のしくみ</li>
+        <li>ボールの軌道を予測するAI対戦ロジック</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>Canvasとゲームループを準備しよう</h2>
+      <p>まず、Canvasに描画する基本を用意しましょう。ゲームでは毎フレーム画面を更新する「ゲームループ」が必要です。<code>requestAnimationFrame</code>を使うと、ブラウザのリフレッシュレートに合わせてスムーズにアニメーションできます。</p>
+      <pre class="code-block"><code>var canvas = document.getElementById('game-canvas');
+var ctx = canvas.getContext('2d');
+
+function gameLoop() {
+  if (!gameRunning) return;
+
+  updatePlayer();
+  updateAI();
+  updateBall();
+  draw();
+
+  animFrameId = requestAnimationFrame(gameLoop);
+}</code></pre>
+      <p>ゲームループの中で、プレイヤーの入力処理、AIの動き、ボールの移動、そして描画を毎フレーム実行します。このループがゲームの心臓部分です。<code>requestAnimationFrame</code>は画面のリフレッシュに同期するので、約60FPSでなめらかに動きます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ボールの反射とパドルの衝突判定を作ろう</h2>
+      <h3>壁との反射</h3>
+      <p>ボールが上下の壁に当たったら、Y方向の速度を反転させて跳ね返らせましょう。パドルに当たったときは、当たった位置によって反射角度が変わるようにすると、ゲームに奥行きが出ます。</p>
+      <pre class="code-block"><code>function updateBall() {
+  ballX += ballVX;
+  ballY += ballVY;
+
+  // 上下の壁との衝突
+  if (ballY - ballRadius &lt;= 0) {
+    ballY = ballRadius;
+    ballVY = Math.abs(ballVY);
+  }
+  if (ballY + ballRadius &gt;= canvasH) {
+    ballY = canvasH - ballRadius;
+    ballVY = -Math.abs(ballVY);
+  }
+
+  // プレイヤーパドルとの衝突判定
+  if (ballVX &lt; 0 &amp;&amp;
+      ballX - ballRadius &lt;= playerPaddleX &amp;&amp;
+      ballY &gt;= playerTop &amp;&amp;
+      ballY &lt;= playerBottom) {
+    // パドルのどこに当たったかで角度を変える
+    var hitPos = (ballY - playerY) / (paddleH / 2);
+    var angle = hitPos * (Math.PI / 4);
+    ballSpeed = Math.min(ballSpeed * 1.05, ballMaxSpeed);
+    ballVX = ballSpeed * Math.cos(angle);
+    ballVY = ballSpeed * Math.sin(angle);
+  }
+}</code></pre>
+      <p><code>hitPos</code>はパドルの中心からどれだけ離れた位置に当たったかを-1〜1の範囲で表します。中心に当たれば水平に、端に当たれば角度がついた反射になります。また、当たるたびに速度が5%ずつ上がるので、ラリーが続くほど緊張感が増しますね。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>AI対戦ロジックを実装しよう</h2>
+      <p>コンピュータのパドルを動かすAIを作りましょう。ボールの到達位置を予測して、そこに向かってパドルを動かします。ただし、完璧すぎると面白くないので、わざと反応遅延やランダムなずれを入れるのがコツです。</p>
+      <pre class="code-block"><code>function updateAI() {
+  aiReactionTimer++;
+  if (aiReactionTimer &gt;= aiReactionDelay) {
+    aiReactionTimer = 0;
+
+    if (ballVX &gt; 0) {
+      // ボールの予測位置を計算
+      var timeToReach = (canvasW - paddleMargin - paddleW - ballX) / ballVX;
+      var predictedY = ballY + ballVY * timeToReach;
+
+      // 壁での反射を考慮
+      while (predictedY &lt; 0 || predictedY &gt; canvasH) {
+        if (predictedY &lt; 0) predictedY = -predictedY;
+        if (predictedY &gt; canvasH) predictedY = 2 * canvasH - predictedY;
+      }
+
+      // ランダムなずれを加える
+      var errorRange = paddleH * (0.3 - playerScore * 0.04);
+      aiTargetY = predictedY + (Math.random() - 0.5) * errorRange;
+    } else {
+      aiTargetY = canvasH / 2;
+    }
+  }
+}</code></pre>
+      <p>AIはボールが向かってくるときだけ追跡し、離れているときは中央に戻ります。<code>errorRange</code>でわざとずらすことで、人間らしいミスを再現しています。プレイヤーのスコアが上がるほどAIが強くなるので、ゲームバランスも自然に調整されます。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、Canvasの描画、ボールの反射物理、AI対戦ロジックの3つを学びました。ここからさらに発展させるなら、2人対戦モードの追加、ボールにスピンをかける機能、パワーアップアイテムの実装などに挑戦してみましょう。描画とゲームループの基本がわかれば、いろいろなアクションゲームに応用できますよ。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../breakout/tutorial/">ブロック崩しの作り方</a></li>
+        <li><a href="../../tictactoe/tutorial/">三目並べの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

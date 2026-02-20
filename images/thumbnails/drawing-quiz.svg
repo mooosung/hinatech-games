@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150">
+  <rect width="200" height="150" fill="#1a3a1a" rx="12"/>
+  <!-- キャンバス -->
+  <rect x="25" y="15" width="150" height="110" rx="6" fill="#fff"/>
+  <!-- 描いた絵（猫っぽい） -->
+  <circle cx="100" cy="60" r="22" fill="none" stroke="#333" stroke-width="2.5"/>
+  <!-- 耳 -->
+  <path d="M83 42 L78 28 L90 38" fill="none" stroke="#333" stroke-width="2.5"/>
+  <path d="M117 42 L122 28 L110 38" fill="none" stroke="#333" stroke-width="2.5"/>
+  <!-- 目 -->
+  <circle cx="92" cy="57" r="3" fill="#333"/>
+  <circle cx="108" cy="57" r="3" fill="#333"/>
+  <!-- ひげ -->
+  <line x1="72" y1="64" x2="88" y2="66" stroke="#333" stroke-width="1.5"/>
+  <line x1="72" y1="70" x2="88" y2="68" stroke="#333" stroke-width="1.5"/>
+  <line x1="128" y1="64" x2="112" y2="66" stroke="#333" stroke-width="1.5"/>
+  <line x1="128" y1="70" x2="112" y2="68" stroke="#333" stroke-width="1.5"/>
+  <!-- 口 -->
+  <path d="M95 72 Q100 78 105 72" fill="none" stroke="#333" stroke-width="2"/>
+  <!-- 鉛筆 -->
+  <g transform="translate(145,90) rotate(-30)">
+    <rect x="0" y="0" width="6" height="35" fill="#F1C40F" rx="1"/>
+    <polygon points="0,35 6,35 3,42" fill="#FFD700"/>
+    <rect x="0" y="0" width="6" height="5" fill="#E74C3C" rx="1"/>
+  </g>
+  <!-- カラーパレット -->
+  <circle cx="35" cy="138" r="6" fill="#E74C3C"/>
+  <circle cx="52" cy="138" r="6" fill="#3498DB"/>
+  <circle cx="69" cy="138" r="6" fill="#2ECC71"/>
+  <circle cx="86" cy="138" r="6" fill="#F1C40F"/>
+  <circle cx="103" cy="138" r="6" fill="#9B59B6"/>
+  <!-- ?マーク -->
+  <text x="162" y="140" font-size="20" font-weight="bold" fill="rgba(255,255,255,0.6)" font-family="sans-serif">?</text>
+</svg>

@@ -1,0 +1,313 @@
+/* ============================================
+   お絵かきクイズ - 固有スタイル
+   ============================================ */
+
+/* スコアエリア */
+.score-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.score-box {
+  background: #1a3a1a;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 70px;
+}
+
+.score-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #a0d48a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.btn-new-game {
+  margin-left: auto;
+  background: #2d7a2d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-new-game:hover {
+  background: #1f5a1f;
+}
+
+/* HUD */
+.game-hud {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hud-item {
+  background: #2d5a2d;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  text-align: center;
+  flex: 1;
+}
+
+.hud-label {
+  display: block;
+  font-size: 0.6rem;
+  color: #a0d48a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hud-value {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* 描画ツール */
+.draw-tools {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tool-btn {
+  background: #444;
+  color: #ccc;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.tool-btn:hover {
+  background: #555;
+}
+
+.tool-btn.selected {
+  border-color: #2ECC71;
+  background: #555;
+}
+
+.pen-sizes {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.size-btn {
+  background: #444;
+  color: #ccc;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.size-btn.selected {
+  border-color: #F1C40F;
+}
+
+/* カラーパレット */
+.color-palette {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.color-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.color-btn:hover {
+  transform: scale(1.1);
+}
+
+.color-btn.selected {
+  border-color: #fff;
+}
+
+/* ゲームボード */
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  touch-action: none;
+}
+
+#game-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 8px;
+  display: block;
+  cursor: crosshair;
+}
+
+/* 回答ボタン */
+.answer-buttons {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  display: none;
+  gap: 8px;
+  z-index: 5;
+  flex-wrap: wrap;
+}
+
+.answer-buttons.active {
+  display: flex;
+}
+
+.answer-btn {
+  flex: 1 1 calc(50% - 8px);
+  background: rgba(44, 62, 80, 0.9);
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.answer-btn:hover {
+  background: rgba(52, 152, 219, 0.9);
+  border-color: #3498DB;
+}
+
+.answer-btn.correct {
+  background: rgba(46, 204, 113, 0.9);
+  border-color: #2ECC71;
+}
+
+.answer-btn.wrong {
+  background: rgba(231, 76, 60, 0.9);
+  border-color: #E74C3C;
+}
+
+/* ゲームオーバーレイ */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 58, 26, 0.92);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: overlay-appear 0.3s ease;
+}
+
+.game-overlay.active {
+  display: flex;
+}
+
+@keyframes overlay-appear {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.overlay-content h2 {
+  font-size: 1.75rem;
+  color: #a0d48a;
+  margin-bottom: 0.5rem;
+}
+
+.overlay-content p {
+  font-size: 1.1rem;
+  color: #d4c9a0;
+  margin-bottom: 0.75rem;
+}
+
+.overlay-content .best-result {
+  font-size: 0.95rem;
+  color: #F1C40F;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.overlay-content .btn-primary {
+  margin-bottom: 0.5rem;
+}
+
+/* レスポンシブ */
+@media (max-width: 500px) {
+  .board-wrapper {
+    border-radius: 6px;
+  }
+
+  #game-canvas {
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .score-area {
+    gap: 0.5rem;
+  }
+
+  .score-box {
+    padding: 0.4rem 0.75rem;
+    min-width: 55px;
+  }
+
+  .score-value {
+    font-size: 1rem;
+  }
+
+  .score-label {
+    font-size: 0.6rem;
+  }
+
+  .color-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .answer-btn {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+}

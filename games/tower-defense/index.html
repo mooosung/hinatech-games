@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>タワーディフェンス｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="タワーを設置して敵の侵攻を防げ！ウェーブをクリアしてハイスコアを目指そう。PC・スマホ対応の無料ブラウザゲーム。">
+  <!-- OGP -->
+  <meta property="og:title" content="タワーディフェンス｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="タワーを設置して敵の侵攻を防げ！ウェーブをクリアしてハイスコアを目指そう。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/tower-defense/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "タワーディフェンス",
+    "description": "タワーを設置して敵の侵攻を防げ！ウェーブをクリアしてハイスコアを目指そう。PC・スマホ対応の無料ブラウザゲーム。",
+    "url": "https://hinata-ya.tech/games/games/tower-defense/",
+    "genre": ["ストラテジー", "タワーディフェンス"],
+    "gamePlatform": "Web Browser",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="game-page">
+    <h1 class="game-page-title">タワーディフェンス</h1>
+    <div class="game-page-tags">
+      <span class="tag">ストラテジー</span>
+      <span class="tag">タワーディフェンス</span>
+    </div>
+
+    <div class="game-container">
+      <div class="score-area">
+        <div class="score-box">
+          <span class="score-label">スコア</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">ベスト</span>
+          <span class="score-value" id="best-score">0</span>
+        </div>
+        <button class="btn-new-game" id="btn-new-game">New Game</button>
+      </div>
+
+      <div class="game-hud">
+        <div class="hud-item">
+          <span class="hud-label">WAVE</span>
+          <span class="hud-value" id="wave">1</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">LIFE</span>
+          <span class="hud-value" id="lives">10</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">GOLD</span>
+          <span class="hud-value" id="gold">100</span>
+        </div>
+      </div>
+
+      <div class="tower-select">
+        <button class="tower-btn selected" data-tower="normal">
+          <span class="tower-icon" style="background:#3498DB"></span>
+          <span class="tower-info">ノーマル<br><small>20G</small></span>
+        </button>
+        <button class="tower-btn" data-tower="fast">
+          <span class="tower-icon" style="background:#2ECC71"></span>
+          <span class="tower-info">はやい<br><small>35G</small></span>
+        </button>
+        <button class="tower-btn" data-tower="strong">
+          <span class="tower-icon" style="background:#E74C3C"></span>
+          <span class="tower-info">つよい<br><small>50G</small></span>
+        </button>
+        <button class="tower-btn" data-tower="slow">
+          <span class="tower-icon" style="background:#9B59B6"></span>
+          <span class="tower-info">スロウ<br><small>30G</small></span>
+        </button>
+        <button class="tower-btn" data-tower="splash">
+          <span class="tower-icon" style="background:#F39C12"></span>
+          <span class="tower-info">ばくはつ<br><small>60G</small></span>
+        </button>
+        <button class="tower-btn" data-tower="sniper">
+          <span class="tower-icon" style="background:#1ABC9C"></span>
+          <span class="tower-info">スナイパー<br><small>75G</small></span>
+        </button>
+        <button class="tower-btn tower-btn-sell" data-tower="sell">
+          <span class="tower-icon" style="background:#999"></span>
+          <span class="tower-info">撤去<br><small>半額戻る</small></span>
+        </button>
+      </div>
+
+      <div class="speed-control">
+        <button class="speed-btn selected" data-speed="1" id="btn-speed-1">x1</button>
+        <button class="speed-btn" data-speed="2" id="btn-speed-2">x2</button>
+        <button class="speed-btn" data-speed="3" id="btn-speed-3">x3</button>
+      </div>
+
+      <div class="board-wrapper">
+        <canvas id="game-canvas"></canvas>
+
+        <div class="game-overlay" id="game-over-overlay">
+          <div class="overlay-content">
+            <h2>ゲームオーバー</h2>
+            <p>スコア: <span id="final-score">0</span></p>
+            <p class="best-result" id="best-result"></p>
+            <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
+          </div>
+        </div>
+
+        <div class="game-overlay active" id="game-start-overlay">
+          <div class="overlay-content">
+            <h2>タワーディフェンス</h2>
+            <p>タワーを設置して<br>敵の侵攻を防げ！</p>
+            <button class="btn-primary" id="btn-start">ゲームスタート</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-instructions">
+      <h3>遊び方</h3>
+      <ul>
+        <li><strong>PC</strong>: マップ上の空きマスをクリックしてタワーを設置</li>
+        <li><strong>スマホ</strong>: 空きマスをタップしてタワーを設置</li>
+        <li>敵は道に沿って進む。タワーは自動で攻撃する</li>
+        <li>敵を倒すとゴールドを獲得。タワー設置に使おう</li>
+        <li>敵がゴールに到達するとライフが減る。0になるとゲームオーバー</li>
+        <li>6種類のタワーを使い分けてハイスコアを目指そう！</li>
+        <li>設置済みタワーは「撤去」モードで壊すと半額のゴールドが戻る</li>
+        <li>早送りボタン（x1/x2/x3）でスピードを変えられる</li>
+      </ul>
+    </div>
+
+    <div class="game-promo">
+      <h3>このゲーム、自分でも作れるよ！</h3>
+      <p>
+        経路探索、タワーのAI、ウェーブ管理など<br>
+        ゲーム開発の面白い要素が詰まっています。<br><br>
+        ひなテックでは、こうしたゲームの<br>
+        作り方を楽しく学べます！
+      </p>
+      <div class="promo-links">
+        <a href="tutorial/" class="btn-primary">このゲームの作り方を見る →</a>
+        <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/tower-defense" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+      </div>
+    </div>
+
+    <div class="other-games">
+      <a href="../../index.html">&larr; 他のゲームも遊ぶ</a>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="../../js/common.js" data-base="../../"></script>
+  <script src="game.js"></script>
+</body>
+</html>

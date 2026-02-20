@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ゲームの作り方一覧 - JavaScriptで学ぶプログラミング入門【全27種】｜ひなテックGames</title>
+  <meta name="description" content="JavaScriptとHTML5 Canvasでブラウザゲームを作る方法を全27種のチュートリアルで解説。テトリス、スネーク、2048など人気ゲームの作り方をステップごとに学べます。初心者向け。">
+  <meta property="og:title" content="ゲームの作り方一覧 - JavaScriptで学ぶプログラミング入門【全27種】｜ひなテックGames">
+  <meta property="og:description" content="JavaScriptでブラウザゲームを作る方法を全27種のチュートリアルで解説。初心者でもステップごとに学べます。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hinata-ya.tech/games/tutorials/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "ゲームの作り方一覧",
+    "description": "JavaScriptで作れるブラウザゲームのチュートリアル全27種。初心者向けにステップごとに解説。",
+    "url": "https://hinata-ya.tech/games/tutorials/",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <section class="tutorial-hero">
+    <h1>ゲームを作ってみよう！</h1>
+    <p>JavaScriptとHTML5 Canvasを使って、ブラウザで動くゲームの作り方を学ぼう。<br>全27種類のチュートリアルから好きなものを選んでスタート！</p>
+  </section>
+
+  <section class="games-grid">
+    <div class="game-card">
+      <a href="../games/2048/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/2048.svg" alt="2048の作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">2048の作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">2次元配列</span>
+            <span class="tag">タイルマージ</span>
+            <span class="tag">キー入力</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/absorb/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/absorb.svg" alt="おさかなサバイバルの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">おさかなサバイバルの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">Canvas描画</span>
+            <span class="tag">当たり判定</span>
+            <span class="tag">マウス追従</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/breakout/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/breakout.svg" alt="ブロック崩しの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">ブロック崩しの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">ボール物理</span>
+            <span class="tag">反射角計算</span>
+            <span class="tag">ブロック判定</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/catching/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/catching.svg" alt="キャッチゲームの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">キャッチゲームの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">落下オブジェクト</span>
+            <span class="tag">スコア管理</span>
+            <span class="tag">難易度変化</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/color-match/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/color-match.svg" alt="カラーマッチの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">カラーマッチの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">DOM操作</span>
+            <span class="tag">タイマー</span>
+            <span class="tag">ランダム色</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/drawing-quiz/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/drawing-quiz.svg" alt="お絵かきクイズの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">お絵かきクイズの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">Canvas描画API</span>
+            <span class="tag">イベント処理</span>
+            <span class="tag">フェーズ管理</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/flappy/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/flappy.svg" alt="フラッピーバードの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">フラッピーバードの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">重力</span>
+            <span class="tag">パイプ生成</span>
+            <span class="tag">当たり判定</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/maze/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/maze.svg" alt="迷路ゲームの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">迷路ゲームの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">迷路生成</span>
+            <span class="tag">再帰</span>
+            <span class="tag">グリッド操作</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/memory/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/memory.svg" alt="神経衰弱の作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">神経衰弱の作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">配列シャッフル</span>
+            <span class="tag">状態管理</span>
+            <span class="tag">マッチング</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/minesweeper/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/minesweeper.svg" alt="マインスイーパーの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">マインスイーパーの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">再帰処理</span>
+            <span class="tag">グリッド</span>
+            <span class="tag">爆弾配置</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/pong/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/pong.svg" alt="ポンゲームの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">ポンゲームの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">ボール反射</span>
+            <span class="tag">AI対戦</span>
+            <span class="tag">Canvas</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/puzzle15/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/puzzle15.svg" alt="15パズルの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">15パズルの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">配列操作</span>
+            <span class="tag">クリック</span>
+            <span class="tag">解法判定</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/reversi/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/reversi.svg" alt="リバーシの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">リバーシの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">ゲームAI</span>
+            <span class="tag">石反転</span>
+            <span class="tag">有効手判定</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/rhythm/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/rhythm.svg" alt="リズムゲームの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">リズムゲームの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">タイミング判定</span>
+            <span class="tag">譜面データ</span>
+            <span class="tag">アニメーション</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/shooting/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/shooting.svg" alt="シューティングの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">シューティングの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">弾丸管理</span>
+            <span class="tag">敵生成</span>
+            <span class="tag">当たり判定</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/simon/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/simon.svg" alt="サイモンゲームの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">サイモンゲームの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">シーケンス記憶</span>
+            <span class="tag">配列比較</span>
+            <span class="tag">フィードバック</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/slime-jump/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/slime-jump.svg" alt="スライムジャンパーの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">スライムジャンパーの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">重力</span>
+            <span class="tag">プラットフォーム</span>
+            <span class="tag">カメラ</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/snake/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/snake.svg" alt="へびゲームの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">へびゲームの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">キュー操作</span>
+            <span class="tag">グリッド移動</span>
+            <span class="tag">衝突判定</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/sokoban/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/sokoban.svg" alt="倉庫番の作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">倉庫番の作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">2次元配列</span>
+            <span class="tag">プッシュ判定</span>
+            <span class="tag">Undo機能</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/sudoku/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/sudoku.svg" alt="数独の作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">数独の作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">バックトラッキング</span>
+            <span class="tag">制約チェック</span>
+            <span class="tag">パズル生成</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/tetris/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/tetris.svg" alt="テトリスの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">テトリスの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">回転処理</span>
+            <span class="tag">行消去</span>
+            <span class="tag">落下タイマー</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/tictactoe/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/tictactoe.svg" alt="三目並べの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">三目並べの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">ミニマックスAI</span>
+            <span class="tag">勝利判定</span>
+            <span class="tag">ターン管理</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/tower-defense/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/tower-defense.svg" alt="タワーディフェンスの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">タワーディフェンスの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">経路探索</span>
+            <span class="tag">タワーAI</span>
+            <span class="tag">ウェーブ管理</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/typing/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/typing.svg" alt="タイピングゲームの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">タイピングゲームの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">キーイベント</span>
+            <span class="tag">文字列比較</span>
+            <span class="tag">WPM計算</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/whack-a-mole/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/whack-a-mole.svg" alt="もぐらたたきの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">もぐらたたきの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">ランダム出現</span>
+            <span class="tag">クリック判定</span>
+            <span class="tag">タイマー</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="../games/word-search/tutorial/" class="game-card-link">
+        <img src="../images/thumbnails/word-search.svg" alt="単語探しの作り方" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">単語探しの作り方</h3>
+          <div class="tutorial-keywords">
+            <span class="tag">2次元配列</span>
+            <span class="tag">単語配置</span>
+            <span class="tag">ドラッグ選択</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="promo-banner">
+    <div class="promo-banner-inner">
+      <h2>教室でもっと深く学ぼう！</h2>
+      <p>ひなテックでは、プロの講師と一緒にゲーム開発を学べます。<br>わからないところもすぐに質問できる環境で、楽しくステップアップ！</p>
+      <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
+    </div>
+  </section>
+
+  <div id="footer"></div>
+
+  <script src="../js/common.js" data-base="../"></script>
+</body>
+</html>

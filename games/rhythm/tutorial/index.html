@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>リズムゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="リズムゲームをJavaScriptで作る方法をステップごとにやさしく解説。タイミング判定や譜面データ管理の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="リズムゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="リズムゲームをJavaScriptで作る方法をステップごとにやさしく解説。タイミング判定やアニメーションが学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/rhythm/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "リズムゲームの作り方",
+    "description": "JavaScriptでリズムゲームを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "Canvas要素とレーン構造を準備し、ノーツの描画基盤を作ります"},
+      {"@type": "HowToStep", "name": "譜面データの管理とノーツの生成", "text": "BPMに基づいた譜面データを自動生成し、ノーツを画面上に流します"},
+      {"@type": "HowToStep", "name": "タイミング判定とコンボシステム", "text": "PERFECT/GREAT/GOOD/MISSの判定と、コンボボーナスを実装します"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>リズムゲームの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/rhythm" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>リズムゲームは、音楽に合わせてタイミングよくボタンを押すゲームです。このチュートリアルでは、JavaScriptとCanvasを使ってリズムゲームを作る方法を学びましょう。譜面データの管理、タイミング判定の仕組み、ノーツのアニメーションなど、タイミングベースのゲーム開発に必要な技術を身につけられます。</p>
+      <ul class="concept-list">
+        <li>PERFECT/GREAT/GOOD/MISSのタイミング判定のしくみ</li>
+        <li>BPMに基づいた譜面データの管理と自動生成</li>
+        <li>Canvasを使ったノーツとエフェクトのアニメーション</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>レーンとノーツの基本構造を準備しよう</h2>
+      <p>リズムゲームの画面は複数の「レーン」に分かれていて、ノーツ（音符）が上から下に流れてきます。まず、レーンの数やノーツの速度、判定の範囲といった定数を定義しましょう。</p>
+      <pre class="code-block"><code>var LANE_COUNT = 4;
+var JUDGE_Y_RATIO = 0.82;
+var NOTE_SPEED = 3;
+var PERFECT_RANGE = 20;
+var GREAT_RANGE = 40;
+var GOOD_RANGE = 65;
+var MISS_RANGE = 90;
+
+var SCORE_PERFECT = 300;
+var SCORE_GREAT = 200;
+var SCORE_GOOD = 100;
+
+var LANE_COLORS = ['#E74C3C', '#3498DB', '#2ECC71', '#F1C40F'];
+var LANE_KEYS = ['KeyD', 'KeyF', 'KeyJ', 'KeyK'];</code></pre>
+      <p>4つのレーンにそれぞれ色とキーを割り当てています。<code>JUDGE_Y_RATIO</code>は画面の82%の位置に判定ラインを置くことを意味します。判定の範囲は距離（ピクセル）で定義し、判定ラインから近いほど高得点です。この数値を調整することで、ゲームの難易度を変えられます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>譜面データの管理とノーツ生成を作ろう</h2>
+      <h3>BPMベースの自動譜面生成</h3>
+      <p>譜面（chart）はノーツの出現タイミングとレーン番号のリストです。BPM（テンポ）から1拍の時間を計算し、パターンベースで譜面を自動生成しましょう。</p>
+      <pre class="code-block"><code>var BPM = 130;
+var BEAT_MS = 60000 / BPM;
+
+function generateChart() {
+  chart = [];
+  var totalBeats = 128;
+  var patterns = [
+    [[0], [], [2], []],         // 基本パターン
+    [[0], [1], [2], [3]],       // 階段
+    [[0, 2], [], [1, 3], []],   // 同時押し
+    [[3], [2], [1], [0]],       // 逆階段
+  ];
+
+  var beat = 4; // イントロ休み
+  while (beat &lt; totalBeats - 4) {
+    var difficulty = Math.min(beat / totalBeats, 1);
+    var pat = patterns[Math.floor(Math.random() * patterns.length)];
+
+    for (var i = 0; i &lt; pat.length; i++) {
+      var lanes = pat[i];
+      for (var j = 0; j &lt; lanes.length; j++) {
+        chart.push({ time: beat * BEAT_MS, lane: lanes[j] });
+      }
+      beat += 1;
+    }
+  }
+  chart.sort(function (a, b) { return a.time - b.time; });
+}</code></pre>
+      <p><code>BEAT_MS</code>でBPM130なら1拍あたり約461ミリ秒と計算できます。パターン配列の各要素が1拍分に対応し、空配列<code>[]</code>は休符を表します。曲の進行に合わせて<code>difficulty</code>を上げていくことで、後半ほど複雑なパターンが出やすくなります。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>タイミング判定とコンボシステムを実装しよう</h2>
+      <p>プレイヤーがキーを押したとき、そのレーンにある最も近いノーツとの距離で判定を行います。距離が近いほど高評価、遠いとMISS。連続成功でコンボが増え、ボーナスポイントが加算されるしくみです。</p>
+      <pre class="code-block"><code>function hitLane(lane) {
+  if (!running) return;
+  var judgeY = H * JUDGE_Y_RATIO;
+
+  // 最も近いノーツを探す
+  var closest = null;
+  var closestDist = Infinity;
+  for (var i = 0; i &lt; notes.length; i++) {
+    var n = notes[i];
+    if (n.lane !== lane || n.hit) continue;
+    var dist = Math.abs(n.y - judgeY);
+    if (dist &lt; closestDist) {
+      closestDist = dist;
+      closest = n;
+    }
+  }
+  if (!closest) return;
+
+  if (closestDist &lt;= PERFECT_RANGE) {
+    points = SCORE_PERFECT; combo++;
+  } else if (closestDist &lt;= GREAT_RANGE) {
+    points = SCORE_GREAT; combo++;
+  } else if (closestDist &lt;= GOOD_RANGE) {
+    points = SCORE_GOOD; combo++;
+  } else if (closestDist &lt;= MISS_RANGE) {
+    points = 0; combo = 0;
+  }
+  // コンボボーナス
+  points += Math.floor(combo * 5);
+  score += points;
+  closest.hit = true;
+}</code></pre>
+      <p>判定ラインとノーツのY座標の差（距離）で判定を分岐しています。コンボが続くほどボーナスが増えるので、連続でPERFECTを出すのが高得点のカギになります。ノーツに<code>hit = true</code>をセットして二重判定を防いでいるのもポイントです。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、レーン構造の設計、BPMベースの譜面生成、タイミング判定とコンボシステムの3つを学びました。発展として、Web Audio APIで実際の音楽を再生したり、長押しノーツ（ロングノート）を追加したり、譜面エディターを作ったりしてみましょう。エフェクトやパーティクルを追加すると、見た目もぐっとかっこよくなりますよ。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../typing/tutorial/">タイピングゲームの作り方</a></li>
+        <li><a href="../../simon/tutorial/">サイモンゲームの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2048の作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="2048をJavaScriptで作る方法をステップごとにやさしく解説。2次元配列やタイルマージの基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="2048の作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="2048をJavaScriptで作る方法をステップごとにやさしく解説。2次元配列やタイルマージが学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/2048/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "2048の作り方",
+    "description": "JavaScriptで2048を作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとグリッドの準備", "text": "4x4のゲームボードをHTMLで作り、タイルを表示する領域を準備します。"},
+      {"@type": "HowToStep", "name": "2次元配列でグリッドを管理する", "text": "4x4の2次元配列を使ってタイルの数字を管理し、ランダムにタイルを追加します。"},
+      {"@type": "HowToStep", "name": "タイルのスライドとマージを実装する", "text": "行のスライド処理で同じ数字のタイルを合体させ、キー入力で4方向に対応します。"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>2048の作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/2048" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>2048は、4x4のグリッド上でタイルをスライドさせて同じ数字を合体させるパズルゲームです。このゲームを作ることで、2次元配列の操作やキーボード入力の処理といったゲーム開発の基本が身につきます。</p>
+      <ul class="concept-list">
+        <li>2次元配列を使ったグリッド管理</li>
+        <li>タイルのスライドとマージ（合体）ロジック</li>
+        <li>キーボード入力とスワイプ操作の処理</li>
+        <li>スコア管理とゲームオーバー判定</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ1: グリッドの初期化とタイル追加</h2>
+      <p>まずは4x4のグリッドを2次元配列で作りましょう。グリッドはゲームの「盤面」にあたります。最初は全てのセルを0（空）で埋めて、ランダムな場所に2つのタイルを置きます。</p>
+      <pre class="code-block"><code>var SIZE = 4;
+var grid = [];
+
+function init() {
+  grid = [];
+  for (var r = 0; r &lt; SIZE; r++) {
+    grid[r] = [];
+    for (var c = 0; c &lt; SIZE; c++) {
+      grid[r][c] = 0;
+    }
+  }
+  addRandomTile();
+  addRandomTile();
+}</code></pre>
+      <p><code>grid[r][c]</code> で行(r)と列(c)の位置にあるタイルの値にアクセスできます。0は「空きマス」を表しています。</p>
+      <h3>空きセルにランダムにタイルを置く</h3>
+      <p>空いているセルを探して、そこにランダムに2か4のタイルを追加しましょう。90%の確率で2、10%の確率で4が出るようにします。</p>
+      <pre class="code-block"><code>function emptyCells() {
+  var cells = [];
+  for (var r = 0; r &lt; SIZE; r++) {
+    for (var c = 0; c &lt; SIZE; c++) {
+      if (grid[r][c] === 0) cells.push({ r: r, c: c });
+    }
+  }
+  return cells;
+}
+
+function addRandomTile() {
+  var empty = emptyCells();
+  if (empty.length === 0) return;
+  var cell = empty[Math.floor(Math.random() * empty.length)];
+  grid[cell.r][cell.c] = Math.random() &lt; 0.9 ? 2 : 4;
+}</code></pre>
+      <p><code>emptyCells()</code> で空きマスの一覧を作り、そこからランダムに1つ選んで値を入れています。<code>Math.random()</code> を使ったランダム選択は、ゲーム開発でとてもよく使うテクニックです。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ2: タイルのスライドとマージを作ろう</h2>
+      <p>2048のコアとなるのが「スライド処理」です。プレイヤーが方向キーを押したとき、タイルを寄せて同じ数字のタイルを合体させます。まず、1行分を左にスライドする関数を作りましょう。</p>
+      <pre class="code-block"><code>function slideRow(row) {
+  // ゼロ（空きマス）を除去
+  var filtered = row.filter(function (v) { return v !== 0; });
+  var merged = [];
+  var scoreGain = 0;
+
+  for (var i = 0; i &lt; filtered.length; i++) {
+    if (i + 1 &lt; filtered.length &amp;&amp; filtered[i] === filtered[i + 1]) {
+      var newVal = filtered[i] * 2;
+      merged.push(newVal);
+      scoreGain += newVal;
+      i++; // 次をスキップ
+    } else {
+      merged.push(filtered[i]);
+    }
+  }
+
+  // 残りをゼロで埋める
+  while (merged.length &lt; SIZE) {
+    merged.push(0);
+  }
+  return { row: merged, scoreGain: scoreGain };
+}</code></pre>
+      <p>このコードでは、まず0を除いて詰めてから、隣り合う同じ数字を合体させています。<code>[2, 2, 4, 0]</code> なら <code>[4, 4, 0, 0]</code> になります。</p>
+      <h3>4方向への対応</h3>
+      <p>上下左右すべての方向に対応するために、グリッドを回転させて「常に左方向のスライド」で処理する方法を使います。</p>
+      <pre class="code-block"><code>function rotateGrid(g, times) {
+  var result = g;
+  for (var t = 0; t &lt; times; t++) {
+    var newGrid = [];
+    for (var r = 0; r &lt; SIZE; r++) {
+      newGrid[r] = [];
+      for (var c = 0; c &lt; SIZE; c++) {
+        newGrid[r][c] = result[c][SIZE - 1 - r];
+      }
+    }
+    result = newGrid;
+  }
+  return result;
+}</code></pre>
+      <p>左を0回転、上を1回転、右を2回転、下を3回転させることで、すべての方向を1つの<code>slideRow</code>関数で処理できます。これはとてもスマートなテクニックです。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ3: キー入力とゲームオーバー判定を実装しよう</h2>
+      <p>プレイヤーの操作を受け取るために、キーボードイベントを設定しましょう。矢印キーとWASDキーの両方に対応させます。</p>
+      <pre class="code-block"><code>document.addEventListener('keydown', function (e) {
+  var keyMap = {
+    ArrowLeft: 'left', ArrowRight: 'right',
+    ArrowUp: 'up', ArrowDown: 'down',
+    a: 'left', d: 'right', w: 'up', s: 'down'
+  };
+  var dir = keyMap[e.key];
+  if (dir) {
+    e.preventDefault();
+    move(dir);
+  }
+});</code></pre>
+      <p><code>keyMap</code>オブジェクトでキーと方向を対応させています。<code>e.preventDefault()</code>は、矢印キーでページがスクロールしてしまうのを防ぎます。</p>
+      <h3>ゲームオーバー判定</h3>
+      <p>全てのマスが埋まり、隣り合う同じ数字がなくなったらゲームオーバーです。</p>
+      <pre class="code-block"><code>function canMove() {
+  for (var r = 0; r &lt; SIZE; r++) {
+    for (var c = 0; c &lt; SIZE; c++) {
+      if (grid[r][c] === 0) return true;
+      var val = grid[r][c];
+      if (c + 1 &lt; SIZE &amp;&amp; grid[r][c + 1] === val) return true;
+      if (r + 1 &lt; SIZE &amp;&amp; grid[r + 1][c] === val) return true;
+    }
+  }
+  return false;
+}</code></pre>
+      <p>空きマスがあるか、隣り合う同じ数字があるかをチェックします。どちらもなければ、もう動かせないのでゲームオーバーです。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>おつかれさまでした！ここまでで2048の基本が完成しました。2次元配列でグリッドを管理し、スライド＆マージのロジックを組み、キー入力で操作できるようにしました。さらに発展させるなら、タイルにアニメーションを付けたり、スワイプ操作でスマホ対応にしたり、5x5の大きなグリッドに挑戦してみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../puzzle15/tutorial/">15パズルの作り方</a></li>
+        <li><a href="../../tetris/tutorial/">テトリスの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

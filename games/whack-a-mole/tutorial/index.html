@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>もぐらたたきの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="もぐらたたきをJavaScriptで作る方法をステップごとにやさしく解説。ランダム出現やクリック判定の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="もぐらたたきの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="もぐらたたきをJavaScriptで作る方法をステップごとにやさしく解説。ランダム出現やクリック判定が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/whack-a-mole/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "もぐらたたきの作り方",
+    "description": "JavaScriptでもぐらたたきを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "3x3のもぐら穴とJavaScriptの基本セットアップを行います"},
+      {"@type": "HowToStep", "name": "ランダム出現とタイマー管理", "text": "もぐらのランダム出現と出現間隔の制御を実装します"},
+      {"@type": "HowToStep", "name": "クリック判定とスコア", "text": "もぐらをたたく判定とスコア加算を実装します"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>もぐらたたきの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/whack-a-mole" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>もぐらたたきは、穴からランダムに顔を出すもぐらを素早くたたくアクションゲームです。ランダムなタイミングでの出現制御、クリック/タップの判定処理、カウントダウンタイマーの管理など、リアルタイムゲームの基本がまとまって学べる初心者にぴったりのゲームです。</p>
+      <ul class="concept-list">
+        <li>ランダム出現（もぐらの出現穴と間隔をランダムに決める）</li>
+        <li>クリック判定（もぐらが出ているかどうかをチェック）</li>
+        <li>タイマー管理（カウントダウンと難易度の動的変化）</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>HTMLとCanvasの準備をしよう</h2>
+      <p>もぐらたたきは、DOM要素で3x3の穴を作ります。各穴の中にもぐらの要素を配置し、CSSアニメーションでもぐらが出たり引っ込んだりする演出をつけましょう。まずはゲームの定数と状態変数を用意します。</p>
+      <pre class="code-block"><code>var GAME_DURATION = 30;            // ゲーム時間（秒）
+var SCORE_PER_HIT = 10;            // 1回のヒットで得るスコア
+var INITIAL_MOLE_INTERVAL = 1200;  // もぐらの出現間隔（ミリ秒）
+var MIN_MOLE_INTERVAL = 500;       // 出現間隔の最小値
+var INITIAL_MOLE_DURATION = 1000;  // もぐらがいる時間（ミリ秒）
+var MIN_MOLE_DURATION = 450;       // もぐら表示時間の最小値
+var HOLE_COUNT = 9;                // 穴の数（3x3）
+
+var score = 0;
+var timeLeft = GAME_DURATION;
+var gameRunning = false;
+var activeMoles = {};   // 現在出ているもぐらの管理
+var lastMoleIndex = -1; // 直前に出たもぐらの穴番号</code></pre>
+      <p><code>activeMoles</code>オブジェクトで、どの穴にもぐらが出ているかを管理します。<code>lastMoleIndex</code>で前回と同じ穴に連続して出るのを防ぎます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ランダム出現とタイマー管理を作ろう</h2>
+      <h3>もぐらをランダムな穴から出す</h3>
+      <p>もぐらが出る穴をランダムに選びますが、既にもぐらが出ている穴や、直前に出た穴を避けることで、自然な出現パターンになります。時間の経過とともに出現間隔を短くして、難易度を上げましょう。</p>
+      <pre class="code-block"><code>// ランダムな穴を選ぶ（前回と同じ穴を避ける）
+function getRandomHoleIndex() {
+  var available = [];
+  for (var i = 0; i &lt; HOLE_COUNT; i++) {
+    if (!activeMoles[i] &amp;&amp; i !== lastMoleIndex) {
+      available.push(i);
+    }
+  }
+  if (available.length === 0) return -1;
+  return available[Math.floor(Math.random() * available.length)];
+}
+
+// 難易度に応じた出現間隔を計算
+function getMoleInterval() {
+  var elapsed = GAME_DURATION - timeLeft;
+  var progress = elapsed / GAME_DURATION;
+  var interval = INITIAL_MOLE_INTERVAL
+    - (INITIAL_MOLE_INTERVAL - MIN_MOLE_INTERVAL) * progress;
+  return Math.max(interval, MIN_MOLE_INTERVAL);
+}</code></pre>
+      <p><code>progress</code>は0から1に変化する値で、ゲームの経過割合を表します。時間が進むほど<code>interval</code>が小さくなり、もぐらの出現が速くなります。</p>
+
+      <h3>もぐらの出現スケジュール</h3>
+      <pre class="code-block"><code>function showMole(index) {
+  if (index &lt; 0 || activeMoles[index]) return;
+  var mole = moles[index];
+  mole.classList.add('active');
+  lastMoleIndex = index;
+
+  // 一定時間後にもぐらを引っ込める
+  var duration = getMoleDuration();
+  activeMoles[index] = setTimeout(function () {
+    hideMole(index);
+  }, duration);
+}
+
+function scheduleMole() {
+  if (!gameRunning) return;
+  var index = getRandomHoleIndex();
+  if (index &gt;= 0) showMole(index);
+
+  // 次のもぐらをスケジュール
+  var interval = getMoleInterval();
+  moleSpawnTimer = setTimeout(scheduleMole, interval);
+}</code></pre>
+      <p><code>setTimeout</code>を使って、もぐらが自動的に引っ込む処理と、次のもぐらの出現を連鎖的にスケジュールします。<code>scheduleMole</code>が自分自身を再スケジュールすることで、ゲーム中ずっともぐらが出続けます。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>クリック判定とスコアを実装しよう</h2>
+      <p>穴をクリック（またはタップ）したとき、そこにもぐらが出ていればヒットとしてスコアを加算します。既にたたかれたもぐらを二重にカウントしないよう、<code>whacked</code>クラスでガードしましょう。</p>
+      <pre class="code-block"><code>function whackMole(index) {
+  if (!gameRunning) return;
+  if (!activeMoles[index]) return; // もぐらが出ていない
+
+  var mole = moles[index];
+  if (mole.classList.contains('whacked')) return; // 既にたたかれた
+
+  // たたくエフェクト
+  mole.classList.add('whacked');
+
+  // スコア加算
+  score += SCORE_PER_HIT;
+  updateScore();
+
+  // 少し遅延してから引っ込める
+  clearTimeout(activeMoles[index]);
+  activeMoles[index] = setTimeout(function () {
+    hideMole(index);
+  }, 300);
+}
+
+// 各穴にクリック・タッチイベントを設定
+for (var i = 0; i &lt; holes.length; i++) {
+  (function (index) {
+    holes[index].addEventListener('click', function (e) {
+      e.preventDefault();
+      whackMole(index);
+    });
+    holes[index].addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      whackMole(index);
+    }, { passive: false });
+  })(i);
+}</code></pre>
+      <p>クロージャ（即時関数）を使って、ループ変数<code>i</code>の値を各イベントハンドラにキャプチャしています。<code>touchstart</code>イベントも追加することで、スマートフォンでも快適に遊べます。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>このチュートリアルでは、ランダムな出現制御、クリック判定とスコア管理、動的な難易度変化の仕組みを学びました。さらに発展させるなら、特別なもぐら（たたくとボーナスや減点）、コンボシステム（連続ヒットでボーナス）、もぐらの出現アニメーション強化、難易度選択モードなどを追加してみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../catching/tutorial/">キャッチゲームの作り方</a></li>
+        <li><a href="../../simon/tutorial/">サイモンゲームの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>

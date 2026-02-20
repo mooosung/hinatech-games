@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>キャッチゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames</title>
+  <meta name="description" content="キャッチゲームをJavaScriptで作る方法をステップごとにやさしく解説。落下オブジェクトやスコア管理の基本が身につきます。コード付きで初心者でも安心。実際に遊べるゲーム付き。">
+  <meta property="og:title" content="キャッチゲームの作り方 - JavaScriptでブラウザゲーム開発【初心者向け】｜ひなテックGames">
+  <meta property="og:description" content="キャッチゲームをJavaScriptで作る方法をステップごとにやさしく解説。落下オブジェクトやスコア管理が学べます。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/catching/tutorial/">
+  <meta property="og:site_name" content="ひなテックGames">
+  <meta property="og:locale" content="ja_JP">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "キャッチゲームの作り方",
+    "description": "JavaScriptでキャッチゲームを作る方法をステップごとに解説",
+    "step": [
+      {"@type": "HowToStep", "name": "HTMLとCanvasの準備", "text": "Canvas要素を配置し、バスケットとフルーツの描画準備をします。"},
+      {"@type": "HowToStep", "name": "落下オブジェクトの生成と移動", "text": "フルーツと爆弾を上から落下させ、バスケットでキャッチする仕組みを作ります。"},
+      {"@type": "HowToStep", "name": "スコア管理と難易度変化を実装する", "text": "スコアに応じて落下速度が上がる難易度システムを実装します。"}
+    ],
+    "tool": [
+      {"@type": "HowToTool", "name": "テキストエディタ（VS Code等）"},
+      {"@type": "HowToTool", "name": "Webブラウザ（Chrome等）"}
+    ],
+    "totalTime": "PT30M",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ひなテック",
+      "url": "https://hinata-ya.tech"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="tutorial-page">
+    <h1>キャッチゲームの作り方 — JavaScriptでブラウザゲームを作ろう</h1>
+    <div class="tutorial-header">
+      <a href="../">このゲームで遊ぶ →</a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/catching" target="_blank" rel="noopener">ソースコード全文 →</a>
+    </div>
+
+    <section class="about-section">
+      <h2>このチュートリアルで学べること</h2>
+      <p>キャッチゲームは、上から落ちてくるフルーツをバスケットでキャッチするシンプルなゲームです。爆弾を避けながらハイスコアを目指します。このゲームを作ることで、落下オブジェクトの管理やスコアに連動した難易度変化の仕組みが身につきます。</p>
+      <ul class="concept-list">
+        <li>落下オブジェクトの生成と配列での管理</li>
+        <li>バスケットとアイテムの当たり判定</li>
+        <li>スコアに応じた難易度の動的変化</li>
+        <li>ライフ制とゲームオーバー処理</li>
+      </ul>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ1: バスケットとフルーツを描画しよう</h2>
+      <p>Canvasにバスケットとフルーツを描画しましょう。バスケットはキャンバスの下部に配置し、マウスやキーボードで左右に動かせるようにします。</p>
+      <pre class="code-block"><code>var BASKET_WIDTH_RATIO = 0.18;
+var BASKET_HEIGHT_RATIO = 0.06;
+
+// バスケットのサイズをキャンバスに合わせて計算
+basketW = canvasW * BASKET_WIDTH_RATIO;
+basketH = canvasH * BASKET_HEIGHT_RATIO;
+basketY = canvasH - basketH - 10;
+basketX = (canvasW - basketW) / 2;</code></pre>
+      <p>キャンバスサイズに対する比率でバスケットの大きさを決めています。こうすると画面サイズが変わっても自然なバランスを保てます。</p>
+      <h3>フルーツの描画</h3>
+      <p>フルーツは円で描きます。色違いのフルーツを用意しましょう。</p>
+      <pre class="code-block"><code>var FRUIT_COLORS = [
+  { fill: '#E74C3C', name: 'りんご' },
+  { fill: '#F39C12', name: 'オレンジ' },
+  { fill: '#2ECC71', name: 'メロン' },
+  { fill: '#9B59B6', name: 'ぶどう' },
+  { fill: '#F1C40F', name: 'レモン' }
+];
+
+function drawFruit(item) {
+  ctx.fillStyle = item.color.fill;
+  ctx.beginPath();
+  ctx.arc(item.x, item.y, itemRadius, 0, Math.PI * 2);
+  ctx.fill();
+}</code></pre>
+      <p>5種類のフルーツをカラフルに表示します。<code>arc</code>メソッドで円を描くだけなので、とてもシンプルです。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ2: アイテムの落下と当たり判定を作ろう</h2>
+      <p>フルーツと爆弾を一定間隔で画面上部に生成し、毎フレーム下に落下させましょう。</p>
+      <pre class="code-block"><code>function spawnItem() {
+  var isBomb = Math.random() &lt; 0.2; // 20%の確率で爆弾
+  var x = itemRadius + Math.random() * (canvasW - itemRadius * 2);
+
+  items.push({
+    x: x,
+    y: -itemRadius,
+    isBomb: isBomb,
+    color: isBomb ? null : FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)]
+  });
+}
+
+// 毎フレームの落下処理
+for (var i = items.length - 1; i &gt;= 0; i--) {
+  items[i].y += currentFallSpeed;
+}</code></pre>
+      <p><code>Math.random() &lt; 0.2</code>で20%の確率で爆弾を出現させています。ループを逆順に回すのは、途中で要素を削除しても添字がずれないようにするためです。</p>
+      <h3>当たり判定</h3>
+      <p>アイテムの中心がバスケットの矩形内に入ったら「キャッチ」です。</p>
+      <pre class="code-block"><code>function checkCollision(item) {
+  return (
+    item.x &gt;= basketX - itemRadius * 0.5 &amp;&amp;
+    item.x &lt;= basketX + basketW + itemRadius * 0.5 &amp;&amp;
+    item.y + itemRadius &gt;= basketY &amp;&amp;
+    item.y - itemRadius &lt;= basketY + basketH
+  );
+}
+
+if (checkCollision(items[i])) {
+  if (items[i].isBomb) {
+    lives--;  // 爆弾でライフ減少
+  } else {
+    score += 10;  // フルーツでスコア加算
+  }
+  items.splice(i, 1);  // アイテムを削除
+}</code></pre>
+      <p>フルーツをキャッチしたらスコアが増え、爆弾をキャッチするとライフが減ります。<code>splice</code>で配列からアイテムを削除しています。</p>
+    </section>
+
+    <section class="about-section tutorial-step">
+      <h2>ステップ3: 難易度変化を実装しよう</h2>
+      <p>スコアが上がるにつれて、落下速度が速くなり出現間隔が短くなるようにしましょう。これでゲームがだんだん難しくなります。</p>
+      <pre class="code-block"><code>var INITIAL_FALL_SPEED = 2;
+var MAX_FALL_SPEED = 8;
+var SPEED_INCREMENT = 0.005;
+var INITIAL_SPAWN_INTERVAL = 60;
+var MIN_SPAWN_INTERVAL = 20;
+
+function updateDifficulty() {
+  currentFallSpeed = Math.min(
+    INITIAL_FALL_SPEED + score * SPEED_INCREMENT,
+    MAX_FALL_SPEED
+  );
+  currentSpawnInterval = Math.max(
+    INITIAL_SPAWN_INTERVAL - Math.floor(score / 5),
+    MIN_SPAWN_INTERVAL
+  );
+}</code></pre>
+      <p><code>Math.min</code>で最大速度を制限し、<code>Math.max</code>で最小間隔を制限しています。こうすることで、ゲームが無限に難しくなるのを防ぎつつ、プレイヤーに緊張感を持たせられます。スコア10点ごとに少しずつ速くなるので、プレイヤーは上達を実感できます。</p>
+      <h3>キャッチエフェクト</h3>
+      <p>キャッチしたときに「+10」のようなテキストが浮き上がるエフェクトも付けましょう。</p>
+      <pre class="code-block"><code>function addEffect(x, y, text, color) {
+  effects.push({
+    x: x, y: y, text: text, color: color,
+    alpha: 1, dy: -2
+  });
+}
+
+function updateEffects() {
+  for (var i = effects.length - 1; i &gt;= 0; i--) {
+    effects[i].y += effects[i].dy;
+    effects[i].alpha -= 0.025;
+    if (effects[i].alpha &lt;= 0) effects.splice(i, 1);
+  }
+}</code></pre>
+      <p>テキストが上に浮かびながら透明になっていくエフェクトです。<code>alpha</code>を少しずつ減らし、0になったら配列から削除します。</p>
+    </section>
+
+    <section class="about-section">
+      <h2>まとめ — 次のステップ</h2>
+      <p>おつかれさまでした！落下オブジェクトの管理、当たり判定、難易度変化という3つのテクニックを使ってキャッチゲームの仕組みが分かりましたね。発展として、特別なアイテム（スコア2倍やバスケットが大きくなるなど）を追加したり、ステージ制にしてみましょう。</p>
+    </section>
+
+    <section class="about-section faq-section">
+      <h2>よくある質問</h2>
+      <h3>Q: プログラミング初心者でも作れますか？</h3>
+      <p>A: はい、大丈夫です。このチュートリアルではステップごとにコードを書いていくので、初めての方でも順番に進めれば完成できます。わからないところがあれば、ひなテックの教室で質問もできますよ。</p>
+      <h3>Q: どのくらい時間がかかりますか？</h3>
+      <p>A: 基本部分は約30分〜1時間で作れます。見た目をこだわったり機能を追加すると、さらに楽しく発展させられます。</p>
+    </section>
+
+    <section class="about-section related-tutorials">
+      <h2>関連チュートリアル</h2>
+      <ul>
+        <li><a href="../../absorb/tutorial/">おさかなサバイバルの作り方</a></li>
+        <li><a href="../../whack-a-mole/tutorial/">もぐらたたきの作り方</a></li>
+      </ul>
+    </section>
+
+    <nav class="tutorial-nav">
+      <a href="../">&larr; ゲームを遊ぶ</a>
+      <a href="../../../tutorials/">他の作り方も見る &rarr;</a>
+    </nav>
+  </div>
+
+  <div id="footer"></div>
+  <script src="../../../js/common.js" data-base="../../../"></script>
+</body>
+</html>
