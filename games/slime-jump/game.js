@@ -127,7 +127,6 @@
       type: type || PLAT_NORMAL,
       broken: false,
       cracked: false,
-      breakTimer: 0,
       moveDir: (Math.random() < 0.5 ? 1 : -1),
       moveSpeed: 1 + Math.random() * 1.5
     };
@@ -414,7 +413,7 @@
         var prevPy = py - player.vy;
 
         if (px + pw > p.x && px < p.x + p.w &&
-            py >= p.y && prevPy <= p.y + p.h) {
+            py >= p.y && prevPy <= p.y) {
 
           if (p.type === PLAT_BREAK && p.cracked) {
             p.broken = true;
@@ -425,7 +424,6 @@
           player.y = p.y - player.h;
           if (p.type === PLAT_BREAK) {
             p.cracked = true;
-            p.breakTimer = 12;
             player.vy = JUMP_FORCE;
             player.squash = 0.5;
             spawnParticles(player.x + player.w / 2, player.y + player.h, '#E67E22', 4);
@@ -449,18 +447,6 @@
         p.x += p.moveDir * p.moveSpeed;
         if (p.x < 0 || p.x + p.w > W) {
           p.moveDir *= -1;
-        }
-      }
-    }
-
-    // 壊れる床のタイマー処理
-    for (var i = 0; i < platforms.length; i++) {
-      var p = platforms[i];
-      if (p.type === PLAT_BREAK && p.cracked && !p.broken) {
-        p.breakTimer--;
-        if (p.breakTimer <= 0) {
-          p.broken = true;
-          spawnParticles(p.x + p.w / 2, p.y, '#E67E22', 8);
         }
       }
     }
