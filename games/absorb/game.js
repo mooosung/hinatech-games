@@ -45,6 +45,7 @@
   var targetX, targetY;
   var mouseActive = false;
   var frameCount = 0;
+  var floatingTexts = [];
 
   // ============================================
   // DOM要素
@@ -122,6 +123,7 @@
       x: x,
       y: y,
       radius: radius,
+      score: Math.ceil(radius),
       color: FISH_COLORS[Math.floor(Math.random() * FISH_COLORS.length)],
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
@@ -192,6 +194,7 @@
       x: canvasW / 2,
       y: canvasH / 2,
       radius: INITIAL_PLAYER_RADIUS,
+      score: Math.ceil(INITIAL_PLAYER_RADIUS),
       color: '#3498DB',
       vx: 0,
       vy: 0,
@@ -260,8 +263,13 @@
 
       if (d < touchDist * 0.7) {
         if (player.radius > npc.radius) {
-          var gained = Math.ceil(npc.radius);
-          score += gained;
+          score += npc.score;
+          player.score += npc.score;
+          floatingTexts.push({
+            x: npc.x, y: npc.y,
+            text: '+' + npc.score,
+            life: 1
+          });
           player.radius += npc.radius * ABSORB_GROWTH / player.radius * 5;
           npcs.splice(i, 1);
           updateScore();
@@ -270,6 +278,14 @@
           return;
         }
       }
+    }
+
+    // フローティングテキスト更新
+    for (var fi = floatingTexts.length - 1; fi >= 0; fi--) {
+      var ft = floatingTexts[fi];
+      ft.y -= 1.2;
+      ft.life -= 0.025;
+      if (ft.life <= 0) floatingTexts.splice(fi, 1);
     }
 
     // 泡の更新
@@ -321,6 +337,21 @@
     // プレイヤー描画
     if (player) {
       drawFish(player, true);
+    }
+
+    // フローティングテキスト描画
+    for (var fi = 0; fi < floatingTexts.length; fi++) {
+      var ft = floatingTexts[fi];
+      ctx.save();
+      ctx.globalAlpha = ft.life;
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFD700';
+      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+      ctx.lineWidth = 3;
+      ctx.strokeText(ft.text, ft.x, ft.y);
+      ctx.fillText(ft.text, ft.x, ft.y);
+      ctx.restore();
     }
   }
 
@@ -451,9 +482,9 @@
       ctx.stroke();
     }
 
-    // サイズ数字（反転を打ち消してから描画）
+    // スコア数字（反転を打ち消してから描画）
     ctx.scale(facing, 1);
-    var sizeNum = Math.ceil(r);
+    var sizeNum = fish.score || Math.ceil(r);
     var fontSize = Math.max(7, r * 0.45);
     ctx.fillStyle = '#fff';
     ctx.font = 'bold ' + fontSize + 'px sans-serif';
@@ -488,6 +519,7 @@
     gameOverFlag = false;
     mouseActive = false;
     frameCount = 0;
+    floatingTexts = [];
     lastSpawnTime = Date.now();
 
     initBubbles();
