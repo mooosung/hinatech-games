@@ -1,6 +1,6 @@
 // ============================================
 // お絵かきクイズ ゲームロジック (AI判定版)
-// TensorFlow.js で手書きイラストをリアルタイム判定
+// TensorFlow.js で手書きイラストを判定
 // ============================================
 
 (function () {
@@ -11,7 +11,6 @@
   // ============================================
   var TIME_PER_ROUND = 30;
   var TOTAL_ROUNDS = 5;
-  var PREDICT_INTERVAL = 1200; // ms - AI推論の間隔
   var MODEL_PATH = 'model/tfjs/model.json';
   var LABELS_PATH = 'model/tfjs/labels.json';
   var IMG_SIZE = 28; // Quick Draw 入力サイズ
@@ -27,10 +26,9 @@
   var currentTheme = null;
   var timeLeft = 0;
   var timerId = null;
-  var predictTimer = null;
   var phase = 'idle'; // 'idle' | 'draw' | 'judging' | 'result'
   var usedThemeIndices = [];
-  var hasDrawn = false; // ユーザーが何か描いたか
+  var hasDrawn = false;
 
   // 描画ツール
   var drawing = false;
@@ -44,7 +42,7 @@
 
   // TF.js モデル
   var model = null;
-  var labels = []; // [{en, ja}, ...]
+  var labels = [];
   var modelReady = false;
 
   // ============================================
@@ -104,12 +102,10 @@
       elModelStatus.textContent = 'AIモデル読み込み中...';
       elModelStatus.className = 'model-status';
 
-      // ラベル読み込み
       var res = await fetch(LABELS_PATH);
       if (!res.ok) throw new Error('labels.json not found');
       labels = await res.json();
 
-      // TF.js モデル読み込み
       model = await tf.loadLayersModel(MODEL_PATH);
       modelReady = true;
 
@@ -185,7 +181,6 @@
   var tmpCtx = tmpCanvas.getContext('2d');
 
   function canvasToTensor() {
-    // 描画キャンバスを 28x28 に縮小
     tmpCtx.fillStyle = '#fff';
     tmpCtx.fillRect(0, 0, IMG_SIZE, IMG_SIZE);
     tmpCtx.drawImage(drawCanvas, 0, 0, drawCanvas.width, drawCanvas.height, 0, 0, IMG_SIZE, IMG_SIZE);
@@ -193,7 +188,6 @@
     var imgData = tmpCtx.getImageData(0, 0, IMG_SIZE, IMG_SIZE);
     var pixels = imgData.data;
 
-    // グレースケール化＆反転 (白=0, 黒=1 → Quick Draw形式)
     var input = new Float32Array(IMG_SIZE * IMG_SIZE);
     for (var i = 0; i < IMG_SIZE * IMG_SIZE; i++) {
       var r = pixels[i * 4];
@@ -203,7 +197,6 @@
       input[i] = (255 - gray) / 255.0;
     }
 
-    // MLP入力: フラットな [1, 784] テンソル
     return tf.tensor2d(input, [1, IMG_SIZE * IMG_SIZE]);
   }
 
@@ -219,7 +212,6 @@
     tensor.dispose();
     prediction.dispose();
 
-    // Top結果を取得
     var results = [];
     for (var i = 0; i < probs.length; i++) {
       results.push({ index: i, prob: probs[i] });
@@ -230,25 +222,23 @@
   }
 
   // ============================================
-  // AIライブ表示更新
+  // AI結果表示（判定後のみ）
   // ============================================
-  function updateAiDisplay(results) {
+  function showAiResult(results) {
     if (!results || results.length === 0) return;
 
     var top = results[0];
     var topLabel = labels[top.index];
     var confidence = Math.round(top.prob * 100);
 
-    elAiGuess.textContent = topLabel.ja + '？';
+    elAiGuess.textContent = topLabel.ja + '（' + confidence + '%）';
 
-    // 正解中かチェック
     if (currentTheme && topLabel.ja === currentTheme.ja) {
       elAiGuess.classList.add('correct');
     } else {
       elAiGuess.classList.remove('correct');
     }
 
-    // 信頼度バー
     elAiConfFill.style.width = confidence + '%';
     elAiConfFill.className = 'ai-confidence-fill';
     if (confidence >= 60) {
@@ -259,28 +249,12 @@
       elAiConfFill.classList.add('low');
     }
 
-    // Top3表示
     var top3 = results.slice(0, 3).map(function (r) {
       return labels[r.index].ja + ' ' + Math.round(r.prob * 100) + '%';
     });
     elAiConfText.textContent = top3.join(' / ');
-  }
 
-  function startPredictLoop() {
-    stopPredictLoop();
-    predictTimer = setInterval(function () {
-      if (phase === 'draw' && hasDrawn) {
-        var results = predict();
-        updateAiDisplay(results);
-      }
-    }, PREDICT_INTERVAL);
-  }
-
-  function stopPredictLoop() {
-    if (predictTimer) {
-      clearInterval(predictTimer);
-      predictTimer = null;
-    }
+    elAiPanel.classList.add('active');
   }
 
   // ============================================
@@ -308,24 +282,22 @@
   // ============================================
   function judgeDrawing() {
     phase = 'judging';
-    stopPredictLoop();
     if (timerId) { clearInterval(timerId); timerId = null; }
     elDoneArea.classList.remove('active');
 
     var results = predict();
     if (!results) {
-      showRoundResult(false, 0, 'AI判定エラー', null);
+      showRoundResult(false, 0, 'AI判定エラー', null, null);
       return;
     }
 
-    // 最終推論表示を更新
-    updateAiDisplay(results);
+    // 判定後にAIパネルを表示
+    showAiResult(results);
 
     var top = results[0];
     var topLabel = labels[top.index];
     var confidence = top.prob;
 
-    // 正解判定: Top1 に正解がある or Top3 にある
     var rank = -1;
     for (var i = 0; i < Math.min(results.length, 5); i++) {
       if (results[i].index === currentTheme._index) {
@@ -339,19 +311,16 @@
     var message = '';
 
     if (rank === 0) {
-      // Top1正解
       isCorrect = true;
       var baseScore = Math.round(confidence * 200);
       var timeBonus = Math.round(timeLeft * 5);
       roundScore = baseScore + timeBonus;
       message = 'AIの自信度 ' + Math.round(confidence * 100) + '% + 時間ボーナス ' + timeBonus;
     } else if (rank >= 1 && rank <= 2) {
-      // Top3に入った（部分点）
       var partialScore = Math.round(results[rank].prob * 80);
       roundScore = partialScore;
       message = 'AIの予想: ' + topLabel.ja + '\nでも' + (rank + 1) + '番目に「' + currentTheme.ja + '」が入ってたよ！';
     } else {
-      // 不正解
       message = 'AIは「' + topLabel.ja + '」だと思ったみたい';
     }
 
@@ -382,9 +351,9 @@
 
     elRoundResult.classList.add('active');
 
-    // 次のラウンドへ自動遷移
     setTimeout(function () {
       elRoundResult.classList.remove('active');
+      elAiPanel.classList.remove('active');
       currentRound++;
       if (currentRound >= TOTAL_ROUNDS) {
         gameOver();
@@ -442,20 +411,14 @@
     elThemeText.textContent = '「' + currentTheme.ja + '」を描こう！';
     elRound.textContent = (currentRound + 1) + '/' + TOTAL_ROUNDS;
     elDoneArea.classList.add('active');
-    elAiPanel.classList.add('active');
-    elAiGuess.textContent = '描き始めてね';
-    elAiGuess.classList.remove('correct');
-    elAiConfFill.style.width = '0%';
-    elAiConfFill.className = 'ai-confidence-fill';
-    elAiConfText.textContent = '';
+    // AIパネルは描画中は非表示
+    elAiPanel.classList.remove('active');
     startTimer();
-    startPredictLoop();
   }
 
   function gameOver() {
     running = false;
     phase = 'idle';
-    stopPredictLoop();
     if (timerId) { clearInterval(timerId); timerId = null; }
     elDoneArea.classList.remove('active');
     elAiPanel.classList.remove('active');
@@ -547,10 +510,6 @@
       clearDrawing();
       render();
       hasDrawn = false;
-      elAiGuess.textContent = '描き始めてね';
-      elAiGuess.classList.remove('correct');
-      elAiConfFill.style.width = '0%';
-      elAiConfText.textContent = '';
     }
   });
 
