@@ -34,6 +34,7 @@
   var player, platforms, particles;
   var cameraY = 0;
   var maxHeight = 0;
+  var lastGeneratedBreak = false;
   var keysDown = {};
   var touchX = null;
   var tiltX = 0;
@@ -125,6 +126,8 @@
       h: PLATFORM_HEIGHT,
       type: type || PLAT_NORMAL,
       broken: false,
+      cracked: false,
+      breakTimer: 0,
       moveDir: (Math.random() < 0.5 ? 1 : -1),
       moveSpeed: 1 + Math.random() * 1.5
     };
@@ -137,6 +140,7 @@
     platforms.push(createPlatform(W / 2 - pw / 2, H - 50, PLAT_NORMAL));
 
     var spacing = H / PLATFORM_COUNT;
+    var lastWasBreak = false;
     for (var i = 1; i < PLATFORM_COUNT * 3; i++) {
       var px = Math.random() * (W - pw);
       var py = H - 50 - i * spacing;
@@ -144,9 +148,10 @@
       var r = Math.random();
       if (i > 5) {
         if (r < 0.15) type = PLAT_MOVING;
-        else if (r < 0.25) type = PLAT_BREAK;
+        else if (r < 0.25 && !lastWasBreak) type = PLAT_BREAK;
         else if (r < 0.32) type = PLAT_SPRING;
       }
+      lastWasBreak = (type === PLAT_BREAK);
       platforms.push(createPlatform(px, py, type));
     }
   }
@@ -216,9 +221,14 @@
     if (p.broken) return;
 
     ctx.save();
+    var drawX = p.x;
+    if (p.type === PLAT_BREAK && p.cracked) {
+      drawX += (Math.random() - 0.5) * 3;
+      py += (Math.random() - 0.5) * 2;
+    }
     var r = 5;
     ctx.beginPath();
-    ctx.roundRect(p.x, py, p.w, p.h, r);
+    ctx.roundRect(drawX, py, p.w, p.h, r);
 
     switch (p.type) {
       case PLAT_NORMAL:
@@ -228,7 +238,7 @@
         ctx.fillStyle = '#3498DB';
         break;
       case PLAT_BREAK:
-        ctx.fillStyle = '#E67E22';
+        ctx.fillStyle = p.cracked ? '#C0392B' : '#E67E22';
         break;
       case PLAT_SPRING:
         ctx.fillStyle = '#2ECC71';
@@ -238,7 +248,21 @@
 
     // 足場の模様
     ctx.fillStyle = 'rgba(255,255,255,0.2)';
-    ctx.fillRect(p.x + 3, py + 2, p.w - 6, 3);
+    ctx.fillRect(drawX + 3, py + 2, p.w - 6, 3);
+
+    // ヒビ模様
+    if (p.type === PLAT_BREAK && p.cracked) {
+      ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(drawX + p.w * 0.3, py);
+      ctx.lineTo(drawX + p.w * 0.4, py + p.h * 0.6);
+      ctx.lineTo(drawX + p.w * 0.5, py + p.h);
+      ctx.moveTo(drawX + p.w * 0.6, py);
+      ctx.lineTo(drawX + p.w * 0.55, py + p.h * 0.5);
+      ctx.lineTo(drawX + p.w * 0.7, py + p.h);
+      ctx.stroke();
+    }
 
     // バネ
     if (p.type === PLAT_SPRING) {
@@ -392,14 +416,20 @@
         if (px + pw > p.x && px < p.x + p.w &&
             py >= p.y && prevPy <= p.y + p.h) {
 
-          if (p.type === PLAT_BREAK) {
+          if (p.type === PLAT_BREAK && p.cracked) {
             p.broken = true;
             spawnParticles(p.x + p.w / 2, p.y, '#E67E22', 8);
             continue;
           }
 
           player.y = p.y - player.h;
-          if (p.type === PLAT_SPRING) {
+          if (p.type === PLAT_BREAK) {
+            p.cracked = true;
+            p.breakTimer = 12;
+            player.vy = JUMP_FORCE;
+            player.squash = 0.5;
+            spawnParticles(player.x + player.w / 2, player.y + player.h, '#E67E22', 4);
+          } else if (p.type === PLAT_SPRING) {
             player.vy = SPRING_FORCE;
             player.squash = 0.8;
             spawnParticles(player.x + player.w / 2, player.y + player.h, '#E74C3C', 6);
@@ -419,6 +449,18 @@
         p.x += p.moveDir * p.moveSpeed;
         if (p.x < 0 || p.x + p.w > W) {
           p.moveDir *= -1;
+        }
+      }
+    }
+
+    // 壊れる床のタイマー処理
+    for (var i = 0; i < platforms.length; i++) {
+      var p = platforms[i];
+      if (p.type === PLAT_BREAK && p.cracked && !p.broken) {
+        p.breakTimer--;
+        if (p.breakTimer <= 0) {
+          p.broken = true;
+          spawnParticles(p.x + p.w / 2, p.y, '#E67E22', 8);
         }
       }
     }
@@ -455,8 +497,9 @@
       var difficulty = Math.min(score / 200, 1);
       var r = Math.random();
       if (r < 0.12 + difficulty * 0.08) type = PLAT_MOVING;
-      else if (r < 0.20 + difficulty * 0.12) type = PLAT_BREAK;
+      else if (r < 0.18 + difficulty * 0.07 && !lastGeneratedBreak) type = PLAT_BREAK;
       else if (r < 0.26 + difficulty * 0.04) type = PLAT_SPRING;
+      lastGeneratedBreak = (type === PLAT_BREAK);
 
       // 高スコアで足場を狭くする
       var widthMult = Math.max(0.7, 1 - difficulty * 0.3);
@@ -525,6 +568,7 @@
     score = 0;
     cameraY = 0;
     maxHeight = 0;
+    lastGeneratedBreak = false;
     elScore.textContent = '0';
     particles = [];
     generatePlatforms();
