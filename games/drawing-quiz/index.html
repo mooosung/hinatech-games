@@ -39,7 +39,7 @@
     <h1 class="game-page-title">お絵かきクイズ</h1>
     <div class="game-page-tags">
       <span class="tag">お絵かき</span>
-      <span class="tag">クイズ</span>
+      <span class="tag">AI</span>
     </div>
 
     <div class="game-container">
@@ -52,6 +52,10 @@
           <span class="score-label">ベスト</span>
           <span class="score-value" id="best-score">0</span>
         </div>
+        <div class="score-box round-box">
+          <span class="score-label">ラウンド</span>
+          <span class="score-value" id="round-display">-</span>
+        </div>
         <button class="btn-new-game" id="btn-new-game">New Game</button>
       </div>
 
@@ -60,14 +64,27 @@
           <span class="hud-label">お題</span>
           <span class="hud-value" id="theme-text">-</span>
         </div>
-        <div class="hud-item">
+        <div class="hud-item hud-timer">
           <span class="hud-label">残り時間</span>
-          <span class="hud-value" id="timer">20</span>
+          <span class="hud-value" id="timer">30</span>
         </div>
       </div>
 
+      <!-- AI判定ライブ表示 -->
+      <div class="ai-live-panel" id="ai-live-panel">
+        <div class="ai-live-header">
+          <span class="ai-icon">🤖</span>
+          <span class="ai-label">AIの予想</span>
+        </div>
+        <div class="ai-guess-text" id="ai-guess-text">描き始めてね</div>
+        <div class="ai-confidence-bar">
+          <div class="ai-confidence-fill" id="ai-confidence-fill"></div>
+        </div>
+        <div class="ai-confidence-text" id="ai-confidence-text"></div>
+      </div>
+
       <div class="draw-tools">
-        <button class="tool-btn selected" data-tool="pen" id="btn-pen">🖊 ペン</button>
+        <button class="tool-btn selected" data-tool="pen" id="btn-pen">ペン</button>
         <button class="tool-btn" data-tool="eraser" id="btn-eraser">消しゴム</button>
         <button class="tool-btn" id="btn-clear-canvas">全消し</button>
         <div class="pen-sizes">
@@ -91,44 +108,59 @@
       <div class="board-wrapper">
         <canvas id="game-canvas"></canvas>
 
-        <div class="answer-buttons" id="answer-buttons"></div>
+        <!-- ラウンド結果オーバーレイ -->
+        <div class="game-overlay" id="round-result-overlay">
+          <div class="overlay-content">
+            <div class="result-emoji" id="result-emoji"></div>
+            <h2 id="result-title"></h2>
+            <p id="result-detail"></p>
+            <p class="result-score-text" id="result-score-text"></p>
+          </div>
+        </div>
 
+        <!-- ゲームオーバー -->
         <div class="game-overlay" id="game-over-overlay">
           <div class="overlay-content">
-            <h2>タイムアップ！</h2>
+            <h2>ゲーム終了！</h2>
             <p>スコア: <span id="final-score">0</span></p>
             <p class="best-result" id="best-result"></p>
             <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
           </div>
         </div>
 
+        <!-- スタート画面 -->
         <div class="game-overlay active" id="game-start-overlay">
           <div class="overlay-content">
             <h2>お絵かきクイズ</h2>
-            <p>お題の絵を描いて<br>当ててもらおう！</p>
-            <button class="btn-primary" id="btn-start">ゲームスタート</button>
+            <p>お題の絵を描いて<br>AIに当ててもらおう！</p>
+            <p class="model-status" id="model-status">AIモデル読み込み中...</p>
+            <button class="btn-primary" id="btn-start" disabled>読み込み中...</button>
           </div>
         </div>
+      </div>
+
+      <!-- できた！ボタン -->
+      <div class="done-button-area" id="done-button-area">
+        <button class="btn-done" id="btn-done">できた！AIに見せる</button>
       </div>
     </div>
 
     <div class="game-instructions">
       <h3>遊び方</h3>
       <ul>
-        <li><strong>PC</strong>: マウスで描く。左クリックでペン、ツールバーで切り替え</li>
-        <li><strong>スマホ</strong>: 指で直接描く</li>
-        <li>お題が表示されたら、制限時間内にお題の絵を描こう</li>
-        <li>描き終わったら4つの選択肢から正しいお題を選んでもらう</li>
-        <li>正解するとスコア獲得！残り時間が多いほど高得点</li>
-        <li>全10問のお題にチャレンジ！</li>
-        <li>ペンの太さ・色を使い分けて上手に描こう</li>
+        <li>お題が表示されたら、制限時間内に絵を描こう</li>
+        <li>描いている間、AIがリアルタイムで予想するよ</li>
+        <li>描けたら「できた！」ボタンを押すか、時間切れまで待とう</li>
+        <li>AIが正しく当てられたらスコアゲット！自信度が高いほど高得点</li>
+        <li>残り時間が多いほどボーナスポイント</li>
+        <li>全5問のお題にチャレンジ！</li>
       </ul>
     </div>
 
     <div class="game-promo">
       <h3>このゲーム、自分でも作れるよ！</h3>
       <p>
-        Canvas描画、イベント処理、ゲーム進行管理など<br>
+        Canvas描画、機械学習（TensorFlow.js）、イベント処理など<br>
         プログラミングの楽しい要素が詰まっています。<br><br>
         ひなテックでは、こうしたゲームの<br>
         作り方を楽しく学べます！
@@ -147,6 +179,7 @@
 
   <div id="footer"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
   <script src="../../js/common.js" data-base="../../"></script>
   <script src="game.js"></script>
 </body>

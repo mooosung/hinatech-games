@@ -1,5 +1,6 @@
 // ============================================
-// お絵かきクイズ ゲームロジック
+// お絵かきクイズ ゲームロジック (AI判定版)
+// TensorFlow.js で手書きイラストをリアルタイム判定
 // ============================================
 
 (function () {
@@ -8,70 +9,12 @@
   // ============================================
   // 定数
   // ============================================
-  var TIME_PER_ROUND = 20;
-  var TOTAL_ROUNDS = 10;
-  var CHOICES_COUNT = 4;
-
-  // お題リスト（カテゴリ付き）
-  var THEMES = [
-    // 動物
-    { word: 'ねこ', category: '動物' },
-    { word: 'いぬ', category: '動物' },
-    { word: 'うさぎ', category: '動物' },
-    { word: 'ぞう', category: '動物' },
-    { word: 'きりん', category: '動物' },
-    { word: 'さかな', category: '動物' },
-    { word: 'とり', category: '動物' },
-    { word: 'へび', category: '動物' },
-    { word: 'かめ', category: '動物' },
-    { word: 'ライオン', category: '動物' },
-    { word: 'ペンギン', category: '動物' },
-    { word: 'くま', category: '動物' },
-    { word: 'カエル', category: '動物' },
-    { word: 'ちょうちょ', category: '動物' },
-    // 食べ物
-    { word: 'りんご', category: '食べ物' },
-    { word: 'バナナ', category: '食べ物' },
-    { word: 'ケーキ', category: '食べ物' },
-    { word: 'ピザ', category: '食べ物' },
-    { word: 'おにぎり', category: '食べ物' },
-    { word: 'アイス', category: '食べ物' },
-    { word: 'ハンバーガー', category: '食べ物' },
-    { word: 'すし', category: '食べ物' },
-    { word: 'ラーメン', category: '食べ物' },
-    { word: 'たまご', category: '食べ物' },
-    // 乗り物
-    { word: 'くるま', category: '乗り物' },
-    { word: 'でんしゃ', category: '乗り物' },
-    { word: 'ひこうき', category: '乗り物' },
-    { word: 'ふね', category: '乗り物' },
-    { word: 'じてんしゃ', category: '乗り物' },
-    { word: 'ロケット', category: '乗り物' },
-    // もの
-    { word: 'いえ', category: 'もの' },
-    { word: 'き（木）', category: 'もの' },
-    { word: 'はな', category: 'もの' },
-    { word: 'たいよう', category: 'もの' },
-    { word: 'つき', category: 'もの' },
-    { word: 'ほし', category: 'もの' },
-    { word: 'かさ', category: 'もの' },
-    { word: 'めがね', category: 'もの' },
-    { word: 'とけい', category: 'もの' },
-    { word: 'テレビ', category: 'もの' },
-    { word: 'ほん', category: 'もの' },
-    { word: 'くつ', category: 'もの' },
-    { word: 'ぼうし', category: 'もの' },
-    { word: 'かぎ', category: 'もの' },
-    { word: 'にじ', category: 'もの' },
-    { word: 'やま', category: 'もの' },
-    { word: 'うみ', category: 'もの' },
-    { word: 'ゆきだるま', category: 'もの' },
-    // 人
-    { word: 'おとこのこ', category: '人' },
-    { word: 'おんなのこ', category: '人' },
-    { word: 'おばけ', category: 'もの' },
-    { word: 'ロボット', category: 'もの' },
-  ];
+  var TIME_PER_ROUND = 30;
+  var TOTAL_ROUNDS = 5;
+  var PREDICT_INTERVAL = 1200; // ms - AI推論の間隔
+  var MODEL_PATH = 'model/tfjs/model.json';
+  var LABELS_PATH = 'model/tfjs/labels.json';
+  var IMG_SIZE = 28; // Quick Draw 入力サイズ
 
   // ============================================
   // 状態変数
@@ -84,20 +27,25 @@
   var currentTheme = null;
   var timeLeft = 0;
   var timerId = null;
-  var phase = 'draw'; // 'draw' | 'answer' | 'result'
-  var usedThemes = [];
-  var choices = [];
-  var answered = false;
+  var predictTimer = null;
+  var phase = 'idle'; // 'idle' | 'draw' | 'judging' | 'result'
+  var usedThemeIndices = [];
+  var hasDrawn = false; // ユーザーが何か描いたか
 
   // 描画ツール
   var drawing = false;
   var penColor = '#000000';
   var penSize = 4;
-  var tool = 'pen'; // 'pen' | 'eraser'
+  var tool = 'pen';
   var lastX = 0, lastY = 0;
 
   // 描画用別キャンバス
   var drawCanvas, drawCtx;
+
+  // TF.js モデル
+  var model = null;
+  var labels = []; // [{en, ja}, ...]
+  var modelReady = false;
 
   // ============================================
   // DOM参照
@@ -106,17 +54,30 @@
   var elBest = document.getElementById('best-score');
   var elTimer = document.getElementById('timer');
   var elThemeText = document.getElementById('theme-text');
+  var elRound = document.getElementById('round-display');
   var elFinal = document.getElementById('final-score');
   var elBestResult = document.getElementById('best-result');
   var elStartOverlay = document.getElementById('game-start-overlay');
   var elOverOverlay = document.getElementById('game-over-overlay');
+  var elRoundResult = document.getElementById('round-result-overlay');
+  var elResultEmoji = document.getElementById('result-emoji');
+  var elResultTitle = document.getElementById('result-title');
+  var elResultDetail = document.getElementById('result-detail');
+  var elResultScore = document.getElementById('result-score-text');
   var elBtnStart = document.getElementById('btn-start');
   var elBtnRetry = document.getElementById('btn-retry');
   var elBtnNew = document.getElementById('btn-new-game');
-  var elAnswerButtons = document.getElementById('answer-buttons');
+  var elBtnDone = document.getElementById('btn-done');
+  var elDoneArea = document.getElementById('done-button-area');
   var elBtnPen = document.getElementById('btn-pen');
   var elBtnEraser = document.getElementById('btn-eraser');
   var elBtnClearCanvas = document.getElementById('btn-clear-canvas');
+  var elModelStatus = document.getElementById('model-status');
+  var elAiPanel = document.getElementById('ai-live-panel');
+  var elAiGuess = document.getElementById('ai-guess-text');
+  var elAiConfFill = document.getElementById('ai-confidence-fill');
+  var elAiConfText = document.getElementById('ai-confidence-text');
+  var elHudTimer = document.querySelector('.hud-timer');
 
   // ============================================
   // ハイスコア
@@ -136,6 +97,36 @@
   }
 
   // ============================================
+  // モデル読み込み
+  // ============================================
+  async function loadModel() {
+    try {
+      elModelStatus.textContent = 'AIモデル読み込み中...';
+      elModelStatus.className = 'model-status';
+
+      // ラベル読み込み
+      var res = await fetch(LABELS_PATH);
+      if (!res.ok) throw new Error('labels.json not found');
+      labels = await res.json();
+
+      // TF.js モデル読み込み
+      model = await tf.loadLayersModel(MODEL_PATH);
+      modelReady = true;
+
+      elModelStatus.textContent = 'AI準備完了！ (' + labels.length + 'カテゴリ認識)';
+      elBtnStart.textContent = 'ゲームスタート';
+      elBtnStart.disabled = false;
+
+      console.log('Model loaded. Categories:', labels.length);
+    } catch (e) {
+      console.error('Model load error:', e);
+      elModelStatus.textContent = 'モデル読み込みエラー: ' + e.message;
+      elModelStatus.className = 'model-status error';
+      elBtnStart.textContent = 'モデルが見つかりません';
+    }
+  }
+
+  // ============================================
   // Canvas初期化
   // ============================================
   function initCanvas() {
@@ -149,7 +140,6 @@
     canvas.height = H * dpr;
     ctx.scale(dpr, dpr);
 
-    // 描画用キャンバス
     if (!drawCanvas) {
       drawCanvas = document.createElement('canvas');
       drawCtx = drawCanvas.getContext('2d');
@@ -170,7 +160,6 @@
 
   function render() {
     ctx.clearRect(0, 0, W, H);
-    // 描画キャンバスを表示
     ctx.drawImage(drawCanvas, 0, 0, W * dpr, H * dpr, 0, 0, W, H);
   }
 
@@ -188,124 +177,221 @@
   }
 
   // ============================================
+  // Canvas → フラットテンソル変換 (MLP入力: [1, 784])
+  // ============================================
+  var tmpCanvas = document.createElement('canvas');
+  tmpCanvas.width = IMG_SIZE;
+  tmpCanvas.height = IMG_SIZE;
+  var tmpCtx = tmpCanvas.getContext('2d');
+
+  function canvasToTensor() {
+    // 描画キャンバスを 28x28 に縮小
+    tmpCtx.fillStyle = '#fff';
+    tmpCtx.fillRect(0, 0, IMG_SIZE, IMG_SIZE);
+    tmpCtx.drawImage(drawCanvas, 0, 0, drawCanvas.width, drawCanvas.height, 0, 0, IMG_SIZE, IMG_SIZE);
+
+    var imgData = tmpCtx.getImageData(0, 0, IMG_SIZE, IMG_SIZE);
+    var pixels = imgData.data;
+
+    // グレースケール化＆反転 (白=0, 黒=1 → Quick Draw形式)
+    var input = new Float32Array(IMG_SIZE * IMG_SIZE);
+    for (var i = 0; i < IMG_SIZE * IMG_SIZE; i++) {
+      var r = pixels[i * 4];
+      var g = pixels[i * 4 + 1];
+      var b = pixels[i * 4 + 2];
+      var gray = (r + g + b) / 3;
+      input[i] = (255 - gray) / 255.0;
+    }
+
+    // MLP入力: フラットな [1, 784] テンソル
+    return tf.tensor2d(input, [1, IMG_SIZE * IMG_SIZE]);
+  }
+
+  // ============================================
+  // AI推論
+  // ============================================
+  function predict() {
+    if (!modelReady || !model) return null;
+
+    var tensor = canvasToTensor();
+    var prediction = model.predict(tensor);
+    var probs = prediction.dataSync();
+    tensor.dispose();
+    prediction.dispose();
+
+    // Top結果を取得
+    var results = [];
+    for (var i = 0; i < probs.length; i++) {
+      results.push({ index: i, prob: probs[i] });
+    }
+    results.sort(function (a, b) { return b.prob - a.prob; });
+
+    return results;
+  }
+
+  // ============================================
+  // AIライブ表示更新
+  // ============================================
+  function updateAiDisplay(results) {
+    if (!results || results.length === 0) return;
+
+    var top = results[0];
+    var topLabel = labels[top.index];
+    var confidence = Math.round(top.prob * 100);
+
+    elAiGuess.textContent = topLabel.ja + '？';
+
+    // 正解中かチェック
+    if (currentTheme && topLabel.ja === currentTheme.ja) {
+      elAiGuess.classList.add('correct');
+    } else {
+      elAiGuess.classList.remove('correct');
+    }
+
+    // 信頼度バー
+    elAiConfFill.style.width = confidence + '%';
+    elAiConfFill.className = 'ai-confidence-fill';
+    if (confidence >= 60) {
+      elAiConfFill.classList.add('high');
+    } else if (confidence >= 30) {
+      elAiConfFill.classList.add('mid');
+    } else {
+      elAiConfFill.classList.add('low');
+    }
+
+    // Top3表示
+    var top3 = results.slice(0, 3).map(function (r) {
+      return labels[r.index].ja + ' ' + Math.round(r.prob * 100) + '%';
+    });
+    elAiConfText.textContent = top3.join(' / ');
+  }
+
+  function startPredictLoop() {
+    stopPredictLoop();
+    predictTimer = setInterval(function () {
+      if (phase === 'draw' && hasDrawn) {
+        var results = predict();
+        updateAiDisplay(results);
+      }
+    }, PREDICT_INTERVAL);
+  }
+
+  function stopPredictLoop() {
+    if (predictTimer) {
+      clearInterval(predictTimer);
+      predictTimer = null;
+    }
+  }
+
+  // ============================================
   // お題選択
   // ============================================
   function pickTheme() {
-    var available = THEMES.filter(function (t) {
-      return usedThemes.indexOf(t.word) === -1;
-    });
+    var available = [];
+    for (var i = 0; i < labels.length; i++) {
+      if (usedThemeIndices.indexOf(i) === -1) {
+        available.push(i);
+      }
+    }
     if (available.length === 0) {
-      usedThemes = [];
-      available = THEMES.slice();
+      usedThemeIndices = [];
+      available = labels.map(function (_, i) { return i; });
     }
-    var idx = Math.floor(Math.random() * available.length);
-    currentTheme = available[idx];
-    usedThemes.push(currentTheme.word);
+    var idx = available[Math.floor(Math.random() * available.length)];
+    usedThemeIndices.push(idx);
+    currentTheme = labels[idx];
+    currentTheme._index = idx;
   }
 
-  function generateChoices() {
-    choices = [currentTheme.word];
-    // 同カテゴリから優先して偽選択肢を選ぶ
-    var sameCategory = THEMES.filter(function (t) {
-      return t.category === currentTheme.category && t.word !== currentTheme.word;
-    });
-    var others = THEMES.filter(function (t) {
-      return t.category !== currentTheme.category;
-    });
+  // ============================================
+  // 判定＆スコアリング
+  // ============================================
+  function judgeDrawing() {
+    phase = 'judging';
+    stopPredictLoop();
+    if (timerId) { clearInterval(timerId); timerId = null; }
+    elDoneArea.classList.remove('active');
 
-    // シャッフル
-    shuffle(sameCategory);
-    shuffle(others);
+    var results = predict();
+    if (!results) {
+      showRoundResult(false, 0, 'AI判定エラー', null);
+      return;
+    }
 
-    // 同カテゴリから2つ、別カテゴリから1つ
-    var pool = sameCategory.slice(0, 2).concat(others.slice(0, 1));
-    if (pool.length < CHOICES_COUNT - 1) {
-      // 足りない場合は追加
-      var more = THEMES.filter(function (t) {
-        return t.word !== currentTheme.word && choices.indexOf(t.word) === -1;
-      });
-      shuffle(more);
-      while (pool.length < CHOICES_COUNT - 1 && more.length > 0) {
-        pool.push(more.shift());
+    // 最終推論表示を更新
+    updateAiDisplay(results);
+
+    var top = results[0];
+    var topLabel = labels[top.index];
+    var confidence = top.prob;
+
+    // 正解判定: Top1 に正解がある or Top3 にある
+    var rank = -1;
+    for (var i = 0; i < Math.min(results.length, 5); i++) {
+      if (results[i].index === currentTheme._index) {
+        rank = i;
+        break;
       }
     }
 
-    for (var i = 0; i < pool.length && choices.length < CHOICES_COUNT; i++) {
-      choices.push(pool[i].word);
-    }
+    var roundScore = 0;
+    var isCorrect = false;
+    var message = '';
 
-    shuffle(choices);
-  }
-
-  function shuffle(arr) {
-    for (var i = arr.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var tmp = arr[i];
-      arr[i] = arr[j];
-      arr[j] = tmp;
-    }
-    return arr;
-  }
-
-  // ============================================
-  // 回答フェーズ
-  // ============================================
-  function showAnswerPhase() {
-    phase = 'answer';
-    answered = false;
-    if (timerId) clearInterval(timerId);
-
-    generateChoices();
-    elAnswerButtons.innerHTML = '';
-    for (var i = 0; i < choices.length; i++) {
-      var btn = document.createElement('button');
-      btn.className = 'answer-btn';
-      btn.textContent = choices[i];
-      btn.setAttribute('data-word', choices[i]);
-      (function (b, word) {
-        b.addEventListener('click', function () {
-          handleAnswer(word, b);
-        });
-      })(btn, choices[i]);
-      elAnswerButtons.appendChild(btn);
-    }
-    elAnswerButtons.classList.add('active');
-    elThemeText.textContent = '何を描いた？';
-  }
-
-  function handleAnswer(word, btn) {
-    if (answered) return;
-    answered = true;
-
-    var btns = elAnswerButtons.querySelectorAll('.answer-btn');
-    if (word === currentTheme.word) {
-      btn.classList.add('correct');
-      var bonus = Math.floor(timeLeft * 10);
-      var roundScore = 100 + bonus;
-      score += roundScore;
-      elScore.textContent = score;
-      elThemeText.textContent = '正解！ +' + roundScore;
+    if (rank === 0) {
+      // Top1正解
+      isCorrect = true;
+      var baseScore = Math.round(confidence * 200);
+      var timeBonus = Math.round(timeLeft * 5);
+      roundScore = baseScore + timeBonus;
+      message = 'AIの自信度 ' + Math.round(confidence * 100) + '% + 時間ボーナス ' + timeBonus;
+    } else if (rank >= 1 && rank <= 2) {
+      // Top3に入った（部分点）
+      var partialScore = Math.round(results[rank].prob * 80);
+      roundScore = partialScore;
+      message = 'AIの予想: ' + topLabel.ja + '\nでも' + (rank + 1) + '番目に「' + currentTheme.ja + '」が入ってたよ！';
     } else {
-      btn.classList.add('wrong');
-      // 正解を表示
-      for (var i = 0; i < btns.length; i++) {
-        if (btns[i].getAttribute('data-word') === currentTheme.word) {
-          btns[i].classList.add('correct');
-        }
-      }
-      elThemeText.textContent = '残念… 正解は「' + currentTheme.word + '」';
+      // 不正解
+      message = 'AIは「' + topLabel.ja + '」だと思ったみたい';
     }
 
-    // 次のラウンドへ
+    showRoundResult(isCorrect, roundScore, message, rank);
+  }
+
+  function showRoundResult(isCorrect, roundScore, message, rank) {
+    phase = 'result';
+    score += roundScore;
+    elScore.textContent = score;
+
+    if (isCorrect) {
+      elResultEmoji.textContent = '🎉';
+      elResultTitle.textContent = 'AIが正解！';
+      elResultTitle.style.color = '#2ECC71';
+    } else if (rank !== null && rank >= 1 && rank <= 2) {
+      elResultEmoji.textContent = '🤔';
+      elResultTitle.textContent = 'おしい！';
+      elResultTitle.style.color = '#F1C40F';
+    } else {
+      elResultEmoji.textContent = '😅';
+      elResultTitle.textContent = 'ざんねん…';
+      elResultTitle.style.color = '#E74C3C';
+    }
+
+    elResultDetail.textContent = message;
+    elResultScore.textContent = roundScore > 0 ? '+' + roundScore + 'pt' : '';
+
+    elRoundResult.classList.add('active');
+
+    // 次のラウンドへ自動遷移
     setTimeout(function () {
-      elAnswerButtons.classList.remove('active');
+      elRoundResult.classList.remove('active');
       currentRound++;
       if (currentRound >= TOTAL_ROUNDS) {
         gameOver();
       } else {
         startRound();
       }
-    }, 1500);
+    }, 2500);
   }
 
   // ============================================
@@ -314,13 +400,18 @@
   function startTimer() {
     timeLeft = TIME_PER_ROUND;
     elTimer.textContent = timeLeft;
+    elHudTimer.classList.remove('warning');
     if (timerId) clearInterval(timerId);
     timerId = setInterval(function () {
       timeLeft--;
       elTimer.textContent = timeLeft;
+      if (timeLeft <= 5) {
+        elHudTimer.classList.add('warning');
+      }
       if (timeLeft <= 0) {
         clearInterval(timerId);
-        showAnswerPhase();
+        timerId = null;
+        judgeDrawing();
       }
     }, 1000);
   }
@@ -329,35 +420,49 @@
   // ゲーム制御
   // ============================================
   function startGame() {
+    if (!modelReady) return;
     initCanvas();
     score = 0;
     currentRound = 0;
-    usedThemes = [];
+    usedThemeIndices = [];
     elScore.textContent = '0';
     elStartOverlay.classList.remove('active');
     elOverOverlay.classList.remove('active');
-    elAnswerButtons.classList.remove('active');
+    elRoundResult.classList.remove('active');
     running = true;
     startRound();
   }
 
   function startRound() {
     phase = 'draw';
+    hasDrawn = false;
     pickTheme();
     clearDrawing();
     render();
-    elThemeText.textContent = '「' + currentTheme.word + '」を描こう！';
-    elAnswerButtons.classList.remove('active');
+    elThemeText.textContent = '「' + currentTheme.ja + '」を描こう！';
+    elRound.textContent = (currentRound + 1) + '/' + TOTAL_ROUNDS;
+    elDoneArea.classList.add('active');
+    elAiPanel.classList.add('active');
+    elAiGuess.textContent = '描き始めてね';
+    elAiGuess.classList.remove('correct');
+    elAiConfFill.style.width = '0%';
+    elAiConfFill.className = 'ai-confidence-fill';
+    elAiConfText.textContent = '';
     startTimer();
+    startPredictLoop();
   }
 
   function gameOver() {
     running = false;
-    if (timerId) clearInterval(timerId);
+    phase = 'idle';
+    stopPredictLoop();
+    if (timerId) { clearInterval(timerId); timerId = null; }
+    elDoneArea.classList.remove('active');
+    elAiPanel.classList.remove('active');
     saveBest();
     elFinal.textContent = score;
     if (score >= bestScore && score > 0) {
-      elBestResult.textContent = '🎉 ハイスコア更新！';
+      elBestResult.textContent = 'ハイスコア更新！';
     } else {
       elBestResult.textContent = 'ベスト: ' + bestScore;
     }
@@ -387,6 +492,7 @@
     if (!running || phase !== 'draw') return;
     e.preventDefault();
     drawing = true;
+    hasDrawn = true;
     var pos = getCanvasPos(e);
     lastX = pos.x;
     lastY = pos.y;
@@ -408,6 +514,9 @@
     drawing = false;
   }
 
+  // ============================================
+  // 初期化
+  // ============================================
   initCanvas();
 
   canvas.addEventListener('mousedown', onDrawStart);
@@ -437,6 +546,11 @@
     if (running && phase === 'draw') {
       clearDrawing();
       render();
+      hasDrawn = false;
+      elAiGuess.textContent = '描き始めてね';
+      elAiGuess.classList.remove('correct');
+      elAiConfFill.style.width = '0%';
+      elAiConfText.textContent = '';
     }
   });
 
@@ -450,7 +564,6 @@
           colorBtns[j].classList.remove('selected');
         }
         btn.classList.add('selected');
-        // ペンに切り替え
         tool = 'pen';
         elBtnPen.classList.add('selected');
         elBtnEraser.classList.remove('selected');
@@ -486,15 +599,24 @@
     }
     if (e.code === 'Space' && running && phase === 'draw') {
       e.preventDefault();
-      showAnswerPhase();
+      judgeDrawing();
+    }
+  });
+
+  // できた！ボタン
+  elBtnDone.addEventListener('click', function () {
+    if (running && phase === 'draw') {
+      judgeDrawing();
     }
   });
 
   // リサイズ
   window.addEventListener('resize', function () {
-    initCanvas();
-    clearDrawing();
-    render();
+    if (phase !== 'draw') {
+      initCanvas();
+      clearDrawing();
+      render();
+    }
   });
 
   // ボタン
@@ -507,5 +629,8 @@
   initCanvas();
   clearDrawing();
   render();
+
+  // モデル読み込み開始
+  loadModel();
 
 })();
