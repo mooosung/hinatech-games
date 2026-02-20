@@ -173,7 +173,8 @@
   }
 
   // ============================================
-  // Canvas → フラットテンソル変換 (MLP入力: [1, 784])
+  // Canvas → CNN テンソル変換 (入力: [1, 28, 28, 1])
+  // バウンディングボックス検出 → 中央揃え → 28x28
   // ============================================
   var tmpCanvas = document.createElement('canvas');
   tmpCanvas.width = IMG_SIZE;
@@ -181,13 +182,55 @@
   var tmpCtx = tmpCanvas.getContext('2d');
 
   function canvasToTensor() {
+    // 描画キャンバスからピクセルデータ取得
+    var srcW = drawCanvas.width;
+    var srcH = drawCanvas.height;
+    var srcData = drawCtx.getImageData(0, 0, srcW, srcH).data;
+
+    // バウンディングボックス検出（非白ピクセルの範囲）
+    var minX = srcW, minY = srcH, maxX = 0, maxY = 0;
+    var found = false;
+    for (var py = 0; py < srcH; py++) {
+      for (var px = 0; px < srcW; px++) {
+        var idx = (py * srcW + px) * 4;
+        var r = srcData[idx], g = srcData[idx + 1], b = srcData[idx + 2];
+        if (r < 240 || g < 240 || b < 240) {
+          if (px < minX) minX = px;
+          if (px > maxX) maxX = px;
+          if (py < minY) minY = py;
+          if (py > maxY) maxY = py;
+          found = true;
+        }
+      }
+    }
+
+    // 何も描かれていなければ空テンソル
+    if (!found) {
+      return tf.zeros([1, IMG_SIZE, IMG_SIZE, 1]);
+    }
+
+    // バウンディングボックスを正方形にして余白追加
+    var bw = maxX - minX + 1;
+    var bh = maxY - minY + 1;
+    var side = Math.max(bw, bh);
+    var padding = Math.round(side * 0.15);
+    side += padding * 2;
+
+    // 中央揃えのオフセット
+    var cx = minX + bw / 2;
+    var cy = minY + bh / 2;
+    var cropX = cx - side / 2;
+    var cropY = cy - side / 2;
+
+    // 切り出して28x28にリサイズ
     tmpCtx.fillStyle = '#fff';
     tmpCtx.fillRect(0, 0, IMG_SIZE, IMG_SIZE);
-    tmpCtx.drawImage(drawCanvas, 0, 0, drawCanvas.width, drawCanvas.height, 0, 0, IMG_SIZE, IMG_SIZE);
+    tmpCtx.drawImage(drawCanvas, cropX, cropY, side, side, 0, 0, IMG_SIZE, IMG_SIZE);
 
     var imgData = tmpCtx.getImageData(0, 0, IMG_SIZE, IMG_SIZE);
     var pixels = imgData.data;
 
+    // グレースケール化＆反転 → [28, 28, 1] (CNN channels_last)
     var input = new Float32Array(IMG_SIZE * IMG_SIZE);
     for (var i = 0; i < IMG_SIZE * IMG_SIZE; i++) {
       var r = pixels[i * 4];
@@ -197,7 +240,7 @@
       input[i] = (255 - gray) / 255.0;
     }
 
-    return tf.tensor2d(input, [1, IMG_SIZE * IMG_SIZE]);
+    return tf.tensor4d(input, [1, IMG_SIZE, IMG_SIZE, 1]);
   }
 
   // ============================================
