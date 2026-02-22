@@ -39,6 +39,20 @@
 
   <section class="games-grid">
     <div class="game-card">
+      <a href="games/suika/index.html" class="game-card-link">
+        <img src="images/thumbnails/suika.svg" alt="フルーツマージ" class="game-card-thumb">
+        <div class="game-card-body">
+          <h3 class="game-card-title">フルーツマージ</h3>
+          <div class="game-card-tags">
+            <span class="tag">パズル</span>
+            <span class="tag">カジュアル</span>
+          </div>
+        </div>
+      </a>
+      <a href="https://github.com/mooosung/hinatech-games/tree/main/games/suika" class="game-card-source" target="_blank" rel="noopener">ソースを見る</a>
+    </div>
+
+    <div class="game-card">
       <a href="games/drawing-quiz/index.html" class="game-card-link">
         <img src="images/thumbnails/drawing-quiz.svg" alt="お絵かきクイズ" class="game-card-thumb">
         <div class="game-card-body">
@@ -414,5 +428,17 @@
   <div id="footer"></div>
 
   <script src="js/common.js" data-base=""></script>
+  <script>
+    (function () {
+      var grid = document.querySelector('.games-grid');
+      if (!grid) return;
+      var cards = Array.from(grid.children);
+      for (var i = cards.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        grid.appendChild(cards[j]);
+        cards[j] = cards[i];
+      }
+    })();
+  </script>
 </body>
 </html>

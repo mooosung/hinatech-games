@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>おさかなサバイバル｜無料ブラウザゲーム｜ひなテックGames</title>
-  <meta name="description" content="池の中で小さな魚を食べて大きくなろう！大きな魚に食べられたらゲームオーバー。PC・スマホ対応の無料ブラウザゲーム。">
+  <title>フルーツマージ｜無料ブラウザゲーム｜ひなテックGames</title>
+  <meta name="description" content="同じフルーツをくっつけて大きくしよう！さくらんぼからスイカを目指すマージパズル。PC・スマホ対応の無料ブラウザゲーム。">
   <!-- OGP -->
-  <meta property="og:title" content="おさかなサバイバル｜無料ブラウザゲーム｜ひなテックGames">
-  <meta property="og:description" content="池の中で小さな魚を食べて大きくなろう！大きな魚に食べられたらゲームオーバー。">
+  <meta property="og:title" content="フルーツマージ｜無料ブラウザゲーム｜ひなテックGames">
+  <meta property="og:description" content="同じフルーツをくっつけて大きくしよう！さくらんぼからスイカを目指すマージパズル。">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://hinata-ya.tech/games/games/absorb/">
+  <meta property="og:url" content="https://hinata-ya.tech/games/games/suika/">
   <meta property="og:site_name" content="ひなテックGames">
   <meta property="og:locale" content="ja_JP">
   <!-- 構造化データ -->
@@ -17,10 +17,10 @@
   {
     "@context": "https://schema.org",
     "@type": "Game",
-    "name": "おさかなサバイバル",
-    "description": "池の中で小さな魚を食べて大きくなろう！大きな魚に食べられたらゲームオーバー。PC・スマホ対応の無料ブラウザゲーム。",
-    "url": "https://hinata-ya.tech/games/games/absorb/",
-    "genre": ["アクション", "サバイバル"],
+    "name": "フルーツマージ",
+    "description": "同じフルーツをくっつけて大きくしよう！さくらんぼからスイカを目指すマージパズル。PC・スマホ対応の無料ブラウザゲーム。",
+    "url": "https://hinata-ya.tech/games/games/suika/",
+    "genre": ["パズル", "カジュアル"],
     "gamePlatform": "Web Browser",
     "publisher": {
       "@type": "Organization",
@@ -36,10 +36,10 @@
   <div id="header"></div>
 
   <div class="game-page">
-    <h1 class="game-page-title">おさかなサバイバル</h1>
+    <h1 class="game-page-title">フルーツマージ</h1>
     <div class="game-page-tags">
-      <span class="tag">アクション</span>
-      <span class="tag">サバイバル</span>
+      <span class="tag">パズル</span>
+      <span class="tag">カジュアル</span>
     </div>
 
     <div class="game-container">
@@ -52,6 +52,10 @@
           <span class="score-label">ベスト</span>
           <span class="score-value" id="best-score">0</span>
         </div>
+        <div class="next-fruit-box" id="next-fruit-box">
+          <span class="score-label">つぎ</span>
+          <canvas id="next-canvas" width="50" height="50"></canvas>
+        </div>
         <button class="btn-new-game" id="btn-new-game">New Game</button>
       </div>
 
@@ -60,7 +64,7 @@
 
         <div class="game-overlay" id="game-over-overlay">
           <div class="overlay-content">
-            <h2>たべられた！</h2>
+            <h2>ゲームオーバー</h2>
             <p>スコア: <span id="final-score">0</span></p>
             <p class="best-result" id="best-result"></p>
             <button class="btn-primary" id="btn-retry">もう一度遊ぶ</button>
@@ -69,8 +73,8 @@
 
         <div class="game-overlay active" id="game-start-overlay">
           <div class="overlay-content">
-            <h2>おさかなサバイバル</h2>
-            <p>小さな魚を食べて<br>池で一番大きくなろう！</p>
+            <h2>フルーツマージ</h2>
+            <p>同じフルーツをくっつけて<br>大きくしよう！</p>
             <button class="btn-primary" id="btn-start">ゲームスタート</button>
           </div>
         </div>
@@ -80,26 +84,27 @@
     <div class="game-instructions">
       <h3>遊び方</h3>
       <ul>
-        <li><strong>PC</strong>: マウスを動かして魚を操作</li>
-        <li><strong>スマホ</strong>: 画面をタッチして操作</li>
-        <li>自分より<strong>小さい魚</strong>を食べると大きくなる</li>
-        <li>自分より<strong>大きい魚</strong>に触れると食べられてしまう</li>
-        <li>どんどん食べてハイスコアを目指そう！</li>
+        <li><strong>PC</strong>: マウスで位置を決めてクリックでフルーツを落とす</li>
+        <li><strong>スマホ</strong>: タッチで位置を決めて指を離すとフルーツが落ちる</li>
+        <li>同じフルーツ同士がくっつくと、ひとつ大きなフルーツに進化！</li>
+        <li>さくらんぼ → いちご → ぶどう → … → メロン → スイカ</li>
+        <li>フルーツが上の線を超えるとゲームオーバー</li>
+        <li>大きなフルーツほど高得点！スイカを目指そう！</li>
       </ul>
     </div>
 
     <div class="game-promo">
       <h3>このゲーム、自分でも作れるよ！</h3>
       <p>
-        Canvas APIを使った魚の描画、当たり判定、AI移動など<br>
+        物理エンジン（Matter.js）を使った衝突判定、<br>
+        マージ処理、Canvas描画など<br>
         ゲーム開発の基本が詰まっています。<br><br>
         ひなテックでは、こうしたゲームの<br>
         作り方を楽しく学べます！
       </p>
       <div class="promo-links">
-        <a href="tutorial/" class="btn-primary">このゲームの作り方を見る →</a>
         <a href="https://hinata-ya.tech" class="btn-primary" target="_blank" rel="noopener">ひなテックについて詳しく見る →</a>
-        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/absorb" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
+        <a href="https://github.com/mooosung/hinatech-games/tree/main/games/suika" class="btn-secondary" target="_blank" rel="noopener">ソースコードを見る →</a>
       </div>
     </div>
 
@@ -110,7 +115,8 @@
 
   <div id="footer"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
   <script src="../../js/common.js" data-base="../../"></script>
-  <script src="game.js?v=20260222b"></script>
+  <script src="game.js?v=20260221a"></script>
 </body>
 </html>
