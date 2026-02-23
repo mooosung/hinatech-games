@@ -412,7 +412,7 @@
       var touchDist = player.radius + npc.radius;
 
       if (dd < touchDist * 0.7) {
-        if (player.score > npc.score) {
+        if (player.radius > npc.radius) {
           score += npc.score;
           player.score += npc.score;
           floatingTexts.push({
@@ -792,7 +792,7 @@
 
     // サイズ数字（反転を打ち消してから描画）
     ctx.scale(facing, 1);
-    var sizeNum = fish.score;
+    var sizeNum = Math.ceil(fish.radius);
     var fontSize = Math.max(7, r * 0.45);
     ctx.fillStyle = '#fff';
     ctx.font = 'bold ' + fontSize + 'px sans-serif';
